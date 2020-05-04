@@ -2,14 +2,12 @@ extern crate rand;
 
 mod algebra;
 mod camera;
-mod colour;
 mod common;
 mod material;
 mod objects;
 
 use algebra::*;
 use camera::*;
-use colour::*;
 use common::*;
 use material::*;
 use objects::*;
@@ -24,17 +22,17 @@ fn main() {
     world.add(Box::new(Sphere::new(
         Vec3::new(0.0, 0.0, -1.0),
         0.5,
-        Box::new(Lambertian::new(colour_from_vec3(Vec3::new(0.1, 0.2, 0.5)))),
+        Box::new(Lambertian::new(Vec3::new(0.1, 0.2, 0.5).as_colour())),
     )));
     world.add(Box::new(Sphere::new(
         Vec3::new(0.0, -100.5, -1.0),
         100.0,
-        Box::new(Lambertian::new(colour_from_vec3(Vec3::new(0.8, 0.8, 0.0)))),
+        Box::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0).as_colour())),
     )));
     world.add(Box::new(Sphere::new(
         Vec3::new(1.0, 0.0, -1.0),
         0.5,
-        Box::new(Metal::new(colour_from_vec3(Vec3::new(0.8, 0.6, 0.2)), 0.0)),
+        Box::new(Metal::new(Vec3::new(0.8, 0.6, 0.2).as_colour(), 0.0)),
     )));
     world.add(Box::new(Sphere::new(
         Vec3::new(-1.0, 0.0, -1.0),
@@ -55,7 +53,7 @@ fn main() {
         eprint!("Scan lines remaining: {}          \r", j);
 
         for i in 0..image_width {
-            let mut colour = Vec3::zero();
+            let mut colour = Vec3::zero().as_colour();
 
             for _s in 0..samples_per_pixel {
                 let u = ((i as f32) + random()) / (image_width as f32);
@@ -64,7 +62,7 @@ fn main() {
                 colour += ray_colour(r, &world, max_depth);
             }
 
-            let c = colour_to_ppm(colour_from_sample(colour, samples_per_pixel));
+            let c = colour.to_colour_from_sample(samples_per_pixel).to_ppm();
             println!("{}", c);
         }
     }
@@ -73,7 +71,7 @@ fn main() {
 
 fn ray_colour(ray: Ray, world: &HittableList, depth: u32) -> Colour {
     if depth <= 0 {
-        return colour_from_vec3(Vec3::zero());
+        return Vec3::zero().as_colour();
     }
 
     match world.hit(ray, 0.001, f32::INFINITY) {
@@ -92,6 +90,5 @@ fn ray_colour(ray: Ray, world: &HittableList, depth: u32) -> Colour {
 fn background_colour(ray: Ray) -> Colour {
     let unit_direction = ray.direction.unit_vector();
     let t = 0.5 * (unit_direction.y() + 1.0);
-    let v = Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t;
-    colour_from_vec3(v)
+    (Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t).as_colour()
 }

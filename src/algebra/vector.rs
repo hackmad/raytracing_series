@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use super::clamp;
 use super::Float;
 use std::ops;
 
@@ -7,6 +8,8 @@ use std::ops;
 pub struct Vec3 {
     e: [Float; 3],
 }
+
+pub type Colour = Vec3;
 
 impl Vec3 {
     pub fn zero() -> Vec3 {
@@ -69,6 +72,27 @@ impl Vec3 {
         let r_out_parallel = (self + n * cos_theta) * etai_over_etat;
         let r_out_perp = n * -(1.0 - r_out_parallel.length_squared()).sqrt();
         r_out_parallel + r_out_perp
+    }
+
+    pub fn as_colour(self) -> Colour {
+        self as Colour
+    }
+
+    pub fn to_colour_from_sample(self, samples_per_pixel: u32) -> Colour {
+        // Divide the color total by the number of samples
+        let s = 1.0 / samples_per_pixel as Float;
+
+        // Gamma-correct for a gamma value of 2.0 (sqrt)
+        Vec3::new(
+            256.0 * clamp((self.x() * s).sqrt(), 0.0, 0.999),
+            256.0 * clamp((self.y() * s).sqrt(), 0.0, 0.999),
+            256.0 * clamp((self.z() * s).sqrt(), 0.0, 0.999),
+        )
+        .as_colour()
+    }
+
+    pub fn to_ppm(self) -> String {
+        format!("{} {} {}", self.x() as u8, self.y() as u8, self.z() as u8)
     }
 }
 
