@@ -23,7 +23,7 @@ pub struct ScatterResult {
 }
 
 pub trait Material {
-    fn scatter(&self, ray_in: Ray, rec: HitRecord) -> Option<ScatterResult>;
+    fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterResult>;
 }
 
 pub type RcMaterial = Rc<dyn Material>;

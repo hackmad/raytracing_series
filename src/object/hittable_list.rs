@@ -27,7 +27,7 @@ impl HittableList {
 }
 
 impl Hittable for HittableList {
-    fn hit(&self, ray: Ray, t_min: Float, t_max: Float) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord> {
         let init: (Option<HitRecord>, Float) = (None, t_max);
 
         let result = self.objects.iter().fold(init, |acc, hittable| {

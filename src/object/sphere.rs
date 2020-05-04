@@ -24,7 +24,7 @@ impl Sphere {
         })
     }
 
-    fn get_hit_record(&self, ray: Ray, t: Float) -> HitRecord {
+    fn get_hit_record(&self, ray: &Ray, t: Float) -> HitRecord {
         let point = ray.at(t);
         let outward_normal = (point - self.center) / self.radius;
         HitRecord::new(ray, t, point, outward_normal, Rc::clone(&self.material))
@@ -32,7 +32,7 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, ray: Ray, t_min: Float, t_max: Float) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord> {
         let oc = ray.origin - self.center;
         let a = ray.direction.length_squared();
         let half_b = oc.dot(ray.direction);

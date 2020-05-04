@@ -16,7 +16,7 @@ pub use self::hittable_list::HittableList;
 pub use self::sphere::Sphere;
 
 pub trait Hittable {
-    fn hit(&self, ray: Ray, t_min: Float, t_max: Float) -> Option<HitRecord>;
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord>;
 }
 
 pub type RcHittable = Rc<dyn Hittable>;

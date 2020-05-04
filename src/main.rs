@@ -33,7 +33,7 @@ fn main() {
                 let v = ((j as Float) + random()) / (image_height as Float);
 
                 let r = s.camera.get_ray(u, v);
-                colour += ray_colour(r, &s.world, max_depth);
+                colour += ray_colour(&r, &s.world, max_depth);
             }
 
             let c = colour.to_colour_from_sample(samples_per_pixel).to_ppm();
@@ -43,15 +43,15 @@ fn main() {
     eprintln!("\nDone!");
 }
 
-fn ray_colour(ray: Ray, world: &HittableList, depth: u32) -> Colour {
+fn ray_colour(ray: &Ray, world: &HittableList, depth: u32) -> Colour {
     if depth <= 0 {
         return Vec3::zero().as_colour();
     }
 
-    match world.hit(ray, 0.001, INFINITY) {
+    match world.hit(&ray, 0.001, INFINITY) {
         Some(rec) => {
-            if let Some(sr) = rec.material.clone().scatter(ray, rec) {
-                ray_colour(sr.scattered, world, depth - 1) * sr.attenuation
+            if let Some(sr) = rec.material.clone().scatter(ray, &rec) {
+                ray_colour(&sr.scattered, world, depth - 1) * sr.attenuation
             } else {
                 background_colour(ray)
             }
@@ -61,7 +61,7 @@ fn ray_colour(ray: Ray, world: &HittableList, depth: u32) -> Colour {
     }
 }
 
-fn background_colour(ray: Ray) -> Colour {
+fn background_colour(ray: &Ray) -> Colour {
     let unit_direction = ray.direction.unit_vector();
     let t = 0.5 * (unit_direction.y() + 1.0);
     (Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t).as_colour()

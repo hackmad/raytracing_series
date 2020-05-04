@@ -16,7 +16,7 @@ pub struct HitRecord {
 
 impl HitRecord {
     pub fn new(
-        ray: Ray,
+        ray: &Ray,
         t: Float,
         point: Point3,
         outward_normal: Vec3,

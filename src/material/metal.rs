@@ -21,7 +21,7 @@ impl Metal {
 }
 
 impl Material for Metal {
-    fn scatter(&self, ray_in: Ray, rec: HitRecord) -> Option<ScatterResult> {
+    fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterResult> {
         let reflected = ray_in.direction.unit_vector().reflect(rec.normal);
         if reflected.dot(rec.normal) > 0.0 {
             let direction = reflected + random_in_unit_sphere() * self.fuzz;
