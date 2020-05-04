@@ -1,38 +1,34 @@
 use super::Float;
 use super::HitRecord;
 use super::Hittable;
-use super::Material;
 use super::Point3;
 use super::Ray;
+use super::RcHittable;
+use super::RcMaterial;
 use super::Vec3;
+use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct Sphere {
     center: Point3,
     radius: Float,
-    material: Box<dyn Material>,
+    material: RcMaterial,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: Float, material: Box<dyn Material>) -> Sphere {
-        Sphere {
+    pub fn new(center: Vec3, radius: Float, material: RcMaterial) -> RcHittable {
+        Rc::new(Sphere {
             center,
             radius,
-            material,
-        }
+            material: Rc::clone(&material),
+        })
     }
-}
 
-fn get_hit_record(
-    ray: Ray,
-    t: Float,
-    center: Point3,
-    radius: Float,
-    mat: Box<dyn Material>,
-) -> HitRecord {
-    let point = ray.at(t);
-    let outward_normal = (point - center) / radius;
-    HitRecord::new(ray, t, point, outward_normal, mat)
+    fn get_hit_record(&self, ray: Ray, t: Float) -> HitRecord {
+        let point = ray.at(t);
+        let outward_normal = (point - self.center) / self.radius;
+        HitRecord::new(ray, t, point, outward_normal, Rc::clone(&self.material))
+    }
 }
 
 impl Hittable for Sphere {
@@ -46,26 +42,14 @@ impl Hittable for Sphere {
         if discriminant > 0.0 {
             let root = discriminant.sqrt();
 
-            let temp = (-half_b - root) / a;
-            if temp < t_max && temp > t_min {
-                return Some(get_hit_record(
-                    ray,
-                    temp,
-                    self.center,
-                    self.radius,
-                    self.material.clone(),
-                ));
+            let t = (-half_b - root) / a;
+            if t < t_max && t > t_min {
+                return Some(self.get_hit_record(ray, t));
             }
 
-            let temp = (-half_b + root) / a;
-            if temp < t_max && temp > t_min {
-                return Some(get_hit_record(
-                    ray,
-                    temp,
-                    self.center,
-                    self.radius,
-                    self.material.clone(),
-                ));
+            let t = (-half_b + root) / a;
+            if t < t_max && t > t_min {
+                return Some(self.get_hit_record(ray, t));
             }
         }
 

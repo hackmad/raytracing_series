@@ -87,69 +87,58 @@ fn background_colour(ray: Ray) -> Colour {
 fn random_scene() -> HittableList {
     let mut world = HittableList::new();
 
-    world.add(Box::new(Sphere::new(
-        Vec3::new(0.0, -1000.0, 0.0),
+    world.add(Sphere::new(
+        Vec3::new(0.0, -1000.0, 0.0).as_point(),
         1000.0,
-        Box::new(Lambertian::new(Vec3::new(0.5, 0.5, 0.5).as_colour())),
-    )));
+        Lambertian::new(Vec3::new(0.5, 0.5, 0.5).as_colour()),
+    ));
 
     for a in -11..11 {
         for b in -11..11 {
             let choose_mat = random();
+
             let center = Vec3::new(
                 a as Float + 0.9 * random(),
                 0.2,
                 b as Float + 0.9 * random(),
-            );
+            )
+            .as_point();
 
-            if (center - Vec3::new(4.0, 0.2, 0.0)).length() > 0.9 {
+            if (center - Vec3::new(4.0, 0.2, 0.0).as_point()).length() > 0.9 {
                 if choose_mat < 0.8 {
                     // diffuse
                     let albedo = (random_vec3() * random_vec3()).as_colour();
-                    world.add(Box::new(Sphere::new(
-                        center,
-                        0.2,
-                        Box::new(Lambertian::new(albedo)),
-                    )));
+                    world.add(Sphere::new(center, 0.2, Lambertian::new(albedo)));
                 } else if choose_mat < 0.95 {
                     // metal
                     let albedo = random_vec3_in_range(0.5, 1.0).as_colour();
                     let fuzz = random_in_range(0.0, 0.5);
-
-                    world.add(Box::new(Sphere::new(
-                        center,
-                        0.2,
-                        Box::new(Metal::new(albedo, fuzz)),
-                    )));
+                    world.add(Sphere::new(center, 0.2, Metal::new(albedo, fuzz)));
                 } else {
                     // glass
-                    world.add(Box::new(Sphere::new(
-                        center,
-                        0.2,
-                        Box::new(Dielectric::new(1.5)),
-                    )));
+                    world.add(Sphere::new(center, 0.2, Dielectric::new(1.5)));
                 }
             }
         }
     }
 
-    world.add(Box::new(Sphere::new(
-        Vec3::new(0.0, 1.0, 0.0),
+    world.add(Sphere::new(
+        Vec3::new(0.0, 1.0, 0.0).as_point(),
         1.0,
-        Box::new(Dielectric::new(1.5)),
-    )));
+        Dielectric::new(1.5),
+    ));
 
-    world.add(Box::new(Sphere::new(
-        Vec3::new(-4.0, 1.0, 0.0),
+    world.add(Sphere::new(
+        Vec3::new(-4.0, 1.0, 0.0).as_point(),
         1.0,
-        Box::new(Lambertian::new(Vec3::new(0.4, 0.2, 0.1).as_colour())),
-    )));
+        Lambertian::new(Vec3::new(0.4, 0.2, 0.1).as_colour()),
+    ));
 
-    world.add(Box::new(Sphere::new(
-        Vec3::new(4.0, 1.0, 0.0),
+    world.add(Sphere::new(
+        Vec3::new(4.0, 1.0, 0.0).as_point(),
         1.0,
-        Box::new(Metal::new(Vec3::new(0.7, 0.6, 0.5).as_colour(), 0.0)),
-    )));
+        Metal::new(Vec3::new(0.7, 0.6, 0.5).as_colour(), 0.0),
+    ));
 
     world
 }

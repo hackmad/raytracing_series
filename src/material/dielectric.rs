@@ -3,8 +3,10 @@ use super::Float;
 use super::HitRecord;
 use super::Material;
 use super::Ray;
+use super::RcMaterial;
 use super::ScatterResult;
 use super::Vec3;
+use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct Dielectric {
@@ -13,11 +15,11 @@ pub struct Dielectric {
 }
 
 impl Dielectric {
-    pub fn new(ri: Float) -> Dielectric {
-        Dielectric {
+    pub fn new(ri: Float) -> RcMaterial {
+        Rc::new(Dielectric {
             ref_idx: ri,
             one_over_ref_idx: 1.0 / ri,
-        }
+        })
     }
 }
 

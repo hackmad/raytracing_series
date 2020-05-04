@@ -4,7 +4,9 @@ use super::Float;
 use super::HitRecord;
 use super::Material;
 use super::Ray;
+use super::RcMaterial;
 use super::ScatterResult;
+use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct Metal {
@@ -13,8 +15,8 @@ pub struct Metal {
 }
 
 impl Metal {
-    pub fn new(albedo: Colour, fuzz: Float) -> Metal {
-        Metal { albedo, fuzz }
+    pub fn new(albedo: Colour, fuzz: Float) -> RcMaterial {
+        Rc::new(Metal { albedo, fuzz })
     }
 }
 

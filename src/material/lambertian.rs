@@ -3,7 +3,9 @@ use super::Colour;
 use super::HitRecord;
 use super::Material;
 use super::Ray;
+use super::RcMaterial;
 use super::ScatterResult;
+use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct Lambertian {
@@ -11,8 +13,8 @@ pub struct Lambertian {
 }
 
 impl Lambertian {
-    pub fn new(albedo: Colour) -> Lambertian {
-        Lambertian { albedo }
+    pub fn new(albedo: Colour) -> RcMaterial {
+        Rc::new(Lambertian { albedo })
     }
 }
 

@@ -10,6 +10,7 @@ use super::common::random_in_unit_sphere;
 use super::common::random_unit_vec3;
 use super::common::Float;
 use super::objects::HitRecord;
+use std::rc::Rc;
 
 pub use self::dielectric::Dielectric;
 pub use self::lambertian::Lambertian;
@@ -21,25 +22,8 @@ pub struct ScatterResult {
     pub attenuation: Colour,
 }
 
-pub trait Material: MaterialClone {
+pub trait Material {
     fn scatter(&self, ray_in: Ray, rec: HitRecord) -> Option<ScatterResult>;
 }
 
-pub trait MaterialClone {
-    fn clone_box(&self) -> Box<dyn Material>;
-}
-
-impl<T> MaterialClone for T
-where
-    T: 'static + Material + Clone,
-{
-    fn clone_box(&self) -> Box<dyn Material> {
-        Box::new(self.clone())
-    }
-}
-
-impl Clone for Box<dyn Material> {
-    fn clone(&self) -> Box<dyn Material> {
-        self.clone_box()
-    }
-}
+pub type RcMaterial = Rc<dyn Material>;

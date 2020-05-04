@@ -2,10 +2,12 @@ use super::Float;
 use super::HitRecord;
 use super::Hittable;
 use super::Ray;
+use super::RcHittable;
+use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct HittableList {
-    objects: Vec<Box<dyn Hittable>>,
+    objects: Vec<RcHittable>,
 }
 
 impl HittableList {
@@ -15,18 +17,12 @@ impl HittableList {
         }
     }
 
-    pub fn new_from_object(object: Box<dyn Hittable>) -> HittableList {
-        HittableList {
-            objects: vec![object],
-        }
-    }
-
     pub fn clear(&mut self) {
         self.objects.clear();
     }
 
-    pub fn add(&mut self, object: Box<dyn Hittable>) {
-        self.objects.push(object);
+    pub fn add(&mut self, object: RcHittable) {
+        self.objects.push(Rc::clone(&object));
     }
 }
 
@@ -48,7 +44,7 @@ impl Hittable for HittableList {
                         point,
                         normal,
                         front_face,
-                        material,
+                        material: Rc::clone(&material),
                     }),
                     t,
                 ),
