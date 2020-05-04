@@ -3,7 +3,9 @@ mod metal;
 
 use super::algebra::Ray;
 use super::colour::Colour;
+use super::common::random_in_unit_sphere;
 use super::common::random_unit_vec3;
+use super::common::Float;
 use super::objects::HitRecord;
 
 pub use self::lambertian::Lambertian;
