@@ -11,17 +11,32 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new() -> Camera {
+    pub fn new(
+        lookfrom: Vec3,
+        lookat: Vec3,
+        vup: Vec3,
+        vfov: Float, // vertical fov in degrees
+        aspect_ratio: Float,
+    ) -> Camera {
+        let theta = vfov.to_radians();
+        let half_height = (theta / 2.0).tan();
+        let half_width = aspect_ratio * half_height;
+
+        let w = (lookfrom - lookat).unit_vector();
+        let u = vup.cross(w).unit_vector();
+        let v = w.cross(u);
+
         Camera {
-            lower_left_corner: Vec3::new(-2.0, -1.0, -1.0),
-            horizontal: Vec3::new(4.0, 0.0, 0.0),
-            vertical: Vec3::new(0.0, 2.0, 0.0),
-            origin: Vec3::new(0.0, 0.0, 0.0),
+            origin: lookfrom,
+            lower_left_corner: lookfrom - u * half_width - v * half_height - w,
+            horizontal: u * (2.0 * half_width),
+            vertical: v * (2.0 * half_height),
         }
     }
 
-    pub fn get_ray(self, u: Float, v: Float) -> Ray {
-        let direction = self.lower_left_corner + self.horizontal * u + self.vertical * v;
+    pub fn get_ray(self, s: Float, t: Float) -> Ray {
+        let direction =
+            self.lower_left_corner + self.horizontal * s + self.vertical * t - self.origin;
         Ray::new(self.origin, direction)
     }
 }

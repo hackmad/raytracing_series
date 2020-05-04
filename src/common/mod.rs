@@ -2,8 +2,9 @@
 
 use super::algebra::Vec3;
 
-pub type Float = f32;
-pub const PI: Float = std::f32::consts::PI;
+pub type Float = f64;
+pub const PI: Float = std::f64::consts::PI;
+pub const INFINITY: Float = std::f64::INFINITY;
 
 pub fn random() -> Float {
     rand::random::<Float>()

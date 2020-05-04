@@ -17,6 +17,7 @@ fn main() {
     let image_height = 100;
     let samples_per_pixel = 100;
     let max_depth = 50;
+    let aspect_ratio = (image_width as Float) / (image_height as Float);
 
     let mut world = HittableList::new();
     world.add(Box::new(Sphere::new(
@@ -45,7 +46,13 @@ fn main() {
         Box::new(Dielectric::new(1.5)),
     )));
 
-    let cam = Camera::new();
+    let cam = Camera::new(
+        Vec3::new(-2.0, 2.0, 1.0),
+        Vec3::new(0.0, 0.0, -1.0),
+        Vec3::new(0.0, 1.0, 0.0),
+        20.0,
+        aspect_ratio,
+    );
 
     println!("P3\n{} {}\n255", image_width, image_height);
 
@@ -56,8 +63,8 @@ fn main() {
             let mut colour = Vec3::zero().as_colour();
 
             for _s in 0..samples_per_pixel {
-                let u = ((i as f32) + random()) / (image_width as f32);
-                let v = ((j as f32) + random()) / (image_height as f32);
+                let u = ((i as Float) + random()) / (image_width as Float);
+                let v = ((j as Float) + random()) / (image_height as Float);
                 let r = cam.get_ray(u, v);
                 colour += ray_colour(r, &world, max_depth);
             }
@@ -74,7 +81,7 @@ fn ray_colour(ray: Ray, world: &HittableList, depth: u32) -> Colour {
         return Vec3::zero().as_colour();
     }
 
-    match world.hit(ray, 0.001, f32::INFINITY) {
+    match world.hit(ray, 0.001, INFINITY) {
         Some(rec) => {
             if let Some(sr) = rec.material.clone().scatter(ray, rec) {
                 ray_colour(sr.scattered, world, depth - 1) * sr.attenuation
