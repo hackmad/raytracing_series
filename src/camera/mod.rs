@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use super::algebra::Point3;
 use super::algebra::Ray;
 use super::algebra::Vec3;
 use super::common::random_in_unit_disk;
@@ -7,10 +8,10 @@ use super::common::Float;
 
 #[derive(Copy, Clone)]
 pub struct Camera {
-    lower_left_corner: Vec3,
+    lower_left_corner: Point3,
     horizontal: Vec3,
     vertical: Vec3,
-    origin: Vec3,
+    origin: Point3,
     lens_radius: Float,
     u: Vec3,
     v: Vec3,
@@ -19,8 +20,8 @@ pub struct Camera {
 
 impl Camera {
     pub fn new(
-        lookfrom: Vec3,
-        lookat: Vec3,
+        lookfrom: Point3,
+        lookat: Point3,
         vup: Vec3,
         vfov: Float, // vertical fov in degrees
         aspect_ratio: Float,

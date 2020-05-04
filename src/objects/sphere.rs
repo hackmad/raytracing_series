@@ -2,12 +2,13 @@ use super::Float;
 use super::HitRecord;
 use super::Hittable;
 use super::Material;
+use super::Point3;
 use super::Ray;
 use super::Vec3;
 
 #[derive(Clone)]
 pub struct Sphere {
-    center: Vec3,
+    center: Point3,
     radius: Float,
     material: Box<dyn Material>,
 }
@@ -20,6 +21,18 @@ impl Sphere {
             material,
         }
     }
+}
+
+fn get_hit_record(
+    ray: Ray,
+    t: Float,
+    center: Point3,
+    radius: Float,
+    mat: Box<dyn Material>,
+) -> HitRecord {
+    let point = ray.at(t);
+    let outward_normal = (point - center) / radius;
+    HitRecord::new(ray, t, point, outward_normal, mat)
 }
 
 impl Hittable for Sphere {
@@ -35,26 +48,22 @@ impl Hittable for Sphere {
 
             let temp = (-half_b - root) / a;
             if temp < t_max && temp > t_min {
-                let point = ray.at(temp);
-                let outward_normal = (point - self.center) / self.radius;
-                return Some(HitRecord::new(
+                return Some(get_hit_record(
                     ray,
                     temp,
-                    point,
-                    outward_normal,
+                    self.center,
+                    self.radius,
                     self.material.clone(),
                 ));
             }
 
             let temp = (-half_b + root) / a;
             if temp < t_max && temp > t_min {
-                let point = ray.at(temp);
-                let outward_normal = (point - self.center) / self.radius;
-                return Some(HitRecord::new(
+                return Some(get_hit_record(
                     ray,
                     temp,
-                    point,
-                    outward_normal,
+                    self.center,
+                    self.radius,
                     self.material.clone(),
                 ));
             }

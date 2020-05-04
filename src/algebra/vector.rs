@@ -10,6 +10,7 @@ pub struct Vec3 {
 }
 
 pub type Colour = Vec3;
+pub type Point3 = Vec3;
 
 impl Vec3 {
     pub fn zero() -> Vec3 {
@@ -72,6 +73,10 @@ impl Vec3 {
         let r_out_parallel = (self + n * cos_theta) * etai_over_etat;
         let r_out_perp = n * -(1.0 - r_out_parallel.length_squared()).sqrt();
         r_out_parallel + r_out_perp
+    }
+
+    pub fn as_point(self) -> Point3 {
+        self as Point3
     }
 
     pub fn as_colour(self) -> Colour {

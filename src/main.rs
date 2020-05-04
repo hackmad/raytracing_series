@@ -19,39 +19,15 @@ fn main() {
     let max_depth = 50;
     let aspect_ratio = (image_width as Float) / (image_height as Float);
 
-    let mut world = HittableList::new();
-    world.add(Box::new(Sphere::new(
-        Vec3::new(0.0, 0.0, -1.0),
-        0.5,
-        Box::new(Lambertian::new(Vec3::new(0.1, 0.2, 0.5).as_colour())),
-    )));
-    world.add(Box::new(Sphere::new(
-        Vec3::new(0.0, -100.5, -1.0),
-        100.0,
-        Box::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0).as_colour())),
-    )));
-    world.add(Box::new(Sphere::new(
-        Vec3::new(1.0, 0.0, -1.0),
-        0.5,
-        Box::new(Metal::new(Vec3::new(0.8, 0.6, 0.2).as_colour(), 0.0)),
-    )));
-    world.add(Box::new(Sphere::new(
-        Vec3::new(-1.0, 0.0, -1.0),
-        0.5,
-        Box::new(Dielectric::new(1.5)),
-    )));
-    world.add(Box::new(Sphere::new(
-        Vec3::new(-1.0, 0.0, -1.0),
-        -0.45, // this only works for dielectrics to make normal point inwards
-        Box::new(Dielectric::new(1.5)),
-    )));
+    let world = random_scene();
 
-    let lookfrom = Vec3::new(3.0, 3.0, 2.0);
-    let lookat = Vec3::new(0.0, 0.0, -1.0);
+    let lookfrom = Vec3::new(13.0, 2.0, 3.0).as_point();
+    let lookat = Vec3::zero().as_point();
     let vup = Vec3::new(0.0, 1.0, 0.0);
-    let focus_dist = (lookfrom - lookat).length();
-    let aperture = 2.0;
+    let focus_dist = 10.0;
+    let aperture = 0.1;
     let vfov = 20.0;
+
     let cam = Camera::new(
         lookfrom,
         lookat,
@@ -106,4 +82,74 @@ fn background_colour(ray: Ray) -> Colour {
     let unit_direction = ray.direction.unit_vector();
     let t = 0.5 * (unit_direction.y() + 1.0);
     (Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t).as_colour()
+}
+
+fn random_scene() -> HittableList {
+    let mut world = HittableList::new();
+
+    world.add(Box::new(Sphere::new(
+        Vec3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        Box::new(Lambertian::new(Vec3::new(0.5, 0.5, 0.5).as_colour())),
+    )));
+
+    for a in -11..11 {
+        for b in -11..11 {
+            let choose_mat = random();
+            let center = Vec3::new(
+                a as Float + 0.9 * random(),
+                0.2,
+                b as Float + 0.9 * random(),
+            );
+
+            if (center - Vec3::new(4.0, 0.2, 0.0)).length() > 0.9 {
+                if choose_mat < 0.8 {
+                    // diffuse
+                    let albedo = (random_vec3() * random_vec3()).as_colour();
+                    world.add(Box::new(Sphere::new(
+                        center,
+                        0.2,
+                        Box::new(Lambertian::new(albedo)),
+                    )));
+                } else if choose_mat < 0.95 {
+                    // metal
+                    let albedo = random_vec3_in_range(0.5, 1.0).as_colour();
+                    let fuzz = random_in_range(0.0, 0.5);
+
+                    world.add(Box::new(Sphere::new(
+                        center,
+                        0.2,
+                        Box::new(Metal::new(albedo, fuzz)),
+                    )));
+                } else {
+                    // glass
+                    world.add(Box::new(Sphere::new(
+                        center,
+                        0.2,
+                        Box::new(Dielectric::new(1.5)),
+                    )));
+                }
+            }
+        }
+    }
+
+    world.add(Box::new(Sphere::new(
+        Vec3::new(0.0, 1.0, 0.0),
+        1.0,
+        Box::new(Dielectric::new(1.5)),
+    )));
+
+    world.add(Box::new(Sphere::new(
+        Vec3::new(-4.0, 1.0, 0.0),
+        1.0,
+        Box::new(Lambertian::new(Vec3::new(0.4, 0.2, 0.1).as_colour())),
+    )));
+
+    world.add(Box::new(Sphere::new(
+        Vec3::new(4.0, 1.0, 0.0),
+        1.0,
+        Box::new(Metal::new(Vec3::new(0.7, 0.6, 0.5).as_colour(), 0.0)),
+    )));
+
+    world
 }

@@ -2,6 +2,7 @@
 
 use super::algebra::Vec3;
 
+// Use f64 since it provides the wider range of math opertaions.
 pub type Float = f64;
 pub const PI: Float = std::f64::consts::PI;
 pub const INFINITY: Float = std::f64::INFINITY;

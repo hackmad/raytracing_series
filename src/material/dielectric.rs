@@ -29,7 +29,7 @@ fn schlick(cosine: Float, ref_idx: Float) -> Float {
 
 impl Material for Dielectric {
     fn scatter(&self, ray_in: Ray, rec: HitRecord) -> Option<ScatterResult> {
-        let attenuation = Vec3::new(1.0, 1.0, 1.0).as_colour();
+        let attenuation = Vec3::new(1.0, 1.0, 1.0).as_colour(); // no attenuation
 
         let etai_over_etat = if rec.front_face {
             self.one_over_ref_idx

@@ -3,6 +3,7 @@
 mod hittable_list;
 mod sphere;
 
+use super::algebra::Point3;
 use super::algebra::Ray;
 use super::algebra::Vec3;
 use super::common::Float;
@@ -37,7 +38,7 @@ impl Clone for Box<dyn Hittable> {
 #[derive(Clone)]
 pub struct HitRecord {
     pub t: Float,
-    pub point: Vec3,
+    pub point: Point3,
     pub normal: Vec3,
     pub front_face: bool,
     pub material: Box<dyn Material>,
@@ -47,7 +48,7 @@ impl HitRecord {
     pub fn new(
         ray: Ray,
         t: Float,
-        point: Vec3,
+        point: Point3,
         outward_normal: Vec3,
         material: Box<dyn Material>,
     ) -> HitRecord {

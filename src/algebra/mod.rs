@@ -5,4 +5,5 @@ use super::common::*;
 
 pub use self::ray::Ray;
 pub use self::vector::Colour;
+pub use self::vector::Point3;
 pub use self::vector::Vec3;
