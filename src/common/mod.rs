@@ -28,27 +28,36 @@ pub fn random_vec3_in_range(min: Float, max: Float) -> Vec3 {
 
 pub fn random_in_unit_sphere() -> Vec3 {
     loop {
-        let p = random_vec3_in_range(-1.0 as Float, 1.0 as Float);
-        if p.length_squared() < 1.0 as Float {
+        let p = random_vec3_in_range(-1.0, 1.0);
+        if p.length_squared() < 1.0 {
             break p;
         }
     }
 }
 
 pub fn random_unit_vec3() -> Vec3 {
-    let a = random_in_range(0.0 as Float, 2.0 * PI);
-    let z = random_in_range(-1.0 as Float, 1.0 as Float);
-    let r = (1.0 as Float - z * z).sqrt();
+    let a = random_in_range(0.0, 2.0 * PI);
+    let z = random_in_range(-1.0, 1.0);
+    let r = (1.0 - z * z).sqrt();
     Vec3::new(r * a.cos(), r * a.sin(), z)
 }
 
 pub fn random_in_hemisphere(normal: Vec3) -> Vec3 {
     let in_unit_sphere = random_in_unit_sphere();
-    if in_unit_sphere.dot(normal) > 0.0 as Float {
+    if in_unit_sphere.dot(normal) > 0.0 {
         // In the same hemisphere as the normal
         in_unit_sphere
     } else {
         -in_unit_sphere
+    }
+}
+
+pub fn random_in_unit_disk() -> Vec3 {
+    loop {
+        let p = Vec3::new(random_in_range(-1.0, 1.0), random_in_range(-1.0, 1.0), 0.0);
+        if p.length_squared() < 1.0 {
+            break p;
+        }
     }
 }
 

@@ -46,12 +46,20 @@ fn main() {
         Box::new(Dielectric::new(1.5)),
     )));
 
+    let lookfrom = Vec3::new(3.0, 3.0, 2.0);
+    let lookat = Vec3::new(0.0, 0.0, -1.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let focus_dist = (lookfrom - lookat).length();
+    let aperture = 2.0;
+    let vfov = 20.0;
     let cam = Camera::new(
-        Vec3::new(-2.0, 2.0, 1.0),
-        Vec3::new(0.0, 0.0, -1.0),
-        Vec3::new(0.0, 1.0, 0.0),
-        20.0,
+        lookfrom,
+        lookat,
+        vup,
+        vfov,
         aspect_ratio,
+        aperture,
+        focus_dist,
     );
 
     println!("P3\n{} {}\n255", image_width, image_height);

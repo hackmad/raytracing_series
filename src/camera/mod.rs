@@ -1,5 +1,8 @@
+#![allow(dead_code)]
+
 use super::algebra::Ray;
 use super::algebra::Vec3;
+use super::common::random_in_unit_disk;
 use super::common::Float;
 
 #[derive(Copy, Clone)]
@@ -8,6 +11,10 @@ pub struct Camera {
     horizontal: Vec3,
     vertical: Vec3,
     origin: Vec3,
+    lens_radius: Float,
+    u: Vec3,
+    v: Vec3,
+    w: Vec3,
 }
 
 impl Camera {
@@ -17,6 +24,8 @@ impl Camera {
         vup: Vec3,
         vfov: Float, // vertical fov in degrees
         aspect_ratio: Float,
+        aperture: Float,
+        focus_dist: Float,
     ) -> Camera {
         let theta = vfov.to_radians();
         let half_height = (theta / 2.0).tan();
@@ -28,15 +37,26 @@ impl Camera {
 
         Camera {
             origin: lookfrom,
-            lower_left_corner: lookfrom - u * half_width - v * half_height - w,
-            horizontal: u * (2.0 * half_width),
-            vertical: v * (2.0 * half_height),
+            lower_left_corner: lookfrom
+                - u * (half_width * focus_dist)
+                - v * (half_height * focus_dist)
+                - w * focus_dist,
+            horizontal: u * (2.0 * half_width * focus_dist),
+            vertical: v * (2.0 * half_height * focus_dist),
+            lens_radius: aperture / 2.0,
+            u,
+            v,
+            w,
         }
     }
 
     pub fn get_ray(self, s: Float, t: Float) -> Ray {
-        let direction =
-            self.lower_left_corner + self.horizontal * s + self.vertical * t - self.origin;
-        Ray::new(self.origin, direction)
+        let rd = random_in_unit_disk() * self.lens_radius;
+        let offset = self.u * rd.x() + self.v * rd.y();
+
+        Ray::new(
+            self.origin + offset,
+            self.lower_left_corner + self.horizontal * s + self.vertical * t - self.origin - offset,
+        )
     }
 }
