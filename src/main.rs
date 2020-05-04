@@ -24,7 +24,7 @@ fn main() {
     world.add(Box::new(Sphere::new(
         Vec3::new(0.0, 0.0, -1.0),
         0.5,
-        Box::new(Lambertian::new(colour_from_vec3(Vec3::new(0.7, 0.3, 0.3)))),
+        Box::new(Lambertian::new(colour_from_vec3(Vec3::new(0.1, 0.2, 0.5)))),
     )));
     world.add(Box::new(Sphere::new(
         Vec3::new(0.0, -100.5, -1.0),
@@ -34,12 +34,17 @@ fn main() {
     world.add(Box::new(Sphere::new(
         Vec3::new(1.0, 0.0, -1.0),
         0.5,
-        Box::new(Metal::new(colour_from_vec3(Vec3::new(0.8, 0.6, 0.2)), 1.0)),
+        Box::new(Metal::new(colour_from_vec3(Vec3::new(0.8, 0.6, 0.2)), 0.0)),
     )));
     world.add(Box::new(Sphere::new(
         Vec3::new(-1.0, 0.0, -1.0),
         0.5,
-        Box::new(Metal::new(colour_from_vec3(Vec3::new(0.8, 0.8, 0.8)), 0.3)),
+        Box::new(Dielectric::new(1.5)),
+    )));
+    world.add(Box::new(Sphere::new(
+        Vec3::new(-1.0, 0.0, -1.0),
+        -0.45, // this only works for dielectrics to make normal point inwards
+        Box::new(Dielectric::new(1.5)),
     )));
 
     let cam = Camera::new();

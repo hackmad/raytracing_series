@@ -1,13 +1,18 @@
+mod dielectric;
 mod lambertian;
 mod metal;
 
 use super::algebra::Ray;
+use super::algebra::Vec3;
+use super::colour::colour_from_vec3;
 use super::colour::Colour;
+use super::common::random;
 use super::common::random_in_unit_sphere;
 use super::common::random_unit_vec3;
 use super::common::Float;
 use super::objects::HitRecord;
 
+pub use self::dielectric::Dielectric;
 pub use self::lambertian::Lambertian;
 pub use self::metal::Metal;
 
