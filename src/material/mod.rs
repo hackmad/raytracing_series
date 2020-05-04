@@ -9,7 +9,7 @@ use super::common::random;
 use super::common::random_in_unit_sphere;
 use super::common::random_unit_vec3;
 use super::common::Float;
-use super::objects::HitRecord;
+use super::object::HitRecord;
 use std::rc::Rc;
 
 pub use self::dielectric::Dielectric;
