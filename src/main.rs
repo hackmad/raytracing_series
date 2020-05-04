@@ -4,12 +4,14 @@ mod algebra;
 mod camera;
 mod colour;
 mod common;
+mod material;
 mod objects;
 
 use algebra::*;
 use camera::*;
 use colour::*;
 use common::*;
+use material::*;
 use objects::*;
 
 fn main() {
@@ -19,8 +21,26 @@ fn main() {
     let max_depth = 50;
 
     let mut world = HittableList::new();
-    world.add(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)));
-    world.add(Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)));
+    world.add(Box::new(Sphere::new(
+        Vec3::new(0.0, 0.0, -1.0),
+        0.5,
+        Box::new(Lambertian::new(colour_from_vec3(Vec3::new(0.7, 0.3, 0.3)))),
+    )));
+    world.add(Box::new(Sphere::new(
+        Vec3::new(0.0, -100.5, -1.0),
+        100.0,
+        Box::new(Lambertian::new(colour_from_vec3(Vec3::new(0.8, 0.8, 0.0)))),
+    )));
+    world.add(Box::new(Sphere::new(
+        Vec3::new(1.0, 0.0, -1.0),
+        0.5,
+        Box::new(Metal::new(colour_from_vec3(Vec3::new(0.8, 0.6, 0.2)))),
+    )));
+    world.add(Box::new(Sphere::new(
+        Vec3::new(-1.0, 0.0, -1.0),
+        0.5,
+        Box::new(Metal::new(colour_from_vec3(Vec3::new(0.8, 0.8, 0.8)))),
+    )));
 
     let cam = Camera::new();
 
@@ -39,34 +59,34 @@ fn main() {
                 colour += ray_colour(r, &world, max_depth);
             }
 
-            let c = Colour::new_from_vec3(colour, samples_per_pixel).as_ppm();
+            let c = colour_to_ppm(colour_from_sample(colour, samples_per_pixel));
             println!("{}", c);
         }
     }
     eprintln!("\nDone!");
 }
 
-fn ray_colour(ray: Ray, world: &HittableList, depth: u32) -> Vec3 {
+fn ray_colour(ray: Ray, world: &HittableList, depth: u32) -> Colour {
+    if depth <= 0 {
+        return colour_from_vec3(Vec3::zero());
+    }
+
     match world.hit(ray, 0.001, f32::INFINITY) {
-        Some(HitRecord {
-            t,
-            normal,
-            point,
-            front_face: _,
-        }) if t > 0.0 => {
-            if depth <= 0 {
-                Vec3::zero()
+        Some(rec) => {
+            if let Some(sr) = rec.material.clone().scatter(ray, rec) {
+                ray_colour(sr.scattered, world, depth - 1) * sr.attenuation
             } else {
-                let target = point + random_in_hemisphere(normal);
-                let new_ray = Ray::new(point, target - point);
-                ray_colour(new_ray, world, depth - 1) * 0.5
+                background_colour(ray)
             }
         }
 
-        _ => {
-            let unit_direction = ray.direction.unit_vector();
-            let t = 0.5 * (unit_direction.y() + 1.0);
-            Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
-        }
+        _ => background_colour(ray),
     }
+}
+
+fn background_colour(ray: Ray) -> Colour {
+    let unit_direction = ray.direction.unit_vector();
+    let t = 0.5 * (unit_direction.y() + 1.0);
+    let v = Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t;
+    colour_from_vec3(v)
 }

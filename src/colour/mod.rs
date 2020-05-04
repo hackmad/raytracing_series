@@ -4,31 +4,27 @@ use super::algebra::Vec3;
 use super::common::clamp;
 use super::common::Float;
 
-#[derive(Copy, Clone)]
-pub struct Colour {
-    pub r: u8,
-    pub g: u8,
-    pub b: u8,
+pub type Colour = Vec3;
+
+pub fn colour_from_vec3(v: Vec3) -> Colour {
+    v as Colour
 }
 
-impl Colour {
-    pub fn new(r: u8, g: u8, b: u8) -> Colour {
-        Colour { r, g, b }
-    }
+pub fn colour_from_sample(v: Vec3, samples_per_pixel: u32) -> Colour {
+    // Divide the color total by the number of samples
+    let s = 1.0 / samples_per_pixel as Float;
 
-    pub fn new_from_vec3(v: Vec3, samples_per_pixel: u32) -> Colour {
-        // Divide the color total by the number of samples
-        let s = 1.0 / samples_per_pixel as Float;
+    // Gamma-correct for a gamma value of 2.0 (sqrt)
+    Vec3::new(
+        256.0 * clamp((v.x() * s).sqrt(), 0.0, 0.999),
+        256.0 * clamp((v.y() * s).sqrt(), 0.0, 0.999),
+        256.0 * clamp((v.z() * s).sqrt(), 0.0, 0.999),
+    ) as Colour
+}
 
-        // Gamma-correct for a gamma value of 2.0 (sqrt)
-        Colour {
-            r: (256.0 * clamp((v.x() * s).sqrt(), 0.0, 0.999)) as u8,
-            g: (256.0 * clamp((v.y() * s).sqrt(), 0.0, 0.999)) as u8,
-            b: (256.0 * clamp((v.z() * s).sqrt(), 0.0, 0.999)) as u8,
-        }
-    }
-
-    pub fn as_ppm(self) -> String {
-        format!("{} {} {}", self.r, self.g, self.b)
-    }
+pub fn colour_to_ppm(c: Colour) -> String {
+    let r = c.x() as u8;
+    let g = c.y() as u8;
+    let b = c.z() as u8;
+    format!("{} {} {}", r, g, b)
 }
