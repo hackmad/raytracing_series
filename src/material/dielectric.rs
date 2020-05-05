@@ -1,3 +1,7 @@
+//! # Dielectric
+//!
+//! A library for handling dielectric material.
+
 use super::random;
 use super::Float;
 use super::HitRecord;
@@ -8,13 +12,20 @@ use super::ScatterResult;
 use super::Vec3;
 use std::rc::Rc;
 
+/// Models a dielectric material.
 #[derive(Clone)]
 pub struct Dielectric {
+    /// Index of refraction.
     ref_idx: Float,
+
+    /// Reciprocal of `ref_idx`.
     one_over_ref_idx: Float,
 }
 
 impl Dielectric {
+    /// Creates a new dielectric material.
+    ///
+    /// * `ri` - Index of refraction.
     pub fn new(ri: Float) -> RcMaterial {
         Rc::new(Dielectric {
             ref_idx: ri,
@@ -23,6 +34,13 @@ impl Dielectric {
     }
 }
 
+/// Approximate the contribution of the Fresnel factor in the specular
+/// reflection of light from a non-conducting interface (surface) between
+/// two media
+///
+/// * `cosine` - Cosine of angle between the direction from which the
+///              incident light is coming and the normal.
+/// * `ref_idx` - Refractive index.
 fn schlick(cosine: Float, ref_idx: Float) -> Float {
     let r0 = (1.0 - ref_idx) / (1.0 + ref_idx);
     let r0 = r0 * r0;
@@ -30,8 +48,16 @@ fn schlick(cosine: Float, ref_idx: Float) -> Float {
 }
 
 impl Material for Dielectric {
+    /// Scatter an incident ray and determine the attenuation.
+    /// If the incident ray is absorbed, `None` is returned.
+    ///
+    /// Model the refractions and total internal reflection.
+    ///
+    /// * `ray_in` - Incident ray.
+    /// * `rec` - The `HitRecord`.
     fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterResult> {
-        let attenuation = Vec3::new(1.0, 1.0, 1.0).as_colour(); // no attenuation
+        // No attenuation
+        let attenuation = Vec3::new(1.0, 1.0, 1.0).as_colour();
 
         let etai_over_etat = if rec.front_face {
             self.one_over_ref_idx

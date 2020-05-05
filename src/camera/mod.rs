@@ -1,5 +1,9 @@
-#![allow(dead_code)]
+//! # Camera
+//!
+//! A library for handling cameras that use a thin lens approximation to
+//! handle defocus blur.
 
+#![allow(dead_code)]
 use super::algebra::Point3;
 use super::algebra::Ray;
 use super::algebra::Vec3;
@@ -8,22 +12,46 @@ use super::common::Float;
 
 #[derive(Copy, Clone)]
 pub struct Camera {
+    /// The lower left corner of the image plane.
     lower_left_corner: Point3,
+
+    /// The horizontal vector along image plane.
     horizontal: Vec3,
+
+    /// The vertical vector along image plane.
     vertical: Vec3,
+
+    // The origin point where camera is located.
     origin: Point3,
+
+    // Radius of camera lens.
     lens_radius: Float,
+
+    /// Orthonomal basis vector u describing the orientation.
     u: Vec3,
+
+    /// Orthonomal basis vector v describing the orientation.
     v: Vec3,
+
+    /// Orthonomal basis vector w describing the orientation.
     w: Vec3,
 }
 
 impl Camera {
+    /// Create a new camera.
+    ///
+    /// * `lookfrom` - Location of camera.
+    /// * `lookat` - Point towards which camera is looking.
+    /// * `vup` - The vector representing the up direction.
+    /// * `vfov` - Vertical field of view in degrees.
+    /// * `aspect_ratio` - The aspect ratio of image.
+    /// * `aperture` - The camere aperture.
+    /// * `focus_dist` - The distance to focal plane.
     pub fn new(
         lookfrom: Point3,
         lookat: Point3,
         vup: Vec3,
-        vfov: Float, // vertical fov in degrees
+        vfov: Float,
         aspect_ratio: Float,
         aperture: Float,
         focus_dist: Float,
@@ -51,6 +79,11 @@ impl Camera {
         }
     }
 
+    /// Returns a ray for the given parametric coordinates along the image
+    /// image plane.
+    ///
+    /// * `s`: Horizontal parameter.
+    /// * `t`: Vertical parameter.
     pub fn get_ray(self, s: Float, t: Float) -> Ray {
         let rd = random_in_unit_disk() * self.lens_radius;
         let offset = self.u * rd.x() + self.v * rd.y();

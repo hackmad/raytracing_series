@@ -1,15 +1,24 @@
+//! # Scene
+//!
+//! A library for handling scene data.
+
 use super::algebra::*;
 use super::camera::*;
 use super::common::*;
 use super::material::*;
 use super::object::*;
 
+/// Models a scene.
 pub struct Scene {
+    /// The camera.
     pub camera: Camera,
+
+    /// Objects in the scene.
     pub world: HittableList,
 }
 
 impl Scene {
+    /// Create new scene with some random geometric objects and camera.
     pub fn new_random_scene(image_width: u32, image_height: u32) -> Scene {
         let aspect_ratio = (image_width as Float) / (image_height as Float);
 
@@ -36,6 +45,7 @@ impl Scene {
     }
 }
 
+/// Generate some fixed spheres and a lot of smaller random spheres.
 fn random_world() -> HittableList {
     let mut world = HittableList::new();
 
@@ -58,16 +68,16 @@ fn random_world() -> HittableList {
 
             if (center - Vec3::new(4.0, 0.2, 0.0).as_point()).length() > 0.9 {
                 if choose_mat < 0.8 {
-                    // diffuse
+                    // Diffuse
                     let albedo = (random_vec3() * random_vec3()).as_colour();
                     world.add(Sphere::new(center, 0.2, Lambertian::new(albedo)));
                 } else if choose_mat < 0.95 {
-                    // metal
+                    // Metal
                     let albedo = random_vec3_in_range(0.5, 1.0).as_colour();
                     let fuzz = random_in_range(0.0, 0.5);
                     world.add(Sphere::new(center, 0.2, Metal::new(albedo, fuzz)));
                 } else {
-                    // glass
+                    // Glass
                     world.add(Sphere::new(center, 0.2, Dielectric::new(1.5)));
                 }
             }
