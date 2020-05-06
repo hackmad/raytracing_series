@@ -2,11 +2,24 @@
 //!
 //! A library for handling scene data.
 
+#![allow(dead_code)]
+
 use super::algebra::*;
 use super::camera::*;
 use super::common::*;
 use super::material::*;
 use super::object::*;
+
+#[derive(Debug)]
+pub enum Scenery {
+    LambertianDiffuse,
+    Metal,
+    Dielectric,
+    CameraViewpoint,
+    CameraFov,
+    DefocusBlur,
+    RandomSpheres,
+}
 
 /// Models a scene.
 pub struct Scene {
@@ -18,31 +31,162 @@ pub struct Scene {
 }
 
 impl Scene {
-    /// Create new scene with some random geometric objects and camera.
-    pub fn new_random_scene(image_width: u32, image_height: u32) -> Scene {
-        let aspect_ratio = (image_width as Float) / (image_height as Float);
-
-        let lookfrom = Vec3::new(13.0, 2.0, 3.0).as_point();
-        let lookat = Vec3::zero().as_point();
-        let vup = Vec3::new(0.0, 1.0, 0.0);
-        let focus_dist = 10.0;
-        let aperture = 0.1;
-        let vfov = 20.0;
-
-        Scene {
-            camera: Camera::new(
-                lookfrom,
-                lookat,
-                vup,
-                vfov,
-                aspect_ratio,
-                aperture,
-                focus_dist,
-            ),
-
-            world: random_world(),
+    pub fn new(scenery: Scenery, image_width: u32, image_height: u32) -> Scene {
+        match scenery {
+            Scenery::LambertianDiffuse => diffuse_spheres(image_width, image_height),
+            Scenery::Metal => metal_spheres(image_width, image_height),
+            Scenery::Dielectric => dielectric_spheres(image_width, image_height),
+            Scenery::CameraViewpoint => camera_viewpoint(image_width, image_height),
+            Scenery::CameraFov => camera_fov(image_width, image_height),
+            Scenery::DefocusBlur => defocus_blur(image_width, image_height),
+            Scenery::RandomSpheres => random_spheres(image_width, image_height),
         }
     }
+}
+
+fn default_camera(image_width: u32, image_height: u32) -> Camera {
+    Camera::new(
+        Vec3::zero().as_point(),
+        Vec3::new(0.0, 0.0, -1.0).as_point(),
+        Vec3::new(0.0, 1.0, 0.0),
+        90.0,
+        (image_width as Float) / (image_height as Float),
+        0.001,
+        100.0,
+    )
+}
+
+fn diffuse_spheres(image_width: u32, image_height: u32) -> Scene {
+    let mut world = HittableList::new();
+
+    world.add(Sphere::new(
+        Vec3::new(0.0, 0.0, -1.0).as_point(),
+        0.5,
+        Lambertian::new(Vec3::new(0.5, 0.5, 0.5).as_colour()),
+    ));
+    world.add(Sphere::new(
+        Vec3::new(0.0, -100.5, -1.0).as_point(),
+        100.0,
+        Lambertian::new(Vec3::new(0.5, 0.5, 0.5).as_colour()),
+    ));
+
+    let camera = default_camera(image_width, image_height);
+
+    Scene { camera, world }
+}
+
+fn metal_spheres(image_width: u32, image_height: u32) -> Scene {
+    let mut world = HittableList::new();
+
+    world.add(Sphere::new(
+        Vec3::new(0.0, 0.0, -1.0).as_point(),
+        0.5,
+        Lambertian::new(Vec3::new(0.7, 0.3, 0.3).as_colour()),
+    ));
+    world.add(Sphere::new(
+        Vec3::new(0.0, -100.5, -1.0).as_point(),
+        100.0,
+        Lambertian::new(Vec3::new(0.8, 0.8, 0.0).as_colour()),
+    ));
+    world.add(Sphere::new(
+        Vec3::new(1.0, 0.0, -1.0).as_point(),
+        0.5,
+        Metal::new(Vec3::new(0.8, 0.6, 0.2).as_colour(), 1.0),
+    ));
+    world.add(Sphere::new(
+        Vec3::new(-1.0, 0.0, -1.0).as_point(),
+        0.5,
+        Metal::new(Vec3::new(0.8, 0.8, 0.8).as_colour(), 0.3),
+    ));
+
+    let camera = default_camera(image_width, image_height);
+
+    Scene { camera, world }
+}
+
+fn dielectric_world() -> HittableList {
+    let mut world = HittableList::new();
+
+    world.add(Sphere::new(
+        Vec3::new(0.0, 0.0, -1.0).as_point(),
+        0.5,
+        Lambertian::new(Vec3::new(0.1, 0.2, 0.5).as_colour()),
+    ));
+    world.add(Sphere::new(
+        Vec3::new(0.0, -100.5, -1.0).as_point(),
+        100.0,
+        Lambertian::new(Vec3::new(0.8, 0.8, 0.0).as_colour()),
+    ));
+    world.add(Sphere::new(
+        Vec3::new(1.0, 0.0, -1.0).as_point(),
+        0.5,
+        Metal::new(Vec3::new(0.8, 0.6, 0.2).as_colour(), 0.3),
+    ));
+    world.add(Sphere::new(
+        Vec3::new(-1.0, 0.0, -1.0).as_point(),
+        0.5,
+        Dielectric::new(1.5),
+    ));
+    world.add(Sphere::new(
+        Vec3::new(-1.0, 0.0, -1.0).as_point(),
+        // use negative radius for hollow sphere, the geometry is unaffected,
+        // but the surface normal points inward.
+        -0.45,
+        Dielectric::new(1.5),
+    ));
+
+    world
+}
+fn dielectric_spheres(image_width: u32, image_height: u32) -> Scene {
+    let world = dielectric_world();
+    let camera = default_camera(image_width, image_height);
+    Scene { camera, world }
+}
+
+fn camera_viewpoint(image_width: u32, image_height: u32) -> Scene {
+    let world = dielectric_world();
+    let camera = Camera::new(
+        Vec3::new(-2.0, 2.0, 1.0).as_point(),
+        Vec3::new(0.0, 0.0, -1.0).as_point(),
+        Vec3::new(0.0, 1.0, 0.0),
+        90.0,
+        (image_width as Float) / (image_height as Float),
+        0.001,
+        100.0,
+    );
+    Scene { camera, world }
+}
+
+fn camera_fov(image_width: u32, image_height: u32) -> Scene {
+    let world = dielectric_world();
+    let camera = Camera::new(
+        Vec3::new(-2.0, 2.0, 1.0).as_point(),
+        Vec3::new(0.0, 0.0, -1.0).as_point(),
+        Vec3::new(0.0, 1.0, 0.0),
+        20.0,
+        (image_width as Float) / (image_height as Float),
+        0.001,
+        100.0,
+    );
+    Scene { camera, world }
+}
+
+fn defocus_blur(image_width: u32, image_height: u32) -> Scene {
+    let world = dielectric_world();
+
+    let lookfrom = Vec3::new(3.0, 3.0, 2.0).as_point();
+    let lookat = Vec3::new(0.0, 0.0, -1.0).as_point();
+
+    let camera = Camera::new(
+        lookfrom,
+        lookat,
+        Vec3::new(0.0, 1.0, 0.0),
+        20.0,
+        (image_width as Float) / (image_height as Float),
+        2.0,
+        (lookfrom - lookat).length(),
+    );
+    Scene { camera, world }
 }
 
 /// Generate some fixed spheres and a lot of smaller random spheres.
@@ -103,4 +247,19 @@ fn random_world() -> HittableList {
     ));
 
     world
+}
+
+/// Create new scene with some random geometric objects and camera.
+fn random_spheres(image_width: u32, image_height: u32) -> Scene {
+    let world = random_world();
+    let camera = Camera::new(
+        Vec3::new(13.0, 2.0, 3.0).as_point(),
+        Vec3::zero().as_point(),
+        Vec3::new(0.0, 1.0, 0.0),
+        20.0,
+        (image_width as Float) / (image_height as Float),
+        0.1,
+        10.0,
+    );
+    Scene { camera, world }
 }

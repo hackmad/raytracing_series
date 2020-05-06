@@ -29,12 +29,16 @@ struct Config {
 
     /// Max recursion depth
     max_depth: u32,
+
+    /// Scene to render
+    scenery: Scenery,
 }
 
 /// Entry point for the recursive raytracer.
 fn main() {
     let c = app_config();
-    let s = Scene::new_random_scene(c.image_width, c.image_height);
+
+    let s = Scene::new(c.scenery, c.image_width, c.image_height);
 
     println!("P3\n{} {}\n255", c.image_width, c.image_height);
 
@@ -137,6 +141,23 @@ fn app_config() -> Config {
                 .default_value("50")
                 .about("maximum depth of recursion"),
         )
+        .arg(
+            Arg::with_name("scene")
+                .long("scene")
+                .value_name("SCENE")
+                .takes_value(true)
+                .possible_values(&[
+                    "lambertian_diffuse",
+                    "metal",
+                    "dielectric",
+                    "camera_viewpoint",
+                    "camera_fov",
+                    "defocus_blur",
+                    "random_spheres",
+                ])
+                .default_value("random_spheres")
+                .about("scene to render"),
+        )
         .get_matches();
 
     let image_width = match matches.value_of("image_width") {
@@ -159,10 +180,25 @@ fn app_config() -> Config {
         _ => panic!("Invalid max depth"),
     };
 
+    let scenery = match matches.value_of("scene") {
+        Some(s) => match s {
+            "lambertian_diffuse" => Scenery::LambertianDiffuse,
+            "metal" => Scenery::Metal,
+            "dielectric" => Scenery::Dielectric,
+            "camera_viewpoint" => Scenery::CameraViewpoint,
+            "camera_fov" => Scenery::CameraFov,
+            "defocus_blur" => Scenery::DefocusBlur,
+            "random_spheres" => Scenery::RandomSpheres,
+            s => panic!("Unknown scenery {}", s),
+        },
+        _ => panic!("Invalid scene name"),
+    };
+
     Config {
         image_width,
         image_height,
         samples_per_pixel,
         max_depth,
+        scenery,
     }
 }
