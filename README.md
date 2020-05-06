@@ -50,11 +50,11 @@ cargo run -- --help
 
 ### Raytracing in One Weekend
 
-![Lambertian Diffuse](images/lambertian_diffuse.ppm)
-![Metal](images/metal.ppm)
-![Dielectric](images/dielectric.ppm)
-![Camera Viewpoint](images/camera_viewpoint.ppm)
-![Camera Field of View](images/camera_fov.ppm)
-![Defocus Blur / Depth of Field](images/defocus_blur.ppm)
-![Final image](images/random_spheres.ppm)
+![Lambertian Diffuse](./images/lambertian_diffuse.ppm)
+![Metal](./images/metal.ppm)
+![Dielectric](./images/dielectric.ppm)
+![Camera Viewpoint](./images/camera_viewpoint.ppm)
+![Camera Field of View](./images/camera_fov.ppm)
+![Defocus Blur / Depth of Field](./images/defocus_blur.ppm)
+![Final image](./images/random_spheres.ppm)
 
