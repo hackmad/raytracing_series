@@ -154,6 +154,7 @@ fn app_config() -> Config {
                     "camera_fov",
                     "defocus_blur",
                     "random_spheres",
+                    "motion_blur",
                 ])
                 .default_value("random_spheres")
                 .about("scene to render"),
@@ -189,7 +190,8 @@ fn app_config() -> Config {
             "camera_fov" => Scenery::CameraFov,
             "defocus_blur" => Scenery::DefocusBlur,
             "random_spheres" => Scenery::RandomSpheres,
-            s => panic!("Unknown scenery {}", s),
+            "motion_blur" => Scenery::MotionBlur,
+            s => panic!("Unknown scene {}", s),
         },
         _ => panic!("Invalid scene name"),
     };

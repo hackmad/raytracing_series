@@ -47,7 +47,7 @@ impl Material for Metal {
         if reflected.dot(rec.normal) > 0.0 {
             let direction = reflected + random_in_unit_sphere() * self.fuzz;
             Some(ScatterResult {
-                scattered: Ray::new(rec.point, direction),
+                scattered: Ray::new(rec.point, direction, ray_in.time),
                 attenuation: self.albedo,
             })
         } else {

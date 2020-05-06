@@ -73,7 +73,7 @@ impl Material for Dielectric {
         if etai_over_etat * sin_theta > 1.0 {
             let reflected = unit_direction.reflect(rec.normal);
             Some(ScatterResult {
-                scattered: Ray::new(rec.point, reflected),
+                scattered: Ray::new(rec.point, reflected, ray_in.time),
                 attenuation,
             })
         } else {
@@ -81,13 +81,13 @@ impl Material for Dielectric {
             if random() < reflect_prob {
                 let reflected = unit_direction.reflect(rec.normal);
                 Some(ScatterResult {
-                    scattered: Ray::new(rec.point, reflected),
+                    scattered: Ray::new(rec.point, reflected, ray_in.time),
                     attenuation,
                 })
             } else {
                 let refracted = unit_direction.refract(rec.normal, etai_over_etat);
                 Some(ScatterResult {
-                    scattered: Ray::new(rec.point, refracted),
+                    scattered: Ray::new(rec.point, refracted, ray_in.time),
                     attenuation,
                 })
             }

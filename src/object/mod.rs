@@ -5,6 +5,7 @@
 #![allow(dead_code)]
 mod hit_record;
 mod hittable_list;
+mod moving_sphere;
 mod sphere;
 
 use super::algebra::Point3;
@@ -22,6 +23,9 @@ pub use self::hittable_list::HittableList;
 
 /// Models a sphere.
 pub use self::sphere::Sphere;
+
+/// Models a sphere that moves along a linear path.
+pub use self::moving_sphere::MovingSphere;
 
 /// Models a geometric object that can handle intersections.
 pub trait Hittable {

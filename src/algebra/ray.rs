@@ -14,6 +14,9 @@ pub struct Ray {
 
     /// Direction.
     pub direction: Vec3,
+
+    /// Time at which ray exists.
+    pub time: Float,
 }
 
 impl Ray {
@@ -21,8 +24,13 @@ impl Ray {
     ///
     /// * `origin` - The starting point of the ray.
     /// * `direction` - The direction vector of the ray.
-    pub fn new(origin: Point3, direction: Vec3) -> Ray {
-        Ray { origin, direction }
+    /// * `time` - The time at which the ray exists.
+    pub fn new(origin: Point3, direction: Vec3, time: Float) -> Ray {
+        Ray {
+            origin,
+            direction,
+            time,
+        }
     }
 
     /// Calculates a point along the ray based on parameter `t`.

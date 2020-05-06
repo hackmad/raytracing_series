@@ -36,10 +36,10 @@ impl Material for Lambertian {
     ///
     /// * `ray_in` - Incident ray.
     /// * `rec` - The `HitRecord`.
-    fn scatter(&self, _ray_in: &Ray, rec: &HitRecord) -> Option<ScatterResult> {
+    fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterResult> {
         let scatter_direction = rec.normal + random_unit_vec3();
         Some(ScatterResult {
-            scattered: Ray::new(rec.point, scatter_direction),
+            scattered: Ray::new(rec.point, scatter_direction, ray_in.time),
             attenuation: self.albedo,
         })
     }

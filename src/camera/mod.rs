@@ -7,6 +7,7 @@
 use super::algebra::Point3;
 use super::algebra::Ray;
 use super::algebra::Vec3;
+use super::common::random_in_range;
 use super::common::random_in_unit_disk;
 use super::common::Float;
 
@@ -35,6 +36,12 @@ pub struct Camera {
 
     /// Orthonomal basis vector w describing the orientation.
     w: Vec3,
+
+    /// Keeps track of start time for motion blur.
+    time0: Float,
+
+    /// Keeps track of end time for motion blur.
+    time1: Float,
 }
 
 impl Camera {
@@ -47,6 +54,8 @@ impl Camera {
     /// * `aspect_ratio` - The aspect ratio of image.
     /// * `aperture` - The camere aperture.
     /// * `focus_dist` - The distance to focal plane.
+    /// * `time0` - Start time for motion blur.
+    /// * `time1` - End time for motion blur.
     pub fn new(
         lookfrom: Point3,
         lookat: Point3,
@@ -55,6 +64,8 @@ impl Camera {
         aspect_ratio: Float,
         aperture: Float,
         focus_dist: Float,
+        time0: Float,
+        time1: Float,
     ) -> Camera {
         let theta = vfov.to_radians();
         let half_height = (theta / 2.0).tan();
@@ -76,11 +87,14 @@ impl Camera {
             u,
             v,
             w,
+            time0,
+            time1,
         }
     }
 
     /// Returns a ray for the given parametric coordinates along the image
-    /// image plane.
+    /// image plane. The ray's time paramter is set at random value between
+    /// `time0` and `time1` for motion blur effect.
     ///
     /// * `s`: Horizontal parameter.
     /// * `t`: Vertical parameter.
@@ -91,6 +105,7 @@ impl Camera {
         Ray::new(
             self.origin + offset,
             self.lower_left_corner + self.horizontal * s + self.vertical * t - self.origin - offset,
+            random_in_range(self.time0, self.time1),
         )
     }
 }

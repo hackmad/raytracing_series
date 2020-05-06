@@ -19,6 +19,7 @@ pub enum Scenery {
     CameraFov,
     DefocusBlur,
     RandomSpheres,
+    MotionBlur,
 }
 
 /// Models a scene.
@@ -40,6 +41,7 @@ impl Scene {
             Scenery::CameraFov => camera_fov(image_width, image_height),
             Scenery::DefocusBlur => defocus_blur(image_width, image_height),
             Scenery::RandomSpheres => random_spheres(image_width, image_height),
+            Scenery::MotionBlur => motion_blur(image_width, image_height),
         }
     }
 }
@@ -53,6 +55,8 @@ fn default_camera(image_width: u32, image_height: u32) -> Camera {
         (image_width as Float) / (image_height as Float),
         0.001,
         100.0,
+        0.0,
+        1.0,
     )
 }
 
@@ -153,6 +157,8 @@ fn camera_viewpoint(image_width: u32, image_height: u32) -> Scene {
         (image_width as Float) / (image_height as Float),
         0.001,
         100.0,
+        0.0,
+        1.0,
     );
     Scene { camera, world }
 }
@@ -167,6 +173,8 @@ fn camera_fov(image_width: u32, image_height: u32) -> Scene {
         (image_width as Float) / (image_height as Float),
         0.001,
         100.0,
+        0.0,
+        1.0,
     );
     Scene { camera, world }
 }
@@ -185,12 +193,14 @@ fn defocus_blur(image_width: u32, image_height: u32) -> Scene {
         (image_width as Float) / (image_height as Float),
         2.0,
         (lookfrom - lookat).length(),
+        0.0,
+        1.0,
     );
     Scene { camera, world }
 }
 
 /// Generate some fixed spheres and a lot of smaller random spheres.
-fn random_world() -> HittableList {
+fn random_world(motion_blur: bool) -> HittableList {
     let mut world = HittableList::new();
 
     world.add(Sphere::new(
@@ -214,7 +224,19 @@ fn random_world() -> HittableList {
                 if choose_mat < 0.8 {
                     // Diffuse
                     let albedo = (random_vec3() * random_vec3()).as_colour();
-                    world.add(Sphere::new(center, 0.2, Lambertian::new(albedo)));
+
+                    if motion_blur {
+                        world.add(MovingSphere::new(
+                            center,
+                            center + Vec3::new(0.0, random_in_range(0.0, 0.5), 0.0),
+                            0.0,
+                            1.0,
+                            0.2,
+                            Lambertian::new(albedo),
+                        ));
+                    } else {
+                        world.add(Sphere::new(center, 0.2, Lambertian::new(albedo)));
+                    }
                 } else if choose_mat < 0.95 {
                     // Metal
                     let albedo = random_vec3_in_range(0.5, 1.0).as_colour();
@@ -251,7 +273,7 @@ fn random_world() -> HittableList {
 
 /// Create new scene with some random geometric objects and camera.
 fn random_spheres(image_width: u32, image_height: u32) -> Scene {
-    let world = random_world();
+    let world = random_world(false);
     let camera = Camera::new(
         Vec3::new(13.0, 2.0, 3.0).as_point(),
         Vec3::zero().as_point(),
@@ -260,6 +282,24 @@ fn random_spheres(image_width: u32, image_height: u32) -> Scene {
         (image_width as Float) / (image_height as Float),
         0.1,
         10.0,
+        0.0,
+        1.0,
+    );
+    Scene { camera, world }
+}
+
+fn motion_blur(image_width: u32, image_height: u32) -> Scene {
+    let world = random_world(true);
+    let camera = Camera::new(
+        Vec3::new(13.0, 2.0, 3.0).as_point(),
+        Vec3::zero().as_point(),
+        Vec3::new(0.0, 1.0, 0.0),
+        20.0,
+        (image_width as Float) / (image_height as Float),
+        0.1,
+        10.0,
+        0.0,
+        1.0,
     );
     Scene { camera, world }
 }
