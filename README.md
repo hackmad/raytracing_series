@@ -63,3 +63,7 @@ sips -s format png image.ppm --out image.png
 ![Camera Field of View](./images/camera_fov.png)
 ![Defocus Blur / Depth of Field](./images/defocus_blur.png)
 ![Final image](./images/random_spheres.png)
+
+### Raytracing The Next Week
+
+![Motion Blur](./images/motion_blur.png)
