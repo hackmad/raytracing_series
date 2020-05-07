@@ -56,14 +56,14 @@ sips -s format png image.ppm --out image.png
 
 ### Raytracing in One Weekend
 
-<img src="./images/lambertian_diffuse.png" alt="Lambertian Diffuse" />
-<img src="./images/metal.png" alt="Metal" />
-<img src="./images/dielectric.png" alt="Dielectric" />
-<img src="./images/camera_viewpoint.png" alt="Camera Viewpoint" />
-<img src="./images/camera_fov.png" alt="Camera Field of View" />
-<img src="./images/defocus_blur.png" alt="Defocus Blur / Depth of Field" />
-<img src="./images/random_spheres.png" alt="Final image" />
+<img src="./images/lambertian_diffuse.png" alt="Lambertian Diffuse" width="200" 
+/> <img src="./images/metal.png" alt="Metal" width="200"
+/> <img src="./images/dielectric.png" alt="Dielectric" width="200" 
+/> <img src="./images/camera_viewpoint.png" alt="Camera Viewpoint" width="200" 
+/> <img src="./images/camera_fov.png" alt="Camera Field of View" width="200" 
+/> <img src="./images/defocus_blur.png" alt="Defocus Blur / Depth of Field" width="200" 
+/> <img src="./images/random_spheres.png" alt="Final image" width="200" />
 
 ### Raytracing The Next Week
 
-<img src="./images/motion_blur.png" alt="Motion Blur" />
+<img src="./images/motion_blur.png" alt="Motion Blur" width="200" />
