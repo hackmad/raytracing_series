@@ -45,3 +45,21 @@ cargo run -- --help
 ```bash
 ./target/release/raytracing_series --help
 ```
+
+## Images
+
+Convert ppm to png using `sips`:
+
+```bash
+sips -s format png image.ppm --out image.png
+```
+
+### Raytracing in One Weekend
+
+![Lambertian Diffuse](./images/lambertian_diffuse.png)
+![Metal](./images/metal.png)
+![Dielectric](./images/dielectric.png)
+![Camera Viewpoint](./images/camera_viewpoint.png)
+![Camera Field of View](./images/camera_fov.png)
+![Defocus Blur / Depth of Field](./images/defocus_blur.png)
+![Final image](./images/random_spheres.png)
