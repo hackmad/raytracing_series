@@ -3,13 +3,13 @@
 //! A library for handling dielectric material.
 
 use super::random;
+use super::Colour;
 use super::Float;
 use super::HitRecord;
 use super::Material;
 use super::Ray;
 use super::RcMaterial;
 use super::ScatterResult;
-use super::Vec3;
 use std::rc::Rc;
 
 /// Models a dielectric material.
@@ -57,7 +57,7 @@ impl Material for Dielectric {
     /// * `rec` - The `HitRecord`.
     fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterResult> {
         // No attenuation
-        let attenuation = Vec3::new(1.0, 1.0, 1.0).as_colour();
+        let attenuation = Colour::new(1.0, 1.0, 1.0);
 
         let etai_over_etat = if rec.front_face {
             self.one_over_ref_idx

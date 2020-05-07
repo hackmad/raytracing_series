@@ -46,7 +46,7 @@ fn main() {
         eprint!("Scan lines remaining: {}          \r", j);
 
         for i in 0..c.image_width {
-            let mut colour = Vec3::zero().as_colour();
+            let mut colour = Colour::zero();
 
             for _s in 0..c.samples_per_pixel {
                 let u = ((i as Float) + random()) / (c.image_width as Float);
@@ -72,7 +72,7 @@ fn main() {
 fn ray_colour(ray: &Ray, world: &HittableList, depth: u32) -> Colour {
     // Terminate the recursion if maximum depth is reached.
     if depth <= 0 {
-        return Vec3::zero().as_colour();
+        return Colour::zero();
     }
 
     // Note the 0.001 is used to avoid starting the ray inside the surface
@@ -99,7 +99,7 @@ fn ray_colour(ray: &Ray, world: &HittableList, depth: u32) -> Colour {
 fn background_colour(ray: &Ray) -> Colour {
     let unit_direction = ray.direction.unit_vector();
     let t = 0.5 * (unit_direction.y() + 1.0);
-    (Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t).as_colour()
+    Colour::new(1.0, 1.0, 1.0) * (1.0 - t) + Colour::new(0.5, 0.7, 1.0) * t
 }
 
 fn app_config() -> Config {

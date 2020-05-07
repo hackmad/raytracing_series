@@ -10,6 +10,7 @@ use super::Ray;
 use super::RcHittable;
 use super::RcMaterial;
 use super::Vec3;
+use super::AABB;
 use std::rc::Rc;
 
 /// Models a sphere.
@@ -79,5 +80,14 @@ impl Hittable for Sphere {
         }
 
         None
+    }
+
+    /// Create a bounding box across time interval `[t0, t1]`.
+    ///
+    /// * `_time0` - Start time of motion (ignored).
+    /// * `_time1` - End time of motion (ignored).
+    fn bounding_box(&self, _time0: Float, _time1: Float) -> Option<AABB> {
+        let r = Vec3::new(self.radius, self.radius, self.radius);
+        Some(AABB::new(self.center - r, self.center + r))
     }
 }

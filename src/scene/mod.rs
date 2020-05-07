@@ -48,9 +48,9 @@ impl Scene {
 
 fn default_camera(image_width: u32, image_height: u32) -> Camera {
     Camera::new(
-        Vec3::zero().as_point(),
-        Vec3::new(0.0, 0.0, -1.0).as_point(),
-        Vec3::new(0.0, 1.0, 0.0),
+        Point3::zero(),
+        Point3::new(0.0, 0.0, -1.0),
+        Point3::new(0.0, 1.0, 0.0),
         90.0,
         (image_width as Float) / (image_height as Float),
         0.001,
@@ -64,14 +64,14 @@ fn diffuse_spheres(image_width: u32, image_height: u32) -> Scene {
     let mut world = HittableList::new();
 
     world.add(Sphere::new(
-        Vec3::new(0.0, 0.0, -1.0).as_point(),
+        Point3::new(0.0, 0.0, -1.0),
         0.5,
-        Lambertian::new(Vec3::new(0.5, 0.5, 0.5).as_colour()),
+        Lambertian::new(Colour::new(0.5, 0.5, 0.5)),
     ));
     world.add(Sphere::new(
-        Vec3::new(0.0, -100.5, -1.0).as_point(),
+        Point3::new(0.0, -100.5, -1.0),
         100.0,
-        Lambertian::new(Vec3::new(0.5, 0.5, 0.5).as_colour()),
+        Lambertian::new(Colour::new(0.5, 0.5, 0.5)),
     ));
 
     let camera = default_camera(image_width, image_height);
@@ -83,24 +83,24 @@ fn metal_spheres(image_width: u32, image_height: u32) -> Scene {
     let mut world = HittableList::new();
 
     world.add(Sphere::new(
-        Vec3::new(0.0, 0.0, -1.0).as_point(),
+        Point3::new(0.0, 0.0, -1.0),
         0.5,
-        Lambertian::new(Vec3::new(0.7, 0.3, 0.3).as_colour()),
+        Lambertian::new(Colour::new(0.7, 0.3, 0.3)),
     ));
     world.add(Sphere::new(
-        Vec3::new(0.0, -100.5, -1.0).as_point(),
+        Point3::new(0.0, -100.5, -1.0),
         100.0,
-        Lambertian::new(Vec3::new(0.8, 0.8, 0.0).as_colour()),
+        Lambertian::new(Colour::new(0.8, 0.8, 0.0)),
     ));
     world.add(Sphere::new(
-        Vec3::new(1.0, 0.0, -1.0).as_point(),
+        Point3::new(1.0, 0.0, -1.0),
         0.5,
-        Metal::new(Vec3::new(0.8, 0.6, 0.2).as_colour(), 1.0),
+        Metal::new(Colour::new(0.8, 0.6, 0.2), 1.0),
     ));
     world.add(Sphere::new(
-        Vec3::new(-1.0, 0.0, -1.0).as_point(),
+        Point3::new(-1.0, 0.0, -1.0),
         0.5,
-        Metal::new(Vec3::new(0.8, 0.8, 0.8).as_colour(), 0.3),
+        Metal::new(Colour::new(0.8, 0.8, 0.8), 0.3),
     ));
 
     let camera = default_camera(image_width, image_height);
@@ -112,27 +112,27 @@ fn dielectric_world() -> HittableList {
     let mut world = HittableList::new();
 
     world.add(Sphere::new(
-        Vec3::new(0.0, 0.0, -1.0).as_point(),
+        Point3::new(0.0, 0.0, -1.0),
         0.5,
-        Lambertian::new(Vec3::new(0.1, 0.2, 0.5).as_colour()),
+        Lambertian::new(Colour::new(0.1, 0.2, 0.5)),
     ));
     world.add(Sphere::new(
-        Vec3::new(0.0, -100.5, -1.0).as_point(),
+        Point3::new(0.0, -100.5, -1.0),
         100.0,
-        Lambertian::new(Vec3::new(0.8, 0.8, 0.0).as_colour()),
+        Lambertian::new(Colour::new(0.8, 0.8, 0.0)),
     ));
     world.add(Sphere::new(
-        Vec3::new(1.0, 0.0, -1.0).as_point(),
+        Point3::new(1.0, 0.0, -1.0),
         0.5,
-        Metal::new(Vec3::new(0.8, 0.6, 0.2).as_colour(), 0.3),
+        Metal::new(Colour::new(0.8, 0.6, 0.2), 0.3),
     ));
     world.add(Sphere::new(
-        Vec3::new(-1.0, 0.0, -1.0).as_point(),
+        Point3::new(-1.0, 0.0, -1.0),
         0.5,
         Dielectric::new(1.5),
     ));
     world.add(Sphere::new(
-        Vec3::new(-1.0, 0.0, -1.0).as_point(),
+        Point3::new(-1.0, 0.0, -1.0),
         // use negative radius for hollow sphere, the geometry is unaffected,
         // but the surface normal points inward.
         -0.45,
@@ -150,8 +150,8 @@ fn dielectric_spheres(image_width: u32, image_height: u32) -> Scene {
 fn camera_viewpoint(image_width: u32, image_height: u32) -> Scene {
     let world = dielectric_world();
     let camera = Camera::new(
-        Vec3::new(-2.0, 2.0, 1.0).as_point(),
-        Vec3::new(0.0, 0.0, -1.0).as_point(),
+        Point3::new(-2.0, 2.0, 1.0),
+        Point3::new(0.0, 0.0, -1.0),
         Vec3::new(0.0, 1.0, 0.0),
         90.0,
         (image_width as Float) / (image_height as Float),
@@ -166,8 +166,8 @@ fn camera_viewpoint(image_width: u32, image_height: u32) -> Scene {
 fn camera_fov(image_width: u32, image_height: u32) -> Scene {
     let world = dielectric_world();
     let camera = Camera::new(
-        Vec3::new(-2.0, 2.0, 1.0).as_point(),
-        Vec3::new(0.0, 0.0, -1.0).as_point(),
+        Point3::new(-2.0, 2.0, 1.0),
+        Point3::new(0.0, 0.0, -1.0),
         Vec3::new(0.0, 1.0, 0.0),
         20.0,
         (image_width as Float) / (image_height as Float),
@@ -182,8 +182,8 @@ fn camera_fov(image_width: u32, image_height: u32) -> Scene {
 fn defocus_blur(image_width: u32, image_height: u32) -> Scene {
     let world = dielectric_world();
 
-    let lookfrom = Vec3::new(3.0, 3.0, 2.0).as_point();
-    let lookat = Vec3::new(0.0, 0.0, -1.0).as_point();
+    let lookfrom = Point3::new(3.0, 3.0, 2.0);
+    let lookat = Point3::new(0.0, 0.0, -1.0);
 
     let camera = Camera::new(
         lookfrom,
@@ -204,23 +204,22 @@ fn random_world(motion_blur: bool) -> HittableList {
     let mut world = HittableList::new();
 
     world.add(Sphere::new(
-        Vec3::new(0.0, -1000.0, 0.0).as_point(),
+        Point3::new(0.0, -1000.0, 0.0),
         1000.0,
-        Lambertian::new(Vec3::new(0.5, 0.5, 0.5).as_colour()),
+        Lambertian::new(Colour::new(0.5, 0.5, 0.5)),
     ));
 
     for a in -11..11 {
         for b in -11..11 {
             let choose_mat = random();
 
-            let center = Vec3::new(
+            let center = Point3::new(
                 a as Float + 0.9 * random(),
                 0.2,
                 b as Float + 0.9 * random(),
-            )
-            .as_point();
+            );
 
-            if (center - Vec3::new(4.0, 0.2, 0.0).as_point()).length() > 0.9 {
+            if (center - Point3::new(4.0, 0.2, 0.0)).length() > 0.9 {
                 if choose_mat < 0.8 {
                     // Diffuse
                     let albedo = (random_vec3() * random_vec3()).as_colour();
@@ -251,21 +250,21 @@ fn random_world(motion_blur: bool) -> HittableList {
     }
 
     world.add(Sphere::new(
-        Vec3::new(0.0, 1.0, 0.0).as_point(),
+        Point3::new(0.0, 1.0, 0.0),
         1.0,
         Dielectric::new(1.5),
     ));
 
     world.add(Sphere::new(
-        Vec3::new(-4.0, 1.0, 0.0).as_point(),
+        Point3::new(-4.0, 1.0, 0.0),
         1.0,
-        Lambertian::new(Vec3::new(0.4, 0.2, 0.1).as_colour()),
+        Lambertian::new(Colour::new(0.4, 0.2, 0.1)),
     ));
 
     world.add(Sphere::new(
-        Vec3::new(4.0, 1.0, 0.0).as_point(),
+        Point3::new(4.0, 1.0, 0.0),
         1.0,
-        Metal::new(Vec3::new(0.7, 0.6, 0.5).as_colour(), 0.0),
+        Metal::new(Colour::new(0.7, 0.6, 0.5), 0.0),
     ));
 
     world
@@ -275,8 +274,8 @@ fn random_world(motion_blur: bool) -> HittableList {
 fn random_spheres(image_width: u32, image_height: u32) -> Scene {
     let world = random_world(false);
     let camera = Camera::new(
-        Vec3::new(13.0, 2.0, 3.0).as_point(),
-        Vec3::zero().as_point(),
+        Point3::new(13.0, 2.0, 3.0),
+        Point3::zero(),
         Vec3::new(0.0, 1.0, 0.0),
         20.0,
         (image_width as Float) / (image_height as Float),
@@ -291,8 +290,8 @@ fn random_spheres(image_width: u32, image_height: u32) -> Scene {
 fn motion_blur(image_width: u32, image_height: u32) -> Scene {
     let world = random_world(true);
     let camera = Camera::new(
-        Vec3::new(13.0, 2.0, 3.0).as_point(),
-        Vec3::zero().as_point(),
+        Point3::new(13.0, 2.0, 3.0),
+        Point3::zero(),
         Vec3::new(0.0, 1.0, 0.0),
         20.0,
         (image_width as Float) / (image_height as Float),

@@ -128,12 +128,11 @@ impl Vec3 {
         let s = 1.0 / samples_per_pixel as Float;
 
         // Gamma-correct for a gamma value of 2.0 (sqrt)
-        Vec3::new(
+        Colour::new(
             256.0 * clamp((self.x() * s).sqrt(), 0.0, 0.999),
             256.0 * clamp((self.y() * s).sqrt(), 0.0, 0.999),
             256.0 * clamp((self.z() * s).sqrt(), 0.0, 0.999),
         )
-        .as_colour()
     }
 
     /// Returns a string representing colour values for PPM file format.
@@ -292,5 +291,16 @@ impl ops::Neg for Vec3 {
     /// Returns the vector scaled by factor `-1`.
     fn neg(self) -> Vec3 {
         self * (-1.0)
+    }
+}
+
+impl ops::Index<usize> for Vec3 {
+    type Output = Float;
+
+    /// Returns the vector components by index.
+    ///
+    /// * `i` - The index (0 -> x, 1 -> y, 2 -> z)
+    fn index(&self, i: usize) -> &Self::Output {
+        &self.e[i]
     }
 }

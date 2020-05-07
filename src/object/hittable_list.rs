@@ -8,6 +8,7 @@ use super::HitRecord;
 use super::Hittable;
 use super::Ray;
 use super::RcHittable;
+use super::AABB;
 use std::rc::Rc;
 
 /// Models a collection of geometric objects that support ray intersections.
@@ -67,5 +68,23 @@ impl Hittable for HittableList {
         });
 
         result.0
+    }
+
+    /// Create a bounding box across time interval `[t0, t1]`.
+    ///
+    /// * `time0` - Start time of motion.
+    /// * `time1` - End time of motion.
+    fn bounding_box(&self, time0: Float, time1: Float) -> Option<AABB> {
+        let initial: Option<AABB> = None;
+        self.objects.iter().fold(initial, |acc, object| {
+            if let Some(box0) = object.bounding_box(time0, time1) {
+                match acc {
+                    Some(box1) => Some(AABB::surrounding_box(box0, box1)),
+                    None => Some(box0),
+                }
+            } else {
+                None
+            }
+        })
     }
 }

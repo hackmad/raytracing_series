@@ -10,6 +10,8 @@ use super::Point3;
 use super::Ray;
 use super::RcHittable;
 use super::RcMaterial;
+use super::Vec3;
+use super::AABB;
 use std::rc::Rc;
 
 /// Models a sphere that moves along a linear path.
@@ -113,5 +115,16 @@ impl Hittable for MovingSphere {
         }
 
         None
+    }
+
+    /// Create a bounding box across time interval `[t0, t1]`.
+    ///
+    /// * `time0` - Start time of motion.
+    /// * `time1` - End time of motion.
+    fn bounding_box(&self, time0: Float, time1: Float) -> Option<AABB> {
+        let r = Vec3::new(self.radius, self.radius, self.radius);
+        let box0 = AABB::new(self.center(time0) - r, self.center(time0) + r);
+        let box1 = AABB::new(self.center(time1) - r, self.center(time1) + r);
+        Some(AABB::surrounding_box(box0, box1))
     }
 }

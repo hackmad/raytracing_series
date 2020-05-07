@@ -8,7 +8,6 @@ mod metal;
 
 use super::algebra::Colour;
 use super::algebra::Ray;
-use super::algebra::Vec3;
 use super::common::random;
 use super::common::random_in_unit_sphere;
 use super::common::random_unit_vec3;
