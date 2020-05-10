@@ -71,8 +71,8 @@ fn main() {
     for j in (0..config.image_height).rev() {
         let y = j as Float;
 
-        let progress = percent_step * y;
-        eprint!("Progress: {}%    \r", progress);
+        let progress = percent_step * (image_height - y);
+        eprint!("Progress: {:>6.2}%\r", progress);
 
         for i in 0..config.image_width {
             let x = i as Float;
