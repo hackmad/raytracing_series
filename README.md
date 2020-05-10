@@ -65,10 +65,10 @@ sips -s format png image.ppm --out image.png
 
 ### Raytracing The Next Week
 
-| Title              | Image                                                      | Title                                  | Image                                                   |
-| ------------------ | ---------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------- |
-| Motion Blur        | <img src="./images/motion_blur.png" height="100" />        | Motion Blur w/ BVH                     | <img src="./images/motion_blur_bvh.png" height="100" /> |
-| Final Image w/ BVH | <img src="./images/random_spheres_bvh.png" height="100" /> | Final Image w/ Checker + Solid Texture | <img src="./images/checkered_floor.png" height="100" /> |
+| Title              | Image                                                      | Title                       | Image                                                   |
+| ------------------ | ---------------------------------------------------------- | --------------------------- | ------------------------------------------------------- |
+| Motion Blur        | <img src="./images/motion_blur.png" height="100" />        | Motion Blur w/ BVH          | <img src="./images/motion_blur_bvh.png" height="100" /> |
+| Final Image w/ BVH | <img src="./images/random_spheres_bvh.png" height="100" /> | Solid &amp; Checker Texture | <img src="./images/checkered_floor.png" height="100" /> |
 
 #### Timing Benchmarks
 

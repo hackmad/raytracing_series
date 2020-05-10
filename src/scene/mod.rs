@@ -229,12 +229,12 @@ fn metal_spheres(rng: RcRandomizer) -> Vec<RcHittable> {
         Sphere::new(
             Point3::new(1.0, 0.0, -1.0),
             0.5,
-            Metal::new(Colour::new(0.8, 0.6, 0.2), 1.0, Rc::clone(&rng)),
+            Metal::new(Solid::from_rgb(0.8, 0.6, 0.2), 1.0, Rc::clone(&rng)),
         ),
         Sphere::new(
             Point3::new(-1.0, 0.0, -1.0),
             0.5,
-            Metal::new(Colour::new(0.8, 0.8, 0.8), 0.3, Rc::clone(&rng)),
+            Metal::new(Solid::from_rgb(0.8, 0.8, 0.8), 0.3, Rc::clone(&rng)),
         ),
     ]
 }
@@ -254,7 +254,7 @@ fn dielectric_spheres(rng: RcRandomizer) -> Vec<RcHittable> {
         Sphere::new(
             Point3::new(1.0, 0.0, -1.0),
             0.5,
-            Metal::new(Colour::new(0.8, 0.6, 0.2), 0.3, Rc::clone(&rng)),
+            Metal::new(Solid::from_rgb(0.8, 0.6, 0.2), 0.3, Rc::clone(&rng)),
         ),
         Sphere::new(
             Point3::new(-1.0, 0.0, -1.0),
@@ -323,7 +323,7 @@ fn random_spheres(motion_blur: bool, checkered_floor: bool, rng: RcRandomizer) -
                     }
                 } else if choose_mat < 0.95 {
                     // Metal
-                    let albedo = rng.vec3_in_range(0.5, 1.0).as_colour();
+                    let albedo = Solid::new(rng.vec3_in_range(0.5, 1.0).as_colour());
                     let fuzz = rng.float_in_range(0.0, 0.5);
                     world.push(Sphere::new(
                         center,
@@ -357,7 +357,7 @@ fn random_spheres(motion_blur: bool, checkered_floor: bool, rng: RcRandomizer) -
     world.push(Sphere::new(
         Point3::new(4.0, 1.0, 0.0),
         1.0,
-        Metal::new(Colour::new(0.7, 0.6, 0.5), 0.0, Rc::clone(&rng)),
+        Metal::new(Solid::from_rgb(0.7, 0.6, 0.5), 0.0, Rc::clone(&rng)),
     ));
 
     world

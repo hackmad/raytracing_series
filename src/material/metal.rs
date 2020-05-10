@@ -2,15 +2,15 @@
 //!
 //! A library for handling reflective material.
 
-use super::{Colour, Float, HitRecord, Material, Ray, RcMaterial, RcRandomizer, ScatterResult};
+use super::{Float, HitRecord, Material, Ray, RcMaterial, RcRandomizer, RcTexture, ScatterResult};
 use std::fmt;
 use std::rc::Rc;
 
 /// Models a metal
 #[derive(Clone)]
 pub struct Metal {
-    /// The diffuse colour.
-    albedo: Colour,
+    /// The diffuse colour provided by a texture.
+    albedo: RcTexture,
 
     /// Fuzziness factor used for blurred reflections.
     fuzz: Float,
@@ -22,12 +22,12 @@ pub struct Metal {
 impl Metal {
     /// Creates a new metal material.
     ///
-    /// * `albedo` - The diffuse colour.
+    /// * `albedo` - The diffuse colour provided by a texture.
     /// * `fuzz` - The fuzziness factor for blurred reflections.
     /// * `rng` - Random number generator.
-    pub fn new(albedo: Colour, fuzz: Float, rng: RcRandomizer) -> RcMaterial {
+    pub fn new(albedo: RcTexture, fuzz: Float, rng: RcRandomizer) -> RcMaterial {
         Rc::new(Metal {
-            albedo,
+            albedo: Rc::clone(&albedo),
             fuzz,
             rng: Rc::clone(&rng),
         })
@@ -65,7 +65,7 @@ impl Material for Metal {
             let direction = reflected + self.rng.clone().in_unit_sphere() * self.fuzz;
             Some(ScatterResult {
                 scattered: Ray::new(rec.point, direction, ray_in.time),
-                attenuation: self.albedo,
+                attenuation: Rc::clone(&self.albedo).value(rec.u, rec.v, &rec.point),
             })
         } else {
             None
