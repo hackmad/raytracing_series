@@ -24,6 +24,7 @@ pub enum Scenery {
     RandomSpheres,
     MotionBlur,
     CheckeredFloor,
+    CheckeredSpheres,
 }
 
 /// Models a scene.
@@ -86,6 +87,10 @@ impl Scene {
             Scenery::CheckeredFloor => (
                 random_spheres(true, true, Rc::clone(&rng)),
                 random_spheres_camera(image_width, image_height, Rc::clone(&rng)),
+            ),
+            Scenery::CheckeredSpheres => (
+                checkered_spheres(Rc::clone(&rng)),
+                checkered_spheres_camera(image_width, image_height, Rc::clone(&rng)),
             ),
         };
 
@@ -192,6 +197,21 @@ fn random_spheres_camera(image_width: u32, image_height: u32, rng: RcRandomizer)
         20.0,
         (image_width as Float) / (image_height as Float),
         0.1,
+        10.0,
+        0.0,
+        1.0,
+        Rc::clone(&rng),
+    )
+}
+
+fn checkered_spheres_camera(image_width: u32, image_height: u32, rng: RcRandomizer) -> Camera {
+    Camera::new(
+        Point3::new(13.0, 2.0, 3.0),
+        Point3::zero(),
+        Vec3::new(0.0, 1.0, 0.0),
+        20.0,
+        (image_width as Float) / (image_height as Float),
+        0.0,
         10.0,
         0.0,
         1.0,
@@ -358,6 +378,29 @@ fn random_spheres(motion_blur: bool, checkered_floor: bool, rng: RcRandomizer) -
         Point3::new(4.0, 1.0, 0.0),
         1.0,
         Metal::new(Solid::from_rgb(0.7, 0.6, 0.5), 0.0, Rc::clone(&rng)),
+    ));
+
+    world
+}
+
+fn checkered_spheres(rng: RcRandomizer) -> Vec<RcHittable> {
+    let mut world: Vec<RcHittable> = Vec::new();
+
+    let checker = Checker::new(
+        Solid::from_rgb(0.2, 0.3, 0.1),
+        Solid::from_rgb(0.9, 0.9, 0.9),
+    );
+
+    world.push(Sphere::new(
+        Point3::new(0.0, -10.0, 0.0),
+        10.0,
+        Lambertian::new(Rc::clone(&checker), Rc::clone(&rng)),
+    ));
+
+    world.push(Sphere::new(
+        Point3::new(0.0, 10.0, 0.0),
+        10.0,
+        Lambertian::new(Rc::clone(&checker), Rc::clone(&rng)),
     ));
 
     world
