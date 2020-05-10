@@ -5,6 +5,7 @@ extern crate rand;
 extern crate rand_chacha;
 
 mod algebra;
+mod app_config;
 mod camera;
 mod common;
 mod material;
@@ -13,40 +14,16 @@ mod scene;
 mod texture;
 
 use algebra::*;
-use clap::{App, Arg};
+use app_config::*;
 use common::*;
 use object::*;
 use scene::*;
 use std::rc::Rc;
 use std::time::Instant;
 
-/// Program configuration
-struct Config {
-    /// Image height
-    image_width: u32,
-
-    /// Image width
-    image_height: u32,
-
-    /// Samples per pixels for antialiasing
-    samples_per_pixel: u32,
-
-    /// Max recursion depth
-    max_depth: u32,
-
-    /// Scene to render
-    scenery: Scenery,
-
-    /// Enable bounding value hierarchy
-    bvh_enabled: bool,
-
-    /// Random number seed
-    seed: Option<u64>,
-}
-
 /// Entry point for the recursive raytracer.
 fn main() {
-    let config = app_config();
+    let config = AppConfig::load();
 
     let rng = match config.seed {
         Some(seed) => new_seeded_rng(seed),
@@ -135,134 +112,4 @@ fn background_colour(ray: &Ray) -> Colour {
     let unit_direction = ray.direction.unit_vector();
     let t = 0.5 * (unit_direction.y() + 1.0);
     Colour::new(1.0, 1.0, 1.0) * (1.0 - t) + Colour::new(0.5, 0.7, 1.0) * t
-}
-
-fn app_config() -> Config {
-    let matches = App::new("Raytracing in One Weekend")
-        .version("0.0.1")
-        .arg(
-            Arg::with_name("image_width")
-                .short('w')
-                .long("image_width")
-                .value_name("WIDTH")
-                .takes_value(true)
-                .default_value("200")
-                .about("image width in pixels"),
-        )
-        .arg(
-            Arg::with_name("image_height")
-                .short('h')
-                .long("image_height")
-                .value_name("HEIGHT")
-                .takes_value(true)
-                .default_value("100")
-                .about("image height in pixels"),
-        )
-        .arg(
-            Arg::with_name("samples_per_pixel")
-                .short('s')
-                .long("samples_per_pixel")
-                .value_name("SAMPLES")
-                .takes_value(true)
-                .default_value("100")
-                .about("number of samples per pixel for antialiasing"),
-        )
-        .arg(
-            Arg::with_name("max_depth")
-                .short('d')
-                .long("max_depth")
-                .value_name("DEPTH")
-                .takes_value(true)
-                .default_value("50")
-                .about("maximum depth of recursion"),
-        )
-        .arg(
-            Arg::with_name("scene")
-                .long("scene")
-                .value_name("SCENE")
-                .takes_value(true)
-                .possible_values(&[
-                    "lambertian_diffuse",
-                    "metal",
-                    "dielectric",
-                    "telephoto",
-                    "wide_angle",
-                    "defocus_blur",
-                    "random_spheres",
-                    "motion_blur",
-                    "checkered_floor",
-                    "checkered_spheres",
-                ])
-                .default_value("random_spheres")
-                .about("scene to render"),
-        )
-        .arg(
-            Arg::with_name("bvh")
-                .long("bvh")
-                .value_name("BVH")
-                .takes_value(false)
-                .about("enable bounding volume hierarchy"),
-        )
-        .arg(
-            Arg::with_name("seed")
-                .long("seed")
-                .value_name("SEED")
-                .takes_value(true)
-                .about("seed for rng number generator (debug)"),
-        )
-        .get_matches();
-
-    let image_width = match matches.value_of("image_width") {
-        Some(s) => s.parse::<u32>().unwrap(),
-        _ => panic!("Invalid image width"),
-    };
-
-    let image_height = match matches.value_of("image_height") {
-        Some(s) => s.parse::<u32>().unwrap(),
-        _ => panic!("Invalid image height"),
-    };
-
-    let samples_per_pixel = match matches.value_of("samples_per_pixel") {
-        Some(s) => s.parse::<u32>().unwrap(),
-        _ => panic!("Invalid samples per pixel"),
-    };
-
-    let max_depth = match matches.value_of("max_depth") {
-        Some(s) => s.parse::<u32>().unwrap(),
-        _ => panic!("Invalid max depth"),
-    };
-
-    let scenery = match matches.value_of("scene") {
-        Some(s) => match s {
-            "lambertian_diffuse" => Scenery::LambertianDiffuse,
-            "metal" => Scenery::Metal,
-            "dielectric" => Scenery::Dielectric,
-            "telephoto" => Scenery::Telephoto,
-            "wide_angle" => Scenery::WideAngle,
-            "defocus_blur" => Scenery::DefocusBlur,
-            "random_spheres" => Scenery::RandomSpheres,
-            "motion_blur" => Scenery::MotionBlur,
-            "checkered_floor" => Scenery::CheckeredFloor,
-            "checkered_spheres" => Scenery::CheckeredSpheres,
-            unknown_scene => panic!("Unknown scene {}", unknown_scene),
-        },
-        _ => panic!("Invalid scene name"),
-    };
-
-    let bvh_enabled = matches.is_present("bvh");
-
-    let seed = match matches.value_of("seed") {
-        Some(s) => Some(s.parse::<u64>().unwrap()),
-        _ => None,
-    };
-
-    Config {
-        image_width,
-        image_height,
-        samples_per_pixel,
-        max_depth,
-        scenery,
-        bvh_enabled,
-        seed,
-    }
 }

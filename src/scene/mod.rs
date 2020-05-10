@@ -10,10 +10,12 @@ use super::common::*;
 use super::material::*;
 use super::object::*;
 use super::texture::*;
+use std::collections::HashMap;
 use std::rc::Rc;
 use std::time::Instant;
 
-#[derive(Debug)]
+/// Scene types.
+#[derive(Debug, Copy, Clone)]
 pub enum Scenery {
     LambertianDiffuse,
     Metal,
@@ -27,7 +29,28 @@ pub enum Scenery {
     CheckeredSpheres,
 }
 
+impl<'a> Scenery {
+    /// Returns a new `HashMap<&str, Scenery>`.
+    pub fn all() -> HashMap<&'a str, Scenery> {
+        let mut map = HashMap::new();
+
+        map.insert("lambertian_diffuse", Scenery::LambertianDiffuse);
+        map.insert("metal", Scenery::Metal);
+        map.insert("dielectric", Scenery::Dielectric);
+        map.insert("telephoto", Scenery::Telephoto);
+        map.insert("wide_angle", Scenery::WideAngle);
+        map.insert("defocus_blur", Scenery::DefocusBlur);
+        map.insert("random_spheres", Scenery::RandomSpheres);
+        map.insert("motion_blur", Scenery::MotionBlur);
+        map.insert("checkered_floor", Scenery::CheckeredFloor);
+        map.insert("checkered_spheres", Scenery::CheckeredSpheres);
+
+        map
+    }
+}
+
 /// Models a scene.
+#[derive(Debug, Clone)]
 pub struct Scene {
     /// The camera.
     pub camera: Camera,
