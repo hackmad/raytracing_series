@@ -9,6 +9,7 @@ mod metal;
 use super::algebra::{Colour, Ray};
 use super::common::{Float, RcRandomizer};
 use super::object::HitRecord;
+use super::texture::RcTexture;
 use std::fmt;
 use std::rc::Rc;
 

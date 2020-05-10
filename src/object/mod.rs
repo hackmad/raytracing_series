@@ -11,7 +11,7 @@ mod moving_sphere;
 mod sphere;
 
 use super::algebra::{Axis, Point3, Ray, Vec3, AXES};
-use super::common::{Float, RcRandomizer};
+use super::common::{Float, RcRandomizer, PI, PI_OVER_2, TWO_PI};
 use super::material::RcMaterial;
 use std::fmt;
 use std::rc::Rc;
@@ -54,3 +54,11 @@ pub trait Hittable: fmt::Display + fmt::Debug {
 
 /// Reference counted geometric object.
 pub type RcHittable = Rc<dyn Hittable>;
+
+/// Calculate 2-D `(u, v)` coordinates of a point on a sphere with center
+/// `(0, 0, 0)`.
+pub fn get_sphere_uv(p: &Point3) -> (Float, Float) {
+    let phi = p.z().atan2(p.x());
+    let theta = p.y().asin();
+    (1.0 - (phi + PI) / (TWO_PI), (theta + PI_OVER_2) / PI)
+}

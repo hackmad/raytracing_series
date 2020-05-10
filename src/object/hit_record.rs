@@ -23,6 +23,12 @@ pub struct HitRecord {
 
     /// The surface material.
     pub material: RcMaterial,
+
+    /// The 2-D parametric u-coordinate of the surface.
+    pub u: Float,
+
+    /// The 2-D parametric v-coordinate of the surface.
+    pub v: Float,
 }
 
 impl HitRecord {
@@ -33,12 +39,16 @@ impl HitRecord {
     /// * `point` - The intersection point.
     /// * `outward_normal` - Outward surface normal at point of intersection.
     /// * `material` - The surface material.
+    /// * `u` - The 2-D parametric u-coordinate of the surface.
+    /// * `v` - The 2-D parametric v-coordinate of the surface.
     pub fn new(
         ray: &Ray,
         t: Float,
         point: Point3,
         outward_normal: Vec3,
         material: RcMaterial,
+        u: Float,
+        v: Float,
     ) -> HitRecord {
         let front_face = ray.direction.dot(outward_normal) < 0.0;
 
@@ -54,6 +64,8 @@ impl HitRecord {
             front_face,
             normal,
             material: Rc::clone(&material),
+            u,
+            v,
         }
     }
 }
@@ -63,8 +75,8 @@ impl fmt::Display for HitRecord {
         write!(
             f,
             "hit_record(t: {}, point: {}, normal: {}, \
-            front_face: {}, material: {})",
-            self.t, self.point, self.normal, self.front_face, self.material
+            front_face: {}, material: {}, u: {}, v: {})",
+            self.t, self.point, self.normal, self.front_face, self.material, self.u, self.v,
         )
     }
 }

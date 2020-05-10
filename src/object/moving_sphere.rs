@@ -3,7 +3,9 @@
 //! A library for handling ray intersections with a sphere that moves
 //! along a linear path.
 
-use super::{Float, HitRecord, Hittable, Point3, Ray, RcHittable, RcMaterial, Vec3, AABB};
+use super::{
+    get_sphere_uv, Float, HitRecord, Hittable, Point3, Ray, RcHittable, RcMaterial, Vec3, AABB,
+};
 use std::fmt;
 use std::rc::Rc;
 
@@ -88,7 +90,20 @@ impl MovingSphere {
     fn get_hit_record(&self, ray: &Ray, t: Float) -> HitRecord {
         let point = ray.at(t);
         let outward_normal = (point - self.center(ray.time)) / self.radius;
-        HitRecord::new(ray, t, point, outward_normal, Rc::clone(&self.material))
+
+        // Move point so it is relative to origin (0, 0, 0) to get uv-coordinates.
+        let p = (point - self.center(t)) / self.radius;
+        let (u, v) = get_sphere_uv(&p);
+
+        HitRecord::new(
+            ray,
+            t,
+            point,
+            outward_normal,
+            Rc::clone(&self.material),
+            u,
+            v,
+        )
     }
 }
 

@@ -55,6 +55,8 @@ impl Hittable for HittableList {
                     normal,
                     front_face,
                     material,
+                    u,
+                    v,
                 }) => (
                     Some(HitRecord {
                         t,
@@ -62,6 +64,8 @@ impl Hittable for HittableList {
                         normal,
                         front_face,
                         material: Rc::clone(&material),
+                        u,
+                        v,
                     }),
                     t,
                 ),

@@ -13,6 +13,12 @@ pub type Float = f64;
 /// The constant `π`.
 pub const PI: Float = std::f64::consts::PI;
 
+/// The constant `2π`.
+pub const TWO_PI: Float = 2.0 * PI;
+
+/// The constant `π/2`.
+pub const PI_OVER_2: Float = 0.5 * PI;
+
 /// The constant `+∞`.
 pub const INFINITY: Float = std::f64::INFINITY;
 

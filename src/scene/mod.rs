@@ -9,6 +9,7 @@ use super::camera::*;
 use super::common::*;
 use super::material::*;
 use super::object::*;
+use super::texture::*;
 use std::rc::Rc;
 use std::time::Instant;
 
@@ -198,12 +199,12 @@ fn diffuse_spheres(rng: RcRandomizer) -> Vec<RcHittable> {
         Sphere::new(
             Point3::new(0.0, 0.0, -1.0),
             0.5,
-            Lambertian::new(Colour::new(0.5, 0.5, 0.5), Rc::clone(&rng)),
+            Lambertian::new(Solid::from_rgb(0.5, 0.5, 0.5), Rc::clone(&rng)),
         ),
         Sphere::new(
             Point3::new(0.0, -100.5, -1.0),
             100.0,
-            Lambertian::new(Colour::new(0.5, 0.5, 0.5), Rc::clone(&rng)),
+            Lambertian::new(Solid::from_rgb(0.5, 0.5, 0.5), Rc::clone(&rng)),
         ),
     ]
 }
@@ -213,12 +214,12 @@ fn metal_spheres(rng: RcRandomizer) -> Vec<RcHittable> {
         Sphere::new(
             Point3::new(0.0, 0.0, -1.0),
             0.5,
-            Lambertian::new(Colour::new(0.7, 0.3, 0.3), Rc::clone(&rng)),
+            Lambertian::new(Solid::from_rgb(0.7, 0.3, 0.3), Rc::clone(&rng)),
         ),
         Sphere::new(
             Point3::new(0.0, -100.5, -1.0),
             100.0,
-            Lambertian::new(Colour::new(0.8, 0.8, 0.0), Rc::clone(&rng)),
+            Lambertian::new(Solid::from_rgb(0.8, 0.8, 0.0), Rc::clone(&rng)),
         ),
         Sphere::new(
             Point3::new(1.0, 0.0, -1.0),
@@ -238,12 +239,12 @@ fn dielectric_spheres(rng: RcRandomizer) -> Vec<RcHittable> {
         Sphere::new(
             Point3::new(0.0, 0.0, -1.0),
             0.5,
-            Lambertian::new(Colour::new(0.1, 0.2, 0.5), Rc::clone(&rng)),
+            Lambertian::new(Solid::from_rgb(0.1, 0.2, 0.5), Rc::clone(&rng)),
         ),
         Sphere::new(
             Point3::new(0.0, -100.5, -1.0),
             100.0,
-            Lambertian::new(Colour::new(0.8, 0.8, 0.0), Rc::clone(&rng)),
+            Lambertian::new(Solid::from_rgb(0.8, 0.8, 0.0), Rc::clone(&rng)),
         ),
         Sphere::new(
             Point3::new(1.0, 0.0, -1.0),
@@ -272,7 +273,7 @@ fn random_spheres(motion_blur: bool, rng: RcRandomizer) -> Vec<RcHittable> {
     world.push(Sphere::new(
         Point3::new(0.0, -1000.0, 0.0),
         1000.0,
-        Lambertian::new(Colour::new(0.5, 0.5, 0.5), Rc::clone(&rng)),
+        Lambertian::new(Solid::from_rgb(0.5, 0.5, 0.5), Rc::clone(&rng)),
     ));
 
     for a in -11..11 {
@@ -298,13 +299,13 @@ fn random_spheres(motion_blur: bool, rng: RcRandomizer) -> Vec<RcHittable> {
                             0.0,
                             1.0,
                             0.2,
-                            Lambertian::new(albedo, Rc::clone(&rng)),
+                            Lambertian::new(Solid::new(albedo), Rc::clone(&rng)),
                         ));
                     } else {
                         world.push(Sphere::new(
                             center,
                             0.2,
-                            Lambertian::new(albedo, Rc::clone(&rng)),
+                            Lambertian::new(Solid::new(albedo), Rc::clone(&rng)),
                         ));
                     }
                 } else if choose_mat < 0.95 {
@@ -337,7 +338,7 @@ fn random_spheres(motion_blur: bool, rng: RcRandomizer) -> Vec<RcHittable> {
     world.push(Sphere::new(
         Point3::new(-4.0, 1.0, 0.0),
         1.0,
-        Lambertian::new(Colour::new(0.4, 0.2, 0.1), Rc::clone(&rng)),
+        Lambertian::new(Solid::from_rgb(0.4, 0.2, 0.1), Rc::clone(&rng)),
     ));
 
     world.push(Sphere::new(

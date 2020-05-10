@@ -2,15 +2,15 @@
 //!
 //! A library for handling Lambertian diffuse material.
 
-use super::{Colour, HitRecord, Material, Ray, RcMaterial, RcRandomizer, ScatterResult};
+use super::{HitRecord, Material, Ray, RcMaterial, RcRandomizer, RcTexture, ScatterResult};
 use std::fmt;
 use std::rc::Rc;
 
 /// Models a Lambertian diffuse material.
 #[derive(Clone)]
 pub struct Lambertian {
-    /// The diffuse colour.
-    albedo: Colour,
+    /// The diffuse colour provided by a texture.
+    albedo: RcTexture,
 
     /// Random number generator.
     rng: RcRandomizer,
@@ -19,11 +19,11 @@ pub struct Lambertian {
 impl Lambertian {
     /// Creates a new Lambertian diffuse material.
     ///
-    /// * `albedo` - The diffuse colour.
+    /// * `albedo` - The diffuse colour provided by a texture.
     /// * `rng` - Random number generator.
-    pub fn new(albedo: Colour, rng: RcRandomizer) -> RcMaterial {
+    pub fn new(albedo: RcTexture, rng: RcRandomizer) -> RcMaterial {
         Rc::new(Lambertian {
-            albedo,
+            albedo: Rc::clone(&albedo),
             rng: Rc::clone(&rng),
         })
     }
@@ -53,10 +53,10 @@ impl Material for Lambertian {
     /// * `ray_in` - Incident ray.
     /// * `rec` - The `HitRecord`.
     fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterResult> {
-        let scatter_direction = rec.normal + self.rng.clone().unit_vec3();
+        let scatter_direction = rec.normal + Rc::clone(&self.rng).unit_vec3();
         Some(ScatterResult {
             scattered: Ray::new(rec.point, scatter_direction, ray_in.time),
-            attenuation: self.albedo,
+            attenuation: Rc::clone(&self.albedo).value(rec.u, rec.v, &rec.point),
         })
     }
 }

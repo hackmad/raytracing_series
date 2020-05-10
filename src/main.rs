@@ -10,6 +10,7 @@ mod common;
 mod material;
 mod object;
 mod scene;
+mod texture;
 
 use algebra::*;
 use clap::{App, Arg};
