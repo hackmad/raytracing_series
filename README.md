@@ -56,14 +56,54 @@ sips -s format png image.ppm --out image.png
 
 ### Raytracing in One Weekend
 
-<img src="./images/lambertian_diffuse.png" alt="Lambertian Diffuse" height="100" 
-/> <img src="./images/metal.png" alt="Metal" height="100"
-/> <img src="./images/dielectric.png" alt="Dielectric" height="100" 
-/> <img src="./images/camera_viewpoint.png" alt="Camera Viewpoint" height="100" 
-/> <img src="./images/camera_fov.png" alt="Camera Field of View" height="100" 
-/> <img src="./images/defocus_blur.png" alt="Defocus Blur / Depth of Field" height="100" 
-/> <img src="./images/random_spheres.png" alt="Final image" height="100" />
+| Lambertian Diffuse | <img src="./images/lambertian_diffuse.png" height="100" /> |
+| Metal | <img src="./images/metal.png" height="100" /> |
+| Dielectric | <img src="./images/dielectric.png" height="100" /> |
+| Wide Angle Lens | <img src="./images/wide_angle.png" height="100" /> |
+| Telephoto Lens | <img src="./images/telephoto.png" height="100" /> |
+| Defocus Blur | <img src="./images/defocus_blur.png" height="100" /> |
+| Final Image | <img src="./images/random_spheres.png" height="100" /> |
 
 ### Raytracing The Next Week
 
-<img src="./images/motion_blur.png" alt="Motion Blur" height="100" />
+| Motion Blur | <img src="./images/motion_blur.png" height="100" /> |
+| Motion Blur w/ BVH | <img src="./images/motion_blur_bvh.png" height="100" /> |
+| Final Image w/ BVH | <img src="./images/random_spheres_bvh.png" height="100" /> |
+
+#### Timing Benchmarks
+
+Without Bounding Volume Hierarchy:
+
+```bash
+target/release/raytracing_series --scene random_spheres -w 1200 -h 600 \
+    --seed 8589869056 > random_spheres.ppm
+
+HittableList: 0.000042243 seconds
+Done: 1960.7145 seconds
+```
+
+```bash
+target/release/raytracing_series --scene motion_blur -w 1200 -h 600 \
+    --seed 8589869056 > motion_blur.ppm
+
+HittableList: 0.000036335 seconds
+Done: 2201.2559 seconds
+```
+
+With Bounding Volume Hierarchy:
+
+```bash
+target/release/raytracing_series --scene random_spheres --bvh -w 1200 -h 600 \
+    --seed 8589869056 > random_spheres_bvh.ppm
+
+BVH: 0.000402492 seconds
+Done: 824.07605 seconds
+```
+
+```bash
+target/release/raytracing_series --scene motion_blur --bvh -w 1200 -h 600 \
+    --seed 8589869056 > motion_blur_bvh.ppm
+
+BVH: 0.000610622 seconds
+Done: 913.7702 seconds
+```
