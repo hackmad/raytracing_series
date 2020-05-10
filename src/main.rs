@@ -190,6 +190,7 @@ fn app_config() -> Config {
                     "defocus_blur",
                     "random_spheres",
                     "motion_blur",
+                    "checkered_floor",
                 ])
                 .default_value("random_spheres")
                 .about("scene to render"),
@@ -240,7 +241,8 @@ fn app_config() -> Config {
             "defocus_blur" => Scenery::DefocusBlur,
             "random_spheres" => Scenery::RandomSpheres,
             "motion_blur" => Scenery::MotionBlur,
-            s => panic!("Unknown scene {}", s),
+            "checkered_floor" => Scenery::CheckeredFloor,
+            unknown_scene => panic!("Unknown scene {}", unknown_scene),
         },
         _ => panic!("Invalid scene name"),
     };

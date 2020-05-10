@@ -23,6 +23,7 @@ pub enum Scenery {
     DefocusBlur,
     RandomSpheres,
     MotionBlur,
+    CheckeredFloor,
 }
 
 /// Models a scene.
@@ -75,11 +76,15 @@ impl Scene {
                 large_aperture_camera(image_width, image_height, Rc::clone(&rng)),
             ),
             Scenery::RandomSpheres => (
-                random_spheres(false, Rc::clone(&rng)),
+                random_spheres(false, false, Rc::clone(&rng)),
                 random_spheres_camera(image_width, image_height, Rc::clone(&rng)),
             ),
             Scenery::MotionBlur => (
-                random_spheres(true, Rc::clone(&rng)),
+                random_spheres(true, false, Rc::clone(&rng)),
+                random_spheres_camera(image_width, image_height, Rc::clone(&rng)),
+            ),
+            Scenery::CheckeredFloor => (
+                random_spheres(true, true, Rc::clone(&rng)),
                 random_spheres_camera(image_width, image_height, Rc::clone(&rng)),
             ),
         };
@@ -267,13 +272,21 @@ fn dielectric_spheres(rng: RcRandomizer) -> Vec<RcHittable> {
 }
 
 /// Generate some fixed spheres and a lot of smaller rng spheres.
-fn random_spheres(motion_blur: bool, rng: RcRandomizer) -> Vec<RcHittable> {
+fn random_spheres(motion_blur: bool, checkered_floor: bool, rng: RcRandomizer) -> Vec<RcHittable> {
     let mut world: Vec<RcHittable> = Vec::new();
 
+    let albedo = if checkered_floor {
+        Checker::new(
+            Solid::from_rgb(0.2, 0.3, 0.1),
+            Solid::from_rgb(0.9, 0.9, 0.9),
+        )
+    } else {
+        Solid::from_rgb(0.5, 0.5, 0.5)
+    };
     world.push(Sphere::new(
         Point3::new(0.0, -1000.0, 0.0),
         1000.0,
-        Lambertian::new(Solid::from_rgb(0.5, 0.5, 0.5), Rc::clone(&rng)),
+        Lambertian::new(albedo, Rc::clone(&rng)),
     ));
 
     for a in -11..11 {

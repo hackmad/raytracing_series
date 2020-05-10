@@ -2,6 +2,7 @@
 //!
 //! A library for handling textures.
 
+mod checker;
 mod solid;
 
 use super::algebra::{Colour, Point3};
@@ -11,6 +12,9 @@ use std::rc::Rc;
 
 /// Models a solid colour as a texture.
 pub use self::solid::Solid;
+
+/// Models a 3-dimension checkerboard pattern.
+pub use self::checker::Checker;
 
 /// Models textures.
 pub trait Texture: fmt::Display + fmt::Debug {

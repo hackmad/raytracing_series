@@ -56,19 +56,19 @@ sips -s format png image.ppm --out image.png
 
 ### Raytracing in One Weekend
 
-| Title | Image | Title | Image |
-| ----- | ----- | ----- | ----- |
-| Lambertian Diffuse | <img src="./images/lambertian_diffuse.png" height="100" /> | Metal | <img src="./images/metal.png" height="100" /> |
-| Dielectric | <img src="./images/dielectric.png" height="100" /> | Wide Angle Lens | <img src="./images/wide_angle.png" height="100" /> |
-| Telephoto Lens | <img src="./images/telephoto.png" height="100" /> | Defocus Blur | <img src="./images/defocus_blur.png" height="100" /> |
-| Final Image | <img src="./images/random_spheres.png" height="100" /> | | |
+| Title              | Image                                                      | Title           | Image                                                |
+| ------------------ | ---------------------------------------------------------- | --------------- | ---------------------------------------------------- |
+| Lambertian Diffuse | <img src="./images/lambertian_diffuse.png" height="100" /> | Metal           | <img src="./images/metal.png" height="100" />        |
+| Dielectric         | <img src="./images/dielectric.png" height="100" />         | Wide Angle Lens | <img src="./images/wide_angle.png" height="100" />   |
+| Telephoto Lens     | <img src="./images/telephoto.png" height="100" />          | Defocus Blur    | <img src="./images/defocus_blur.png" height="100" /> |
+| Final Image        | <img src="./images/random_spheres.png" height="100" />     |                 |                                                      |
 
 ### Raytracing The Next Week
 
-| Title | Image | Title | Image |
-| ----- | ----- | ----- | ----- |
-| Motion Blur | <img src="./images/motion_blur.png" height="100" /> | Motion Blur w/ BVH | <img src="./images/motion_blur_bvh.png" height="100" /> |
-| Final Image w/ BVH | <img src="./images/random_spheres_bvh.png" height="100" /> | | |
+| Title              | Image                                                      | Title                                  | Image                                                   |
+| ------------------ | ---------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------- |
+| Motion Blur        | <img src="./images/motion_blur.png" height="100" />        | Motion Blur w/ BVH                     | <img src="./images/motion_blur_bvh.png" height="100" /> |
+| Final Image w/ BVH | <img src="./images/random_spheres_bvh.png" height="100" /> | Final Image w/ Checker + Solid Texture | <img src="./images/checkered_floor.png" height="100" /> |
 
 #### Timing Benchmarks
 
