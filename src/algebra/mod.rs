@@ -10,6 +10,4 @@ use super::common::*;
 
 // Re-exports
 pub use self::ray::Ray;
-pub use self::vector::Colour;
-pub use self::vector::Point3;
-pub use self::vector::Vec3;
+pub use self::vector::{Axis, Colour, Point3, Vec3, AXES, X_AXIS, Y_AXIS, Z_AXIS};

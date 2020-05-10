@@ -2,13 +2,8 @@
 //!
 //! A library for handling Lambertian diffuse material.
 
-use super::random_unit_vec3;
-use super::Colour;
-use super::HitRecord;
-use super::Material;
-use super::Ray;
-use super::RcMaterial;
-use super::ScatterResult;
+use super::{Colour, HitRecord, Material, Ray, RcMaterial, RcRandomizer, ScatterResult};
+use std::fmt;
 use std::rc::Rc;
 
 /// Models a Lambertian diffuse material.
@@ -16,14 +11,35 @@ use std::rc::Rc;
 pub struct Lambertian {
     /// The diffuse colour.
     albedo: Colour,
+
+    /// Random number generator.
+    rng: RcRandomizer,
 }
 
 impl Lambertian {
     /// Creates a new Lambertian diffuse material.
     ///
     /// * `albedo` - The diffuse colour.
-    pub fn new(albedo: Colour) -> RcMaterial {
-        Rc::new(Lambertian { albedo })
+    /// * `rng` - Random number generator.
+    pub fn new(albedo: Colour, rng: RcRandomizer) -> RcMaterial {
+        Rc::new(Lambertian {
+            albedo,
+            rng: Rc::clone(&rng),
+        })
+    }
+}
+
+impl fmt::Display for Lambertian {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "lambertian(albedo: {})", self.albedo)
+    }
+}
+
+impl fmt::Debug for Lambertian {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Lambertian")
+            .field("albedo", &self.albedo)
+            .finish()
     }
 }
 
@@ -37,7 +53,7 @@ impl Material for Lambertian {
     /// * `ray_in` - Incident ray.
     /// * `rec` - The `HitRecord`.
     fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterResult> {
-        let scatter_direction = rec.normal + random_unit_vec3();
+        let scatter_direction = rec.normal + self.rng.clone().unit_vec3();
         Some(ScatterResult {
             scattered: Ray::new(rec.point, scatter_direction, ray_in.time),
             attenuation: self.albedo,

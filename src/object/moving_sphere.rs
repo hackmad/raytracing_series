@@ -3,19 +3,12 @@
 //! A library for handling ray intersections with a sphere that moves
 //! along a linear path.
 
-use super::Float;
-use super::HitRecord;
-use super::Hittable;
-use super::Point3;
-use super::Ray;
-use super::RcHittable;
-use super::RcMaterial;
-use super::Vec3;
-use super::AABB;
+use super::{Float, HitRecord, Hittable, Point3, Ray, RcHittable, RcMaterial, Vec3, AABB};
+use std::fmt;
 use std::rc::Rc;
 
 /// Models a sphere that moves along a linear path.
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct MovingSphere {
     /// Center of the sphere at start time of motion.
     center0: Point3,
@@ -28,11 +21,23 @@ pub struct MovingSphere {
 
     /// End time of motion.
     time1: Float,
+
     /// Radius of the sphere.
     radius: Float,
 
     /// Surface material.
     material: RcMaterial,
+}
+
+impl fmt::Display for MovingSphere {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "moving_sphere(center0: {}, center1: {}, \
+            time0: {}, time1: {} radius: {}, material: {})",
+            self.center0, self.center1, self.time0, self.time1, self.radius, self.material
+        )
+    }
 }
 
 impl MovingSphere {

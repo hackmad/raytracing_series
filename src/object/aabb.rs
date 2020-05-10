@@ -3,19 +3,24 @@
 //! A library for creating axis aligned bounding boxes to accelerate
 //! raytracing.
 
-use super::Float;
-use super::Point3;
-use super::Ray;
+use super::{Float, Point3, Ray, AXES};
+use std::fmt;
 use std::mem::swap;
 
 /// Models an axis aligned bounding box.
-#[derive(Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct AABB {
     /// Minimum bounds for the x, y and z dimensions.
     pub min: Point3,
 
     /// Maximum bounds for the x, y and z dimensions.
     pub max: Point3,
+}
+
+impl fmt::Display for AABB {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "aabb(min: {}, max: {})", self.min, self.max)
+    }
 }
 
 impl AABB {
@@ -53,11 +58,11 @@ impl AABB {
     /// * `t_min` - The minium parameter for intersections.
     /// * `t_max` - The maximum parameter for intersections.
     pub fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> bool {
-        for a in 0..3 {
-            let inv_d = ray.direction[a].recip();
+        for a in AXES {
+            let inv_d = 1.0 / ray.direction[*a];
 
-            let mut t0 = (self.min[a] - ray.origin[a]) * inv_d;
-            let mut t1 = (self.max[a] - ray.origin[a]) * inv_d;
+            let mut t0 = (self.min[*a] - ray.origin[*a]) * inv_d;
+            let mut t1 = (self.max[*a] - ray.origin[*a]) * inv_d;
 
             if inv_d < 0.0 {
                 swap(&mut t0, &mut t1);

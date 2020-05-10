@@ -2,15 +2,12 @@
 //!
 //! A library for handling surface intersection details.
 
-use super::Float;
-use super::Point3;
-use super::Ray;
-use super::RcMaterial;
-use super::Vec3;
+use super::{Float, Point3, Ray, RcMaterial, Vec3};
+use std::fmt;
 use std::rc::Rc;
 
 /// Models information at surface intersections.
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct HitRecord {
     /// Parameter along the incident ray.
     pub t: Float,
@@ -58,5 +55,16 @@ impl HitRecord {
             normal,
             material: Rc::clone(&material),
         }
+    }
+}
+
+impl fmt::Display for HitRecord {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "hit_record(t: {}, point: {}, normal: {}, \
+            front_face: {}, material: {})",
+            self.t, self.point, self.normal, self.front_face, self.material
+        )
     }
 }

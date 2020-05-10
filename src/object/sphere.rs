@@ -2,19 +2,12 @@
 //!
 //! A library for handling ray intersections with a sphere
 
-use super::Float;
-use super::HitRecord;
-use super::Hittable;
-use super::Point3;
-use super::Ray;
-use super::RcHittable;
-use super::RcMaterial;
-use super::Vec3;
-use super::AABB;
+use super::{Float, HitRecord, Hittable, Point3, Ray, RcHittable, RcMaterial, Vec3, AABB};
+use std::fmt;
 use std::rc::Rc;
 
 /// Models a sphere.
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Sphere {
     /// Center of the sphere.
     center: Point3,
@@ -24,6 +17,16 @@ pub struct Sphere {
 
     /// Surface material.
     material: RcMaterial,
+}
+
+impl fmt::Display for Sphere {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "sphere(center: {}, radius: {}, material: {})",
+            self.center, self.radius, self.material
+        )
+    }
 }
 
 impl Sphere {

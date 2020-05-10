@@ -2,12 +2,11 @@
 //!
 //! A library for handling rays.
 
-use super::Float;
-use super::Point3;
-use super::Vec3;
+use super::{Float, Point3, Vec3};
+use std::fmt;
 
 /// Models a ray that originates at a point and has a direction.
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct Ray {
     /// Origin.
     pub origin: Point3,
@@ -17,6 +16,16 @@ pub struct Ray {
 
     /// Time at which ray exists.
     pub time: Float,
+}
+
+impl fmt::Display for Ray {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "o: {}, d: {}, t: {}",
+            self.origin, self.direction, self.time
+        )
+    }
 }
 
 impl Ray {

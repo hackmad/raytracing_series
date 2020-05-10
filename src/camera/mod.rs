@@ -4,14 +4,12 @@
 //! handle defocus blur.
 
 #![allow(dead_code)]
-use super::algebra::Point3;
-use super::algebra::Ray;
-use super::algebra::Vec3;
-use super::common::random_in_range;
-use super::common::random_in_unit_disk;
-use super::common::Float;
+use super::algebra::{Point3, Ray, Vec3};
+use super::common::{Float, RcRandomizer};
+use std::fmt;
+use std::rc::Rc;
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct Camera {
     /// The lower left corner of the image plane.
     lower_left_corner: Point3,
@@ -42,6 +40,47 @@ pub struct Camera {
 
     /// Keeps track of end time for motion blur.
     time1: Float,
+
+    /// Random number generator
+    rng: RcRandomizer,
+}
+
+impl fmt::Display for Camera {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "camera(lower_left_corner: {}, horizontal: {}, vertical: {}, \
+                origin: {}, lens_radius: {}, u: {}, v: {}, w: {}, \
+                time0: {}, time1: {})",
+            self.lower_left_corner,
+            self.horizontal,
+            self.vertical,
+            self.origin,
+            self.lens_radius,
+            self.u,
+            self.v,
+            self.w,
+            self.time0,
+            self.time1
+        )
+    }
+}
+
+impl fmt::Debug for Camera {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("Point")
+            .field("lower_left_corner", &self.lower_left_corner)
+            .field("horizontal", &self.horizontal)
+            .field("vertical", &self.vertical)
+            .field("origin", &self.origin)
+            .field("lens_radius", &self.lens_radius)
+            .field("u", &self.u)
+            .field("v", &self.v)
+            .field("w", &self.w)
+            .field("time0", &self.time0)
+            .field("time1", &self.time1)
+            .finish()
+    }
 }
 
 impl Camera {
@@ -56,6 +95,7 @@ impl Camera {
     /// * `focus_dist` - The distance to focal plane.
     /// * `time0` - Start time for motion blur.
     /// * `time1` - End time for motion blur.
+    /// * `rng` - Random number generator.
     pub fn new(
         lookfrom: Point3,
         lookat: Point3,
@@ -66,6 +106,7 @@ impl Camera {
         focus_dist: Float,
         time0: Float,
         time1: Float,
+        rng: RcRandomizer,
     ) -> Camera {
         let theta = vfov.to_radians();
         let half_height = (theta / 2.0).tan();
@@ -89,23 +130,25 @@ impl Camera {
             w,
             time0,
             time1,
+            rng: Rc::clone(&rng),
         }
     }
 
     /// Returns a ray for the given parametric coordinates along the image
-    /// image plane. The ray's time paramter is set at random value between
+    /// image plane. The ray's time paramter is set at rng value between
     /// `time0` and `time1` for motion blur effect.
     ///
     /// * `s`: Horizontal parameter.
     /// * `t`: Vertical parameter.
     pub fn get_ray(self, s: Float, t: Float) -> Ray {
-        let rd = random_in_unit_disk() * self.lens_radius;
+        let rd = self.rng.clone().in_unit_disk() * self.lens_radius;
         let offset = self.u * rd.x() + self.v * rd.y();
+        let time = self.rng.clone().float_in_range(self.time0, self.time1);
 
         Ray::new(
             self.origin + offset,
             self.lower_left_corner + self.horizontal * s + self.vertical * t - self.origin - offset,
-            random_in_range(self.time0, self.time1),
+            time,
         )
     }
 }

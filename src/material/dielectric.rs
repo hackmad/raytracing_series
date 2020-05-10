@@ -2,14 +2,8 @@
 //!
 //! A library for handling dielectric material.
 
-use super::random;
-use super::Colour;
-use super::Float;
-use super::HitRecord;
-use super::Material;
-use super::Ray;
-use super::RcMaterial;
-use super::ScatterResult;
+use super::{Colour, Float, HitRecord, Material, Ray, RcMaterial, RcRandomizer, ScatterResult};
+use std::fmt;
 use std::rc::Rc;
 
 /// Models a dielectric material.
@@ -20,17 +14,41 @@ pub struct Dielectric {
 
     /// Reciprocal of `ref_idx`.
     one_over_ref_idx: Float,
+
+    /// Random number generator.
+    rng: RcRandomizer,
 }
 
 impl Dielectric {
     /// Creates a new dielectric material.
     ///
     /// * `ri` - Index of refraction.
-    pub fn new(ri: Float) -> RcMaterial {
+    /// * `rng` - Random number generator.
+    pub fn new(ri: Float, rng: RcRandomizer) -> RcMaterial {
         Rc::new(Dielectric {
             ref_idx: ri,
             one_over_ref_idx: 1.0 / ri,
+            rng: Rc::clone(&rng),
         })
+    }
+}
+
+impl fmt::Display for Dielectric {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "dielectric(ref_idx: {}, one_over_ref_idx: {})",
+            self.ref_idx, self.one_over_ref_idx
+        )
+    }
+}
+
+impl fmt::Debug for Dielectric {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Dielectric")
+            .field("ref_idx", &self.ref_idx)
+            .field("one_over_ref_idx", &self.one_over_ref_idx)
+            .finish()
     }
 }
 
@@ -78,7 +96,7 @@ impl Material for Dielectric {
             })
         } else {
             let reflect_prob = schlick(cos_theta, etai_over_etat);
-            if random() < reflect_prob {
+            if self.rng.clone().float() < reflect_prob {
                 let reflected = unit_direction.reflect(rec.normal);
                 Some(ScatterResult {
                     scattered: Ray::new(rec.point, reflected, ray_in.time),

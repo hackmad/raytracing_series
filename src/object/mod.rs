@@ -4,16 +4,16 @@
 
 #![allow(dead_code)]
 mod aabb;
+mod bvh;
 mod hit_record;
 mod hittable_list;
 mod moving_sphere;
 mod sphere;
 
-use super::algebra::Point3;
-use super::algebra::Ray;
-use super::algebra::Vec3;
-use super::common::Float;
+use super::algebra::{Axis, Point3, Ray, Vec3, AXES};
+use super::common::{Float, RcRandomizer};
 use super::material::RcMaterial;
+use std::fmt;
 use std::rc::Rc;
 
 /// Models a collection of geometric objects that support ray intersections.
@@ -31,8 +31,11 @@ pub use self::moving_sphere::MovingSphere;
 /// Models an axis aligned bounding box.
 pub use self::aabb::AABB;
 
+/// Models a bounding volume hierarchy.
+pub use self::bvh::BVH;
+
 /// Models a geometric object that can handle intersections.
-pub trait Hittable {
+pub trait Hittable: fmt::Display + fmt::Debug {
     /// Calculate the intersection of a ray with the object.
     ///
     /// * `ray` - The incident ray.
@@ -41,6 +44,8 @@ pub trait Hittable {
     fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord>;
 
     /// Create a bounding box across time interval `[t0, t1]`.
+    /// If no bounding box exists return None. This is meant for objects
+    /// like an infinite plane.
     ///
     /// * `time0` - Start time of motion.
     /// * `time1` - End time of motion.

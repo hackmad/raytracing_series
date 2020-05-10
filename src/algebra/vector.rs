@@ -3,12 +3,11 @@
 //! A library for handling 3-dimensional vectors, points and colours.
 
 #![allow(dead_code)]
-use super::clamp;
-use super::Float;
-use std::ops;
+use super::{clamp, Float};
+use std::{fmt, ops};
 
 /// Models a 3-dimensional vector.
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct Vec3 {
     /// An array that holds the x, y and z components of a vector.
     e: [Float; 3],
@@ -19,6 +18,27 @@ pub type Colour = Vec3;
 
 /// Models a 3-dimensional point as a `Vec3`.
 pub type Point3 = Vec3;
+
+/// Type used for coordinate indexes.
+pub type Axis = usize;
+
+/// Constant representing x-coordinate index.
+pub const X_AXIS: Axis = 0;
+
+/// Constant representing y-coordinate index.
+pub const Y_AXIS: Axis = 1;
+
+/// Constant representing z-coordinate index.
+pub const Z_AXIS: Axis = 2;
+
+/// List of axes.
+pub const AXES: &[Axis] = &[X_AXIS, Y_AXIS, Z_AXIS];
+
+impl fmt::Display for Vec3 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self.e)
+    }
+}
 
 impl Vec3 {
     /// Creates a new zero vector `[0, 0, 0]`.

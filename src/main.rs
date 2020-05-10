@@ -2,6 +2,7 @@
 
 extern crate clap;
 extern crate rand;
+extern crate rand_chacha;
 
 mod algebra;
 mod camera;
@@ -15,6 +16,8 @@ use clap::{App, Arg};
 use common::*;
 use object::*;
 use scene::*;
+use std::rc::Rc;
+use std::time::Instant;
 
 /// Program configuration
 struct Config {
@@ -32,35 +35,66 @@ struct Config {
 
     /// Scene to render
     scenery: Scenery,
+
+    /// Enable bounding value hierarchy
+    bvh_enabled: bool,
+
+    /// Random number seed
+    seed: Option<u64>,
 }
 
 /// Entry point for the recursive raytracer.
 fn main() {
-    let c = app_config();
+    let config = app_config();
 
-    let s = Scene::new(c.scenery, c.image_width, c.image_height);
+    let rng = match config.seed {
+        Some(seed) => new_seeded_rng(seed),
+        None => new_thread_rng(),
+    };
 
-    println!("P3\n{} {}\n255", c.image_width, c.image_height);
+    let scene = Scene::new(
+        config.scenery,
+        config.image_width,
+        config.image_height,
+        config.bvh_enabled,
+        Rc::clone(&rng),
+    );
 
-    for j in (0..c.image_height).rev() {
-        eprint!("Scan lines remaining: {}          \r", j);
+    let image_width = config.image_width as Float;
+    let image_height = config.image_height as Float;
+    let percent_step = 100.0 / image_height;
 
-        for i in 0..c.image_width {
+    let start = Instant::now();
+
+    println!("P3\n{} {}\n255", config.image_width, config.image_height);
+
+    for j in (0..config.image_height).rev() {
+        let y = j as Float;
+
+        let progress = percent_step * y;
+        eprint!("Progress: {}%    \r", progress);
+
+        for i in 0..config.image_width {
+            let x = i as Float;
+
             let mut colour = Colour::zero();
 
-            for _s in 0..c.samples_per_pixel {
-                let u = ((i as Float) + random()) / (c.image_width as Float);
-                let v = ((j as Float) + random()) / (c.image_height as Float);
+            for _s in 0..config.samples_per_pixel {
+                let u = (x + rng.clone().float()) / image_width;
+                let v = (y + rng.clone().float()) / image_height;
 
-                let r = s.camera.get_ray(u, v);
-                colour += ray_colour(&r, &s.world, c.max_depth);
+                let r = scene.camera.clone().get_ray(u, v);
+                colour += ray_colour(&r, &scene.world, config.max_depth);
             }
 
-            let c = colour.to_colour_from_sample(c.samples_per_pixel).to_ppm();
+            let c = colour
+                .to_colour_from_sample(config.samples_per_pixel)
+                .to_ppm();
             println!("{}", c);
         }
     }
-    eprintln!("\nDone!");
+
+    eprintln!("Done: {} seconds", start.elapsed().as_secs_f32());
 }
 
 /// Recursively traces a ray through the scene and generates the colour seen
@@ -69,7 +103,7 @@ fn main() {
 /// * `ray` - The ray.
 /// * `world` - The list of geometric objects.
 /// * `depth` - Maximum depth for recursion.
-fn ray_colour(ray: &Ray, world: &HittableList, depth: u32) -> Colour {
+fn ray_colour(ray: &Ray, world: &RcHittable, depth: u32) -> Colour {
     // Terminate the recursion if maximum depth is reached.
     if depth <= 0 {
         return Colour::zero();
@@ -150,14 +184,28 @@ fn app_config() -> Config {
                     "lambertian_diffuse",
                     "metal",
                     "dielectric",
-                    "camera_viewpoint",
-                    "camera_fov",
+                    "telephoto",
+                    "wide_angle",
                     "defocus_blur",
                     "random_spheres",
                     "motion_blur",
                 ])
                 .default_value("random_spheres")
                 .about("scene to render"),
+        )
+        .arg(
+            Arg::with_name("bvh")
+                .long("bvh")
+                .value_name("BVH")
+                .takes_value(false)
+                .about("enable bounding volume hierarchy"),
+        )
+        .arg(
+            Arg::with_name("seed")
+                .long("seed")
+                .value_name("SEED")
+                .takes_value(true)
+                .about("seed for rng number generator (debug)"),
         )
         .get_matches();
 
@@ -186,8 +234,8 @@ fn app_config() -> Config {
             "lambertian_diffuse" => Scenery::LambertianDiffuse,
             "metal" => Scenery::Metal,
             "dielectric" => Scenery::Dielectric,
-            "camera_viewpoint" => Scenery::CameraViewpoint,
-            "camera_fov" => Scenery::CameraFov,
+            "telephoto" => Scenery::Telephoto,
+            "wide_angle" => Scenery::WideAngle,
             "defocus_blur" => Scenery::DefocusBlur,
             "random_spheres" => Scenery::RandomSpheres,
             "motion_blur" => Scenery::MotionBlur,
@@ -196,11 +244,20 @@ fn app_config() -> Config {
         _ => panic!("Invalid scene name"),
     };
 
+    let bvh_enabled = matches.is_present("bvh");
+
+    let seed = match matches.value_of("seed") {
+        Some(s) => Some(s.parse::<u64>().unwrap()),
+        _ => None,
+    };
+
     Config {
         image_width,
         image_height,
         samples_per_pixel,
         max_depth,
         scenery,
+        bvh_enabled,
+        seed,
     }
 }
