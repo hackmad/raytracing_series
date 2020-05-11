@@ -48,6 +48,13 @@ impl Vec3 {
         }
     }
 
+    /// Creates a new zero vector `[1, 1, 1]`.
+    pub fn one() -> Vec3 {
+        Vec3 {
+            e: [1.0 as Float, 1.0 as Float, 1.0 as Float],
+        }
+    }
+
     /// Creates a new vector `[x, y, z]`.
     ///
     /// * `x` - The x-coordinate.

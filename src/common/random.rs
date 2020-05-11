@@ -36,7 +36,7 @@ impl<T> Randomizer for Random<T>
 where
     T: RngCore,
 {
-    /// Returns a random floating point values in [0, 1].
+    /// Returns a random floating point value in [0, 1].
     fn float(&self) -> Float {
         self.rng.borrow_mut().gen::<Float>()
     }
@@ -46,7 +46,15 @@ where
     /// * `min` - Minimum bound
     /// * `max` - Maximum bound
     fn float_in_range(&self, min: Float, max: Float) -> Float {
-        min + (max - min) * self.float()
+        self.rng.borrow_mut().gen_range(min, max)
+    }
+
+    /// Returns a random usize value in [`min`, `max`].
+    ///
+    /// * `min` - Minimum bound
+    /// * `max` - Maximum bound
+    fn usize_in_range(&self, min: usize, max: usize) -> usize {
+        self.rng.borrow_mut().gen_range(min, max)
     }
 
     /// Returns a random vector with random components in [0, 1].

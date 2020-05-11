@@ -3,10 +3,12 @@
 //! A library for handling textures.
 
 mod checker;
+mod noise;
+mod perlin;
 mod solid;
 
-use super::algebra::{Colour, Point3};
-use super::common::Float;
+use super::algebra::{Colour, Point3, Vec3};
+use super::common::{Float, RcRandomizer};
 use std::fmt;
 use std::rc::Rc;
 
@@ -15,6 +17,12 @@ pub use self::solid::Solid;
 
 /// Models a 3-dimension checkerboard pattern.
 pub use self::checker::Checker;
+
+/// Models a 3-dimension checkerboard pattern.
+pub use self::noise::Noise;
+
+/// Perlin noise generator.
+pub use self::perlin::Perlin;
 
 /// Models textures.
 pub trait Texture: fmt::Display + fmt::Debug {

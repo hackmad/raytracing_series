@@ -27,6 +27,7 @@ pub enum Scenery {
     MotionBlur,
     CheckeredFloor,
     CheckeredSpheres,
+    PerlinSpheres,
 }
 
 impl<'a> Scenery {
@@ -44,6 +45,7 @@ impl<'a> Scenery {
         map.insert("motion_blur", Scenery::MotionBlur);
         map.insert("checkered_floor", Scenery::CheckeredFloor);
         map.insert("checkered_spheres", Scenery::CheckeredSpheres);
+        map.insert("perlin_spheres", Scenery::PerlinSpheres);
 
         map
     }
@@ -113,6 +115,10 @@ impl Scene {
             ),
             Scenery::CheckeredSpheres => (
                 checkered_spheres(Rc::clone(&rng)),
+                checkered_spheres_camera(image_width, image_height, Rc::clone(&rng)),
+            ),
+            Scenery::PerlinSpheres => (
+                perlin_spheres(Rc::clone(&rng)),
                 checkered_spheres_camera(image_width, image_height, Rc::clone(&rng)),
             ),
         };
@@ -424,6 +430,26 @@ fn checkered_spheres(rng: RcRandomizer) -> Vec<RcHittable> {
         Point3::new(0.0, 10.0, 0.0),
         10.0,
         Lambertian::new(Rc::clone(&checker), Rc::clone(&rng)),
+    ));
+
+    world
+}
+
+fn perlin_spheres(rng: RcRandomizer) -> Vec<RcHittable> {
+    let mut world: Vec<RcHittable> = Vec::new();
+
+    let noise = Noise::new(4.0, 7, 10.0, 256, Rc::clone(&rng));
+
+    world.push(Sphere::new(
+        Point3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        Lambertian::new(Rc::clone(&noise), Rc::clone(&rng)),
+    ));
+
+    world.push(Sphere::new(
+        Point3::new(0.0, 2.0, 0.0),
+        2.0,
+        Lambertian::new(Rc::clone(&noise), Rc::clone(&rng)),
     ));
 
     world

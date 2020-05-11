@@ -30,11 +30,17 @@ pub trait Randomizer {
     /// Returns a random floating point values in [0, 1].
     fn float(&self) -> Float;
 
-    /// Returns a random floating point values in [`min`, `max`].
+    /// Returns a random floating point value in [`min`, `max`].
     ///
     /// * `min` - Minimum bound
     /// * `max` - Maximum bound
     fn float_in_range(&self, min: Float, max: Float) -> Float;
+
+    /// Returns a random usize value in [`min`, `max`].
+    ///
+    /// * `min` - Minimum bound
+    /// * `max` - Maximum bound
+    fn usize_in_range(&self, min: usize, max: usize) -> usize;
 
     /// Returns a random vector with random components in [0, 1].
     fn vec3(&self) -> Vec3;
