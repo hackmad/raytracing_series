@@ -2,6 +2,10 @@
 
 Reference: https://raytracing.github.io
 
+## Credits
+
+- [NASA Visible Earth](https://visibleearth.nasa.gov/images/73909/december-blue-marble-next-generation-w-topography-and-bathymetry) for the image texture.
+
 ## Building and Running
 
 Build debug profile:
@@ -70,6 +74,7 @@ sips -s format png image.ppm --out image.png
 | Motion Blur        | <img src="./images/motion_blur.png" height="100" />        | Motion Blur w/ BVH          | <img src="./images/motion_blur_bvh.png" height="100" /> |
 | Final Image w/ BVH | <img src="./images/random_spheres_bvh.png" height="100" /> | Solid &amp; Checker Texture | <img src="./images/checkered_floor.png" height="100" /> |
 | Checkered Spheres  | <img src="./images/checkered_spheres.png" height="100" />  | Perlin Noise Texture        | <img src="./images/perlin_spheres.png" height="100" />  |
+| Earth Textured     | <img src="./images/earth.png" height="100" />              |                             |                                                         |
 
 #### Timing Benchmarks
 

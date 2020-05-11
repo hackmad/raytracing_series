@@ -1,6 +1,7 @@
 //! # Recursive ray tracer
 
 extern crate clap;
+extern crate image;
 extern crate rand;
 extern crate rand_chacha;
 

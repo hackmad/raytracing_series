@@ -28,6 +28,7 @@ pub enum Scenery {
     CheckeredFloor,
     CheckeredSpheres,
     PerlinSpheres,
+    Earth,
 }
 
 impl<'a> Scenery {
@@ -46,6 +47,7 @@ impl<'a> Scenery {
         map.insert("checkered_floor", Scenery::CheckeredFloor);
         map.insert("checkered_spheres", Scenery::CheckeredSpheres);
         map.insert("perlin_spheres", Scenery::PerlinSpheres);
+        map.insert("earth", Scenery::Earth);
 
         map
     }
@@ -120,6 +122,10 @@ impl Scene {
             Scenery::PerlinSpheres => (
                 perlin_spheres(Rc::clone(&rng)),
                 checkered_spheres_camera(image_width, image_height, Rc::clone(&rng)),
+            ),
+            Scenery::Earth => (
+                earth(Rc::clone(&rng)),
+                earth_camera(image_width, image_height, Rc::clone(&rng)),
             ),
         };
 
@@ -242,6 +248,21 @@ fn checkered_spheres_camera(image_width: u32, image_height: u32, rng: RcRandomiz
         (image_width as Float) / (image_height as Float),
         0.0,
         10.0,
+        0.0,
+        1.0,
+        Rc::clone(&rng),
+    )
+}
+
+fn earth_camera(image_width: u32, image_height: u32, rng: RcRandomizer) -> Camera {
+    Camera::new(
+        Point3::new(0.0, 0.0, 12.0),
+        Point3::zero(),
+        Point3::new(0.0, 1.0, 0.0),
+        20.0,
+        (image_width as Float) / (image_height as Float),
+        0.001,
+        100.0,
         0.0,
         1.0,
         Rc::clone(&rng),
@@ -450,6 +471,20 @@ fn perlin_spheres(rng: RcRandomizer) -> Vec<RcHittable> {
         Point3::new(0.0, 2.0, 0.0),
         2.0,
         Lambertian::new(Rc::clone(&noise), Rc::clone(&rng)),
+    ));
+
+    world
+}
+
+fn earth(rng: RcRandomizer) -> Vec<RcHittable> {
+    let mut world: Vec<RcHittable> = Vec::new();
+
+    let earth_texture = Image::new("images/world.topo.bathy.200412.3x5400x2700.jpg");
+
+    world.push(Sphere::new(
+        Point3::zero(),
+        2.0,
+        Lambertian::new(Rc::clone(&earth_texture), Rc::clone(&rng)),
     ));
 
     world

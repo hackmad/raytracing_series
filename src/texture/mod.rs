@@ -3,12 +3,13 @@
 //! A library for handling textures.
 
 mod checker;
+mod image;
 mod noise;
 mod perlin;
 mod solid;
 
 use super::algebra::{Colour, Point3, Vec3};
-use super::common::{Float, RcRandomizer};
+use super::common::{clamp, Float, RcRandomizer};
 use std::fmt;
 use std::rc::Rc;
 
@@ -23,6 +24,9 @@ pub use self::noise::Noise;
 
 /// Perlin noise generator.
 pub use self::perlin::Perlin;
+
+/// Models an image texture
+pub use self::image::Image;
 
 /// Models textures.
 pub trait Texture: fmt::Display + fmt::Debug {
