@@ -26,6 +26,10 @@ Build and run with default settings:
 cargo run > image.ppm
 ```
 
+```bash
+cargo run --release > image.ppm
+```
+
 Run compiled versions with default settings:
 
 ```bash
@@ -36,10 +40,32 @@ Run compiled versions with default settings:
 ./target/release/raytracing_series > image.ppm
 ```
 
+Run with program arguments:
+
+```bash
+cargo run -- --scene metal -w 1200 -h 600 > image.ppm
+```
+
+```bash
+cargo run --release -- --scene metal -w 1200 -h 600 > image.ppm
+```
+
+```bash
+./target/debug/raytracing_series --scene metal -w 1200 -h 600 > image.ppm
+```
+
+```bash
+./target/release/raytracing_series --scene metal -w 1200 -h 600 > image.ppm
+```
+
 Get help on program arguments:
 
 ```bash
 cargo run -- --help
+```
+
+```bash
+cargo run --release -- --help
 ```
 
 ```bash
