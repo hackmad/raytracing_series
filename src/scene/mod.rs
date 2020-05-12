@@ -5,6 +5,7 @@
 #![allow(dead_code)]
 
 use super::algebra::*;
+use super::background::*;
 use super::camera::*;
 use super::common::*;
 use super::material::*;
@@ -29,10 +30,18 @@ pub enum Scenery {
     CheckeredSpheres,
     PerlinSpheres,
     Earth,
+    SimpleLight,
 }
 
 impl<'a> Scenery {
     /// Returns a new `HashMap<&str, Scenery>`.
+    ///
+    /// There is probably a better way to do this.  To get the string
+    /// representations you can do this:
+    /// ```
+    /// let scene_map = Scenery::all();
+    /// let scenes: Vec<&str> = scene_map.keys().map(|k| k.as_ref()).collect();
+    /// ```
     pub fn all() -> HashMap<&'a str, Scenery> {
         let mut map = HashMap::new();
 
@@ -48,19 +57,22 @@ impl<'a> Scenery {
         map.insert("checkered_spheres", Scenery::CheckeredSpheres);
         map.insert("perlin_spheres", Scenery::PerlinSpheres);
         map.insert("earth", Scenery::Earth);
+        map.insert("simple_light", Scenery::SimpleLight);
 
         map
     }
 }
 
 /// Models a scene.
-#[derive(Debug, Clone)]
 pub struct Scene {
     /// The camera.
     pub camera: Camera,
 
     /// Objects in the scene.
     pub world: RcHittable,
+
+    /// Background.
+    pub background: BackgroundFn,
 }
 
 impl Scene {
@@ -78,69 +90,130 @@ impl Scene {
         bvh_enabled: bool,
         rng: RcRandomizer,
     ) -> Scene {
-        let (world, camera) = match scenery {
-            Scenery::LambertianDiffuse => (
-                diffuse_spheres(Rc::clone(&rng)),
+        match scenery {
+            Scenery::LambertianDiffuse => Scene::new_scene(
+                &diffuse_spheres(Rc::clone(&rng)),
                 default_camera(image_width, image_height, Rc::clone(&rng)),
+                gradient_background,
+                bvh_enabled,
+                rng,
             ),
-            Scenery::Metal => (
-                metal_spheres(Rc::clone(&rng)),
+            Scenery::Metal => Scene::new_scene(
+                &metal_spheres(Rc::clone(&rng)),
                 default_camera(image_width, image_height, Rc::clone(&rng)),
+                gradient_background,
+                bvh_enabled,
+                rng,
             ),
-            Scenery::Dielectric => (
-                dielectric_spheres(Rc::clone(&rng)),
+            Scenery::Dielectric => Scene::new_scene(
+                &dielectric_spheres(Rc::clone(&rng)),
                 default_camera(image_width, image_height, Rc::clone(&rng)),
+                gradient_background,
+                bvh_enabled,
+                rng,
             ),
-            Scenery::WideAngle => (
-                dielectric_spheres(Rc::clone(&rng)),
+            Scenery::WideAngle => Scene::new_scene(
+                &dielectric_spheres(Rc::clone(&rng)),
                 wide_angle_camera(image_width, image_height, Rc::clone(&rng)),
+                gradient_background,
+                bvh_enabled,
+                rng,
             ),
-            Scenery::Telephoto => (
-                dielectric_spheres(Rc::clone(&rng)),
+            Scenery::Telephoto => Scene::new_scene(
+                &dielectric_spheres(Rc::clone(&rng)),
                 telephoto_camera(image_width, image_height, Rc::clone(&rng)),
+                gradient_background,
+                bvh_enabled,
+                rng,
             ),
-            Scenery::DefocusBlur => (
-                dielectric_spheres(Rc::clone(&rng)),
+            Scenery::DefocusBlur => Scene::new_scene(
+                &dielectric_spheres(Rc::clone(&rng)),
                 large_aperture_camera(image_width, image_height, Rc::clone(&rng)),
+                gradient_background,
+                bvh_enabled,
+                rng,
             ),
-            Scenery::RandomSpheres => (
-                random_spheres(false, false, Rc::clone(&rng)),
+            Scenery::RandomSpheres => Scene::new_scene(
+                &random_spheres(false, false, Rc::clone(&rng)),
                 random_spheres_camera(image_width, image_height, Rc::clone(&rng)),
+                gradient_background,
+                bvh_enabled,
+                rng,
             ),
-            Scenery::MotionBlur => (
-                random_spheres(true, false, Rc::clone(&rng)),
+            Scenery::MotionBlur => Scene::new_scene(
+                &random_spheres(true, false, Rc::clone(&rng)),
                 random_spheres_camera(image_width, image_height, Rc::clone(&rng)),
+                gradient_background,
+                bvh_enabled,
+                rng,
             ),
-            Scenery::CheckeredFloor => (
-                random_spheres(true, true, Rc::clone(&rng)),
+            Scenery::CheckeredFloor => Scene::new_scene(
+                &random_spheres(true, true, Rc::clone(&rng)),
                 random_spheres_camera(image_width, image_height, Rc::clone(&rng)),
+                gradient_background,
+                bvh_enabled,
+                rng,
             ),
-            Scenery::CheckeredSpheres => (
-                checkered_spheres(Rc::clone(&rng)),
+            Scenery::CheckeredSpheres => Scene::new_scene(
+                &checkered_spheres(Rc::clone(&rng)),
                 checkered_spheres_camera(image_width, image_height, Rc::clone(&rng)),
+                gradient_background,
+                bvh_enabled,
+                rng,
             ),
-            Scenery::PerlinSpheres => (
-                perlin_spheres(Rc::clone(&rng)),
+            Scenery::PerlinSpheres => Scene::new_scene(
+                &perlin_spheres(Rc::clone(&rng)),
                 checkered_spheres_camera(image_width, image_height, Rc::clone(&rng)),
+                gradient_background,
+                bvh_enabled,
+                rng,
             ),
-            Scenery::Earth => (
-                earth(Rc::clone(&rng)),
+            Scenery::Earth => Scene::new_scene(
+                &earth(Rc::clone(&rng)),
                 earth_camera(image_width, image_height, Rc::clone(&rng)),
+                gradient_background,
+                bvh_enabled,
+                rng,
             ),
-        };
-
-        let start = Instant::now();
-        let world = if bvh_enabled {
-            eprint!("BVH: ");
-            build_bvh(&world, Rc::clone(&rng))
-        } else {
-            eprint!("HittableList: ");
-            build_hittable_list(&world)
-        };
-        eprintln!("{} seconds", start.elapsed().as_secs_f32());
-
-        Scene { camera, world }
+            Scenery::SimpleLight => Scene::new_scene(
+                &simple_light(Rc::clone(&rng)),
+                simple_light_camera(image_width, image_height, Rc::clone(&rng)),
+                black_background,
+                bvh_enabled,
+                rng,
+            ),
+        }
     }
+
+    fn new_scene(
+        world: &Vec<RcHittable>,
+        camera: Camera,
+        background: BackgroundFn,
+        bvh_enabled: bool,
+        rng: RcRandomizer,
+    ) -> Scene {
+        Scene {
+            world: build_world(world, bvh_enabled, Rc::clone(&rng)),
+            camera,
+            background,
+        }
+    }
+}
+
+fn build_world(world: &Vec<RcHittable>, bvh_enabled: bool, rng: RcRandomizer) -> RcHittable {
+    let start = Instant::now();
+
+    let world = if bvh_enabled {
+        eprint!("BVH: ");
+        build_bvh(&world, Rc::clone(&rng))
+    } else {
+        eprint!("HittableList: ");
+        build_hittable_list(&world)
+    };
+
+    eprintln!("{} seconds", start.elapsed().as_secs_f32());
+
+    world
 }
 
 fn build_hittable_list(objects: &Vec<RcHittable>) -> RcHittable {
@@ -263,6 +336,22 @@ fn earth_camera(image_width: u32, image_height: u32, rng: RcRandomizer) -> Camer
         (image_width as Float) / (image_height as Float),
         0.001,
         100.0,
+        0.0,
+        1.0,
+        Rc::clone(&rng),
+    )
+}
+
+fn simple_light_camera(image_width: u32, image_height: u32, rng: RcRandomizer) -> Camera {
+    let lookfrom = Point3::new(20.0, 6.5, 5.5);
+    Camera::new(
+        lookfrom,
+        Point3::new(0.0, 2.0, 0.0),
+        Vec3::new(0.0, 1.0, 0.0),
+        20.0,
+        (image_width as Float) / (image_height as Float),
+        0.0,
+        10.0,
         0.0,
         1.0,
         Rc::clone(&rng),
@@ -486,6 +575,25 @@ fn earth(rng: RcRandomizer) -> Vec<RcHittable> {
         2.0,
         Lambertian::new(Rc::clone(&earth_texture), Rc::clone(&rng)),
     ));
+
+    world
+}
+
+fn simple_light(rng: RcRandomizer) -> Vec<RcHittable> {
+    let mut world: Vec<RcHittable> = Vec::new();
+
+    for s in perlin_spheres(Rc::clone(&rng)) {
+        world.push(s);
+    }
+
+    let light = DiffuseLight::new(Solid::from_rgb(4.0, 4.0, 4.0), Rc::clone(&rng));
+    world.push(Sphere::new(
+        Point3::new(0.0, 7.0, 0.0),
+        2.0,
+        Rc::clone(&light),
+    ));
+
+    world.push(XYrect::new(3.0, 5.0, 1.0, 3.0, -2.0, Rc::clone(&light)));
 
     world
 }

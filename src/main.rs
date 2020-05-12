@@ -7,6 +7,7 @@ extern crate rand_chacha;
 
 mod algebra;
 mod app_config;
+mod background;
 mod camera;
 mod common;
 mod material;
@@ -16,6 +17,7 @@ mod texture;
 
 use algebra::*;
 use app_config::*;
+use background::*;
 use common::*;
 use object::*;
 use scene::*;
@@ -63,7 +65,7 @@ fn main() {
                 let v = (y + rng.clone().float()) / image_height;
 
                 let r = scene.camera.clone().get_ray(u, v);
-                colour += ray_colour(&r, &scene.world, config.max_depth);
+                colour += ray_colour(&r, scene.background, &scene.world, config.max_depth);
             }
 
             let c = colour
@@ -80,9 +82,10 @@ fn main() {
 /// at the image plane.
 ///
 /// * `ray` - The ray.
+/// * `background` - The background.
 /// * `world` - The list of geometric objects.
 /// * `depth` - Maximum depth for recursion.
-fn ray_colour(ray: &Ray, world: &RcHittable, depth: u32) -> Colour {
+fn ray_colour(ray: &Ray, background: BackgroundFn, world: &RcHittable, depth: u32) -> Colour {
     // Terminate the recursion if maximum depth is reached.
     if depth <= 0 {
         return Colour::zero();
@@ -93,24 +96,17 @@ fn ray_colour(ray: &Ray, world: &RcHittable, depth: u32) -> Colour {
     // intersection routine.
     match world.hit(&ray, 0.001, INFINITY) {
         Some(rec) => {
+            let emission = rec.material.emission(rec.u, rec.v, &rec.point);
+
             // If material did not absorb the ray and scattered it, continue
             // tracing the new ray.
             if let Some(sr) = rec.material.clone().scatter(ray, &rec) {
-                ray_colour(&sr.scattered, world, depth - 1) * sr.attenuation
+                emission + ray_colour(&sr.scattered, background, world, depth - 1) * sr.attenuation
             } else {
-                background_colour(ray)
+                emission
             }
         }
 
-        _ => background_colour(ray),
+        _ => background(ray),
     }
-}
-
-/// Generate a gradient colour for the background.
-///
-/// * `ray` - The ray.
-fn background_colour(ray: &Ray) -> Colour {
-    let unit_direction = ray.direction.unit_vector();
-    let t = 0.5 * (unit_direction.y() + 1.0);
-    Colour::new(1.0, 1.0, 1.0) * (1.0 - t) + Colour::new(0.5, 0.7, 1.0) * t
 }

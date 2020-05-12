@@ -9,6 +9,7 @@ mod hit_record;
 mod hittable_list;
 mod moving_sphere;
 mod sphere;
+mod xy_rect;
 
 use super::algebra::{Axis, Point3, Ray, Vec3, AXES};
 use super::common::{Float, RcRandomizer, PI, PI_OVER_2, TWO_PI};
@@ -27,6 +28,9 @@ pub use self::sphere::Sphere;
 
 /// Models a sphere that moves along a linear path.
 pub use self::moving_sphere::MovingSphere;
+
+/// Models an axis-aligned rectangle.
+pub use self::xy_rect::XYrect;
 
 /// Models an axis aligned bounding box.
 pub use self::aabb::AABB;

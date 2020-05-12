@@ -5,33 +5,34 @@
 use super::scene::Scenery;
 use clap::{App, Arg};
 
-/// Program configuration
+/// Program configuration.
 #[derive(Debug, Copy, Clone)]
 pub struct AppConfig {
-    /// Image height
+    /// Image height.
     pub image_width: u32,
 
-    /// Image width
+    /// Image width.
     pub image_height: u32,
 
-    /// Samples per pixels for antialiasing
+    /// Samples per pixels for antialiasing.
     pub samples_per_pixel: u32,
 
     /// Max recursion depth
     pub max_depth: u32,
 
-    /// Scene to render
+    /// Scene to render.
     pub scenery: Scenery,
 
-    /// Enable bounding value hierarchy
+    /// Enable bounding value hierarchy.
     pub bvh_enabled: bool,
 
-    /// Random number seed
+    /// Random number seed.
     pub seed: Option<u64>,
 }
 
 impl AppConfig {
     pub fn load() -> AppConfig {
+        // Get list of all scenes & get a list of their string representations.
         let scene_map = Scenery::all();
         let scenes: Vec<&str> = scene_map.keys().map(|k| k.as_ref()).collect();
 
