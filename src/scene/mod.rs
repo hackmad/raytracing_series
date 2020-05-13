@@ -31,6 +31,7 @@ pub enum Scenery {
     PerlinSpheres,
     Earth,
     SimpleLight,
+    EmptyCornellBox,
     CornellBox,
 }
 
@@ -59,6 +60,7 @@ impl<'a> Scenery {
         map.insert("perlin_spheres", Scenery::PerlinSpheres);
         map.insert("earth", Scenery::Earth);
         map.insert("simple_light", Scenery::SimpleLight);
+        map.insert("empty_cornell_box", Scenery::EmptyCornellBox);
         map.insert("cornell_box", Scenery::CornellBox);
 
         map
@@ -180,6 +182,13 @@ impl Scene {
             Scenery::SimpleLight => Scene::new_scene(
                 &simple_light(Rc::clone(&rng)),
                 simple_light_camera(image_width, image_height, Rc::clone(&rng)),
+                black_background,
+                bvh_enabled,
+                rng,
+            ),
+            Scenery::EmptyCornellBox => Scene::new_scene(
+                &empty_cornell_box(Rc::clone(&rng)),
+                cornell_box_camera(image_width, image_height, Rc::clone(&rng)),
                 black_background,
                 bvh_enabled,
                 rng,
@@ -622,7 +631,7 @@ fn simple_light(rng: RcRandomizer) -> Vec<RcHittable> {
     world
 }
 
-fn cornell_box(rng: RcRandomizer) -> Vec<RcHittable> {
+fn empty_cornell_box(rng: RcRandomizer) -> Vec<RcHittable> {
     let mut world: Vec<RcHittable> = Vec::new();
 
     let red = Lambertian::new(SolidColour::from_rgb(0.65, 0.05, 0.05), Rc::clone(&rng));
@@ -630,14 +639,14 @@ fn cornell_box(rng: RcRandomizer) -> Vec<RcHittable> {
     let green = Lambertian::new(SolidColour::from_rgb(0.12, 0.45, 0.15), Rc::clone(&rng));
     let light = DiffuseLight::new(SolidColour::from_rgb(15.0, 15.0, 15.0), Rc::clone(&rng));
 
-    world.push(YZrect::new(
+    world.push(FlipFace::new(YZrect::new(
         0.0,
         555.0,
         0.0,
         555.0,
         555.0,
         Rc::clone(&green),
-    ));
+    )));
 
     world.push(YZrect::new(0.0, 555.0, 0.0, 555.0, 0.0, Rc::clone(&red)));
 
@@ -650,7 +659,14 @@ fn cornell_box(rng: RcRandomizer) -> Vec<RcHittable> {
         Rc::clone(&light),
     ));
 
-    world.push(XZrect::new(0.0, 555.0, 0.0, 555.0, 0.0, Rc::clone(&white)));
+    world.push(FlipFace::new(XZrect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        0.0,
+        Rc::clone(&white),
+    )));
 
     world.push(XZrect::new(
         0.0,
@@ -661,13 +677,52 @@ fn cornell_box(rng: RcRandomizer) -> Vec<RcHittable> {
         Rc::clone(&white),
     ));
 
-    world.push(XYrect::new(
+    world.push(FlipFace::new(XYrect::new(
         0.0,
         555.0,
         0.0,
         555.0,
         555.0,
         Rc::clone(&white),
+    )));
+
+    world
+}
+
+fn cornell_box(rng: RcRandomizer) -> Vec<RcHittable> {
+    let mut world: Vec<RcHittable> = Vec::new();
+
+    let objects = empty_cornell_box(Rc::clone(&rng));
+    for object in objects.iter() {
+        world.push(Rc::clone(&object));
+    }
+
+    let white = Lambertian::new(SolidColour::from_rgb(0.73, 0.73, 0.73), Rc::clone(&rng));
+
+    world.push(Translate::new(
+        Rotate::new(
+            XYZbox::new(
+                Point3::zero(),
+                Point3::new(165.0, 330.0, 165.0),
+                Rc::clone(&white),
+            ),
+            Y_AXIS,
+            15.0,
+        ),
+        Vec3::new(265.0, 0.0, 295.0),
+    ));
+
+    world.push(Translate::new(
+        Rotate::new(
+            XYZbox::new(
+                Point3::zero(),
+                Point3::new(165.0, 165.0, 165.0),
+                Rc::clone(&white),
+            ),
+            Y_AXIS,
+            -18.0,
+        ),
+        Vec3::new(130.0, 0.0, 65.0),
     ));
 
     world
