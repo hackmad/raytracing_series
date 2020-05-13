@@ -6,7 +6,7 @@ mod checker;
 mod image;
 mod noise;
 mod perlin;
-mod solid;
+mod solid_colour;
 
 use super::algebra::{Colour, Point3, Vec3};
 use super::common::{clamp, Float, RcRandomizer};
@@ -14,7 +14,7 @@ use std::fmt;
 use std::rc::Rc;
 
 /// Models a solid colour as a texture.
-pub use self::solid::Solid;
+pub use self::solid_colour::SolidColour;
 
 /// Models a 3-dimension checkerboard pattern.
 pub use self::checker::Checker;

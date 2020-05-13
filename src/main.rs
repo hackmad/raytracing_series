@@ -96,7 +96,7 @@ fn ray_colour(ray: &Ray, background: BackgroundFn, world: &RcHittable, depth: u3
     // intersection routine.
     match world.hit(&ray, 0.001, INFINITY) {
         Some(rec) => {
-            let emission = rec.material.emission(rec.u, rec.v, &rec.point);
+            let emission = rec.material.emission(ray, &rec);
 
             // If material did not absorb the ray and scattered it, continue
             // tracing the new ray.

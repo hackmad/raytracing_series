@@ -7,7 +7,7 @@ mod diffuse_light;
 mod lambertian;
 mod metal;
 
-use super::algebra::{Colour, Point3, Ray};
+use super::algebra::{Colour, Ray};
 use super::common::{Float, RcRandomizer};
 use super::object::HitRecord;
 use super::texture::RcTexture;
@@ -43,10 +43,9 @@ pub trait Material: fmt::Display + fmt::Debug {
 
     /// Return the emiited colour value. Default emission is black.
     ///
-    /// * `u` - Parametric surface u-coordinate.
-    /// * `v` - Parametric surface v-coordinate.
-    /// * `p` - Point on the surface.
-    fn emission(&self, _u: Float, _v: Float, _p: &Point3) -> Colour {
+    /// * `ray_in` - Incident ray.
+    /// * `rec` - The `HitRecord`.
+    fn emission(&self, _ray_in: &Ray, _rec: &HitRecord) -> Colour {
         Colour::zero()
     }
 }

@@ -1,4 +1,4 @@
-//! # Solid
+//! # SolidColour
 //!
 //! A library for handling solid colour as a texture.
 
@@ -8,17 +8,17 @@ use std::rc::Rc;
 
 /// Models a solid colour as a texture.
 #[derive(Debug, Clone)]
-pub struct Solid {
+pub struct SolidColour {
     /// The colour value.
     colour_value: Colour,
 }
 
-impl Solid {
+impl SolidColour {
     /// Creates a new solid texture from a `Colour` value.
     ///
     /// * `colour` - The colour.
     pub fn new(colour: Colour) -> RcTexture {
-        Rc::new(Solid {
+        Rc::new(SolidColour {
             colour_value: colour,
         })
     }
@@ -27,19 +27,19 @@ impl Solid {
     ///
     /// * `colour` - The colour.
     pub fn from_rgb(r: Float, g: Float, b: Float) -> RcTexture {
-        Rc::new(Solid {
+        Rc::new(SolidColour {
             colour_value: Colour::new(r, g, b),
         })
     }
 }
 
-impl fmt::Display for Solid {
+impl fmt::Display for SolidColour {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "solid(colour_value: {}", self.colour_value)
+        write!(f, "solid_colour(colour_value: {}", self.colour_value)
     }
 }
 
-impl Texture for Solid {
+impl Texture for SolidColour {
     /// Return the stored colour value regardless of texture coordinates
     /// and intersection point.
     ///

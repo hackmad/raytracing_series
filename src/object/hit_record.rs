@@ -68,6 +68,49 @@ impl HitRecord {
             v,
         }
     }
+
+    /// Returns a copy with the front_Face field flipped.
+    pub fn flip_front_face(&self) -> HitRecord {
+        HitRecord {
+            t: self.t,
+            point: self.point,
+            front_face: !self.front_face,
+            normal: self.normal,
+            material: Rc::clone(&self.material),
+            u: self.u,
+            v: self.v,
+        }
+    }
+
+    /// Returns a copy with the point changed
+    pub fn update_point(&self, p: Point3) -> HitRecord {
+        HitRecord {
+            t: self.t,
+            point: p,
+            front_face: self.front_face,
+            normal: self.normal,
+            material: Rc::clone(&self.material),
+            u: self.u,
+            v: self.v,
+        }
+    }
+
+    /// Returns a copy with the normal changed
+    pub fn update_normal(&self, ray: &Ray, n: Vec3) -> HitRecord {
+        let front_face = ray.direction.dot(n) <= 0.0;
+
+        let normal = if front_face { n } else { -n };
+
+        HitRecord {
+            t: self.t,
+            point: self.point,
+            front_face,
+            normal,
+            material: Rc::clone(&self.material),
+            u: self.u,
+            v: self.v,
+        }
+    }
 }
 
 impl fmt::Display for HitRecord {

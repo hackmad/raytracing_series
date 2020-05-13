@@ -64,6 +64,15 @@ impl Vec3 {
         Vec3 { e: [x, y, z] }
     }
 
+    /// Creates a new vector `[x, y, z]`.
+    ///
+    /// * `a` - Array containing x, y, z coordinates.
+    pub fn from_array(a: [Float; 3]) -> Vec3 {
+        Vec3 {
+            e: [a[0], a[1], a[2]],
+        }
+    }
+
     /// Returns the x-component of the vector.
     pub fn x(self) -> Float {
         self.e[0]

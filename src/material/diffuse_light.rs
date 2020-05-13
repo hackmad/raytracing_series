@@ -2,7 +2,7 @@
 //!
 //! A library for handling diffuse light emissive material.
 
-use super::{Colour, Float, Material, Point3, RcMaterial, RcRandomizer, RcTexture};
+use super::{Colour, HitRecord, Material, Ray, RcMaterial, RcRandomizer, RcTexture};
 use std::fmt;
 use std::rc::Rc;
 
@@ -46,10 +46,9 @@ impl fmt::Debug for DiffuseLight {
 impl Material for DiffuseLight {
     /// Return the emiited colour value. Default emission is black.
     ///
-    /// * `u` - Parametric surface u-coordinate.
-    /// * `v` - Parametric surface v-coordinate.
-    /// * `u` - Point on the surface.
-    fn emission(&self, u: Float, v: Float, p: &Point3) -> Colour {
-        Rc::clone(&self.emit).value(u, v, p)
+    /// * `ray_in` - Incident ray.
+    /// * `rec` - The `HitRecord`.
+    fn emission(&self, _ray_in: &Ray, rec: &HitRecord) -> Colour {
+        Rc::clone(&self.emit).value(rec.u, rec.v, &rec.point)
     }
 }

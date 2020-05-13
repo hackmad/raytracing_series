@@ -31,6 +31,7 @@ pub enum Scenery {
     PerlinSpheres,
     Earth,
     SimpleLight,
+    CornellBox,
 }
 
 impl<'a> Scenery {
@@ -58,6 +59,7 @@ impl<'a> Scenery {
         map.insert("perlin_spheres", Scenery::PerlinSpheres);
         map.insert("earth", Scenery::Earth);
         map.insert("simple_light", Scenery::SimpleLight);
+        map.insert("cornell_box", Scenery::CornellBox);
 
         map
     }
@@ -178,6 +180,13 @@ impl Scene {
             Scenery::SimpleLight => Scene::new_scene(
                 &simple_light(Rc::clone(&rng)),
                 simple_light_camera(image_width, image_height, Rc::clone(&rng)),
+                black_background,
+                bvh_enabled,
+                rng,
+            ),
+            Scenery::CornellBox => Scene::new_scene(
+                &cornell_box(Rc::clone(&rng)),
+                cornell_box_camera(image_width, image_height, Rc::clone(&rng)),
                 black_background,
                 bvh_enabled,
                 rng,
@@ -343,12 +352,26 @@ fn earth_camera(image_width: u32, image_height: u32, rng: RcRandomizer) -> Camer
 }
 
 fn simple_light_camera(image_width: u32, image_height: u32, rng: RcRandomizer) -> Camera {
-    let lookfrom = Point3::new(20.0, 6.5, 5.5);
     Camera::new(
-        lookfrom,
+        Point3::new(26.0, 3.0, 6.0),
         Point3::new(0.0, 2.0, 0.0),
         Vec3::new(0.0, 1.0, 0.0),
         20.0,
+        (image_width as Float) / (image_height as Float),
+        0.0,
+        10.0,
+        0.0,
+        1.0,
+        Rc::clone(&rng),
+    )
+}
+
+fn cornell_box_camera(image_width: u32, image_height: u32, rng: RcRandomizer) -> Camera {
+    Camera::new(
+        Point3::new(278.0, 278.0, -800.0),
+        Point3::new(278.0, 278.0, 0.0),
+        Vec3::new(0.0, 1.0, 0.0),
+        40.0,
         (image_width as Float) / (image_height as Float),
         0.0,
         10.0,
@@ -363,12 +386,12 @@ fn diffuse_spheres(rng: RcRandomizer) -> Vec<RcHittable> {
         Sphere::new(
             Point3::new(0.0, 0.0, -1.0),
             0.5,
-            Lambertian::new(Solid::from_rgb(0.5, 0.5, 0.5), Rc::clone(&rng)),
+            Lambertian::new(SolidColour::from_rgb(0.5, 0.5, 0.5), Rc::clone(&rng)),
         ),
         Sphere::new(
             Point3::new(0.0, -100.5, -1.0),
             100.0,
-            Lambertian::new(Solid::from_rgb(0.5, 0.5, 0.5), Rc::clone(&rng)),
+            Lambertian::new(SolidColour::from_rgb(0.5, 0.5, 0.5), Rc::clone(&rng)),
         ),
     ]
 }
@@ -378,22 +401,22 @@ fn metal_spheres(rng: RcRandomizer) -> Vec<RcHittable> {
         Sphere::new(
             Point3::new(0.0, 0.0, -1.0),
             0.5,
-            Lambertian::new(Solid::from_rgb(0.7, 0.3, 0.3), Rc::clone(&rng)),
+            Lambertian::new(SolidColour::from_rgb(0.7, 0.3, 0.3), Rc::clone(&rng)),
         ),
         Sphere::new(
             Point3::new(0.0, -100.5, -1.0),
             100.0,
-            Lambertian::new(Solid::from_rgb(0.8, 0.8, 0.0), Rc::clone(&rng)),
+            Lambertian::new(SolidColour::from_rgb(0.8, 0.8, 0.0), Rc::clone(&rng)),
         ),
         Sphere::new(
             Point3::new(1.0, 0.0, -1.0),
             0.5,
-            Metal::new(Solid::from_rgb(0.8, 0.6, 0.2), 1.0, Rc::clone(&rng)),
+            Metal::new(SolidColour::from_rgb(0.8, 0.6, 0.2), 1.0, Rc::clone(&rng)),
         ),
         Sphere::new(
             Point3::new(-1.0, 0.0, -1.0),
             0.5,
-            Metal::new(Solid::from_rgb(0.8, 0.8, 0.8), 0.3, Rc::clone(&rng)),
+            Metal::new(SolidColour::from_rgb(0.8, 0.8, 0.8), 0.3, Rc::clone(&rng)),
         ),
     ]
 }
@@ -403,17 +426,17 @@ fn dielectric_spheres(rng: RcRandomizer) -> Vec<RcHittable> {
         Sphere::new(
             Point3::new(0.0, 0.0, -1.0),
             0.5,
-            Lambertian::new(Solid::from_rgb(0.1, 0.2, 0.5), Rc::clone(&rng)),
+            Lambertian::new(SolidColour::from_rgb(0.1, 0.2, 0.5), Rc::clone(&rng)),
         ),
         Sphere::new(
             Point3::new(0.0, -100.5, -1.0),
             100.0,
-            Lambertian::new(Solid::from_rgb(0.8, 0.8, 0.0), Rc::clone(&rng)),
+            Lambertian::new(SolidColour::from_rgb(0.8, 0.8, 0.0), Rc::clone(&rng)),
         ),
         Sphere::new(
             Point3::new(1.0, 0.0, -1.0),
             0.5,
-            Metal::new(Solid::from_rgb(0.8, 0.6, 0.2), 0.3, Rc::clone(&rng)),
+            Metal::new(SolidColour::from_rgb(0.8, 0.6, 0.2), 0.3, Rc::clone(&rng)),
         ),
         Sphere::new(
             Point3::new(-1.0, 0.0, -1.0),
@@ -436,11 +459,11 @@ fn random_spheres(motion_blur: bool, checkered_floor: bool, rng: RcRandomizer) -
 
     let albedo = if checkered_floor {
         Checker::new(
-            Solid::from_rgb(0.2, 0.3, 0.1),
-            Solid::from_rgb(0.9, 0.9, 0.9),
+            SolidColour::from_rgb(0.2, 0.3, 0.1),
+            SolidColour::from_rgb(0.9, 0.9, 0.9),
         )
     } else {
-        Solid::from_rgb(0.5, 0.5, 0.5)
+        SolidColour::from_rgb(0.5, 0.5, 0.5)
     };
     world.push(Sphere::new(
         Point3::new(0.0, -1000.0, 0.0),
@@ -471,18 +494,18 @@ fn random_spheres(motion_blur: bool, checkered_floor: bool, rng: RcRandomizer) -
                             0.0,
                             1.0,
                             0.2,
-                            Lambertian::new(Solid::new(albedo), Rc::clone(&rng)),
+                            Lambertian::new(SolidColour::new(albedo), Rc::clone(&rng)),
                         ));
                     } else {
                         world.push(Sphere::new(
                             center,
                             0.2,
-                            Lambertian::new(Solid::new(albedo), Rc::clone(&rng)),
+                            Lambertian::new(SolidColour::new(albedo), Rc::clone(&rng)),
                         ));
                     }
                 } else if choose_mat < 0.95 {
                     // Metal
-                    let albedo = Solid::new(rng.vec3_in_range(0.5, 1.0).as_colour());
+                    let albedo = SolidColour::new(rng.vec3_in_range(0.5, 1.0).as_colour());
                     let fuzz = rng.float_in_range(0.0, 0.5);
                     world.push(Sphere::new(
                         center,
@@ -510,13 +533,13 @@ fn random_spheres(motion_blur: bool, checkered_floor: bool, rng: RcRandomizer) -
     world.push(Sphere::new(
         Point3::new(-4.0, 1.0, 0.0),
         1.0,
-        Lambertian::new(Solid::from_rgb(0.4, 0.2, 0.1), Rc::clone(&rng)),
+        Lambertian::new(SolidColour::from_rgb(0.4, 0.2, 0.1), Rc::clone(&rng)),
     ));
 
     world.push(Sphere::new(
         Point3::new(4.0, 1.0, 0.0),
         1.0,
-        Metal::new(Solid::from_rgb(0.7, 0.6, 0.5), 0.0, Rc::clone(&rng)),
+        Metal::new(SolidColour::from_rgb(0.7, 0.6, 0.5), 0.0, Rc::clone(&rng)),
     ));
 
     world
@@ -526,8 +549,8 @@ fn checkered_spheres(rng: RcRandomizer) -> Vec<RcHittable> {
     let mut world: Vec<RcHittable> = Vec::new();
 
     let checker = Checker::new(
-        Solid::from_rgb(0.2, 0.3, 0.1),
-        Solid::from_rgb(0.9, 0.9, 0.9),
+        SolidColour::from_rgb(0.2, 0.3, 0.1),
+        SolidColour::from_rgb(0.9, 0.9, 0.9),
     );
 
     world.push(Sphere::new(
@@ -586,7 +609,8 @@ fn simple_light(rng: RcRandomizer) -> Vec<RcHittable> {
         world.push(s);
     }
 
-    let light = DiffuseLight::new(Solid::from_rgb(4.0, 4.0, 4.0), Rc::clone(&rng));
+    let light = DiffuseLight::new(SolidColour::from_rgb(4.0, 4.0, 4.0), Rc::clone(&rng));
+
     world.push(Sphere::new(
         Point3::new(0.0, 7.0, 0.0),
         2.0,
@@ -594,6 +618,57 @@ fn simple_light(rng: RcRandomizer) -> Vec<RcHittable> {
     ));
 
     world.push(XYrect::new(3.0, 5.0, 1.0, 3.0, -2.0, Rc::clone(&light)));
+
+    world
+}
+
+fn cornell_box(rng: RcRandomizer) -> Vec<RcHittable> {
+    let mut world: Vec<RcHittable> = Vec::new();
+
+    let red = Lambertian::new(SolidColour::from_rgb(0.65, 0.05, 0.05), Rc::clone(&rng));
+    let white = Lambertian::new(SolidColour::from_rgb(0.73, 0.73, 0.73), Rc::clone(&rng));
+    let green = Lambertian::new(SolidColour::from_rgb(0.12, 0.45, 0.15), Rc::clone(&rng));
+    let light = DiffuseLight::new(SolidColour::from_rgb(15.0, 15.0, 15.0), Rc::clone(&rng));
+
+    world.push(YZrect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        555.0,
+        Rc::clone(&green),
+    ));
+
+    world.push(YZrect::new(0.0, 555.0, 0.0, 555.0, 0.0, Rc::clone(&red)));
+
+    world.push(XZrect::new(
+        213.0,
+        343.0,
+        227.0,
+        332.0,
+        554.0,
+        Rc::clone(&light),
+    ));
+
+    world.push(XZrect::new(0.0, 555.0, 0.0, 555.0, 0.0, Rc::clone(&white)));
+
+    world.push(XZrect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        555.0,
+        Rc::clone(&white),
+    ));
+
+    world.push(XYrect::new(
+        0.0,
+        555.0,
+        0.0,
+        555.0,
+        555.0,
+        Rc::clone(&white),
+    ));
 
     world
 }

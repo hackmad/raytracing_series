@@ -101,6 +101,7 @@ sips -s format png image.ppm --out image.png
 | Final Image w/ BVH | <img src="./images/random_spheres_bvh.png" height="100" /> | Solid &amp; Checker Texture | <img src="./images/checkered_floor.png" height="100" /> |
 | Checkered Spheres  | <img src="./images/checkered_spheres.png" height="100" />  | Perlin Noise Texture        | <img src="./images/perlin_spheres.png" height="100" />  |
 | Earth Textured     | <img src="./images/earth.png" height="100" />              | XY Rectangle &amp; Lights   | <img src="./images/simple_light.png" height="100" />    |
+| Empty Cornell Box  | <img src="./images/empty_cornell_box.png" height="100" />  |                             |                                                         |
 
 #### Timing Benchmarks
 
