@@ -5,6 +5,7 @@
 mod random;
 
 use super::algebra::Vec3;
+use std::fmt;
 use std::rc::Rc;
 
 /// Use f64 since it provides the wider range of math operations.
@@ -26,7 +27,7 @@ pub const INFINITY: Float = std::f64::INFINITY;
 pub use self::random::{new_seeded_rng, new_thread_rng, Random};
 
 /// Define some utility functions for generating random values.
-pub trait Randomizer {
+pub trait Randomizer: fmt::Debug {
     /// Returns a random floating point values in [0, 1].
     fn float(&self) -> Float;
 

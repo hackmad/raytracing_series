@@ -5,6 +5,7 @@
 #![allow(dead_code)]
 mod aabb;
 mod bvh;
+mod constant_medium;
 mod flip_face;
 mod hit_record;
 mod hittable_list;
@@ -19,7 +20,8 @@ mod yz_rect;
 
 use super::algebra::{Axis, Point3, Ray, Vec3, AXES};
 use super::common::{Float, RcRandomizer, INFINITY, PI, PI_OVER_2, TWO_PI};
-use super::material::RcMaterial;
+use super::material::{Isotropic, RcMaterial};
+use super::texture::RcTexture;
 use std::fmt;
 use std::rc::Rc;
 
@@ -61,6 +63,9 @@ pub use self::aabb::AABB;
 
 /// Models a bounding volume hierarchy.
 pub use self::bvh::BVH;
+
+/// Models a constant medium for effects like smoke and fog.
+pub use self::constant_medium::ConstantMedium;
 
 /// Models a geometric object that can handle intersections.
 pub trait Hittable: fmt::Display + fmt::Debug {

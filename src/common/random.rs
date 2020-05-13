@@ -6,6 +6,7 @@ use super::{Float, Randomizer, RcRandomizer, Vec3, PI};
 use rand::{thread_rng, Rng, RngCore, SeedableRng};
 use rand_chacha::ChaCha20Rng;
 use std::cell::RefCell;
+use std::fmt;
 use std::rc::Rc;
 
 /// Random number generator.
@@ -30,6 +31,17 @@ pub fn new_seeded_rng(seed: u64) -> RcRandomizer {
     Rc::new(Random {
         rng: RefCell::new(rng),
     })
+}
+
+impl<T> fmt::Debug for Random<T>
+where
+    T: RngCore,
+{
+    /// This is here to squash complaints from using RcRandomizer in Hittable
+    /// because of Debug requirements.
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("Random").finish()
+    }
 }
 
 impl<T> Randomizer for Random<T>

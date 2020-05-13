@@ -102,6 +102,7 @@ sips -s format png image.ppm --out image.png
 | Checkered Spheres  | <img src="./images/checkered_spheres.png" height="100" />  | Perlin Noise Texture        | <img src="./images/perlin_spheres.png" height="100" />  |
 | Earth Textured     | <img src="./images/earth.png" height="100" />              | XY Rectangle &amp; Lights   | <img src="./images/simple_light.png" height="100" />    |
 | Empty Cornell Box  | <img src="./images/empty_cornell_box.png" width="200" />   | Standard Cornell Box        | <img src="./images/cornell_box.png" width="200" />      |
+| Smoke and Fog      | <img src="./images/smoke_and_fog.png" width="200" />       |                             |                                                         |
 
 #### Timing Benchmarks
 
