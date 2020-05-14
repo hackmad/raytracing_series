@@ -34,6 +34,7 @@ pub enum Scenery {
     EmptyCornellBox,
     CornellBox,
     SmokeAndFog,
+    FinalNextWeek,
 }
 
 impl<'a> Scenery {
@@ -64,6 +65,7 @@ impl<'a> Scenery {
         map.insert("empty_cornell_box", Scenery::EmptyCornellBox);
         map.insert("cornell_box", Scenery::CornellBox);
         map.insert("smoke_and_fog", Scenery::SmokeAndFog);
+        map.insert("final_next_week", Scenery::FinalNextWeek);
 
         map
     }
@@ -205,6 +207,13 @@ impl Scene {
             Scenery::SmokeAndFog => Scene::new_scene(
                 &cornell_box_smoke_and_fog(Rc::clone(&rng)),
                 cornell_box_camera(image_width, image_height, Rc::clone(&rng)),
+                black_background,
+                bvh_enabled,
+                rng,
+            ),
+            Scenery::FinalNextWeek => Scene::new_scene(
+                &final_next_week(Rc::clone(&rng)),
+                final_next_week_camera(image_width, image_height, Rc::clone(&rng)),
                 black_background,
                 bvh_enabled,
                 rng,
@@ -387,6 +396,21 @@ fn simple_light_camera(image_width: u32, image_height: u32, rng: RcRandomizer) -
 fn cornell_box_camera(image_width: u32, image_height: u32, rng: RcRandomizer) -> Camera {
     Camera::new(
         Point3::new(278.0, 278.0, -800.0),
+        Point3::new(278.0, 278.0, 0.0),
+        Vec3::new(0.0, 1.0, 0.0),
+        40.0,
+        (image_width as Float) / (image_height as Float),
+        0.0,
+        10.0,
+        0.0,
+        1.0,
+        Rc::clone(&rng),
+    )
+}
+
+fn final_next_week_camera(image_width: u32, image_height: u32, rng: RcRandomizer) -> Camera {
+    Camera::new(
+        Point3::new(478.0, 278.0, -600.0),
         Point3::new(278.0, 278.0, 0.0),
         Vec3::new(0.0, 1.0, 0.0),
         40.0,
@@ -589,7 +613,7 @@ fn checkered_spheres(rng: RcRandomizer) -> Vec<RcHittable> {
 fn perlin_spheres(rng: RcRandomizer) -> Vec<RcHittable> {
     let mut world: Vec<RcHittable> = Vec::new();
 
-    let noise = Noise::new(4.0, 7, 10.0, 256, Rc::clone(&rng));
+    let noise = Noise::new(4.0, 7, 10.0, 256, Z_AXIS, Rc::clone(&rng));
 
     world.push(Sphere::new(
         Point3::new(0.0, -1000.0, 0.0),
@@ -662,12 +686,12 @@ fn cornell_box_base<'a>(
     mat.insert("light", light);
 
     let mut obj = HashMap::new();
-    obj.insert("left", FlipFace::new(left));
+    obj.insert("left", left);
     obj.insert("right", right);
     obj.insert("top_light", top_light);
-    obj.insert("top", FlipFace::new(top));
+    obj.insert("top", top);
     obj.insert("bottom", bottom);
-    obj.insert("back", FlipFace::new(back));
+    obj.insert("back", back);
 
     (obj, mat)
 }
@@ -780,6 +804,128 @@ fn cornell_box_smoke_and_fog(rng: RcRandomizer) -> Vec<RcHittable> {
         0.01,
         SolidColour::from_rgb(1.0, 1.0, 1.0),
         Rc::clone(&rng),
+    ));
+
+    world
+}
+
+fn final_next_week(rng: RcRandomizer) -> Vec<RcHittable> {
+    let mut world: Vec<RcHittable> = Vec::new();
+
+    let ground = Lambertian::new(SolidColour::from_rgb(0.48, 0.83, 0.53), Rc::clone(&rng));
+
+    let mut boxes1: Vec<RcHittable> = Vec::new();
+
+    let boxes_per_side = 20;
+    for i in 0..boxes_per_side {
+        for j in 0..boxes_per_side {
+            let w = 100.0;
+            let x0 = -1000.0 + (i as Float) * w;
+            let z0 = -1000.0 + (j as Float) * w;
+            let y0 = 0.0;
+            let x1 = x0 + w;
+            let y1 = Rc::clone(&rng).float_in_range(1.0, 101.0);
+            let z1 = z0 + w;
+
+            boxes1.push(XYZbox::new(
+                Point3::new(x0, y0, z0),
+                Point3::new(x1, y1, z1),
+                Rc::clone(&ground),
+            ));
+        }
+    }
+
+    world.push(BVH::new(&mut boxes1, 0.0, 1.0, Rc::clone(&rng)));
+
+    let light = DiffuseLight::new(SolidColour::from_rgb(7.0, 7.0, 7.0), Rc::clone(&rng));
+    world.push(XZrect::new(
+        123.0,
+        423.0,
+        147.0,
+        412.0,
+        554.0,
+        Rc::clone(&light),
+    ));
+
+    let center1 = Point3::new(400.0, 400.0, 200.0);
+    let center2 = center1 + Vec3::new(30.0, 0.0, 0.0);
+    let moving_sphere_material =
+        Lambertian::new(SolidColour::from_rgb(0.7, 0.3, 0.1), Rc::clone(&rng));
+    world.push(MovingSphere::new(
+        center1,
+        center2,
+        0.0,
+        1.0,
+        50.0,
+        moving_sphere_material,
+    ));
+
+    world.push(Sphere::new(
+        Point3::new(260.0, 150.0, 45.0),
+        50.0,
+        Dielectric::new(1.5, Rc::clone(&rng)),
+    ));
+    world.push(Sphere::new(
+        Point3::new(0.0, 150.0, 145.0),
+        50.0,
+        Metal::new(SolidColour::from_rgb(0.8, 0.8, 0.9), 10.0, Rc::clone(&rng)),
+    ));
+
+    let boundary = Sphere::new(
+        Point3::new(360.0, 150.0, 145.0),
+        70.0,
+        Dielectric::new(1.5, Rc::clone(&rng)),
+    );
+    world.push(Rc::clone(&boundary));
+
+    world.push(ConstantMedium::new(
+        Rc::clone(&boundary),
+        0.2,
+        SolidColour::from_rgb(0.2, 0.4, 0.9),
+        Rc::clone(&rng),
+    ));
+
+    let boundary = Sphere::new(
+        Point3::new(0.0, 0.0, 0.0),
+        5000.0,
+        Dielectric::new(1.5, Rc::clone(&rng)),
+    );
+    world.push(ConstantMedium::new(
+        Rc::clone(&boundary),
+        0.0001,
+        SolidColour::from_rgb(1.0, 1.0, 1.0),
+        Rc::clone(&rng),
+    ));
+
+    let earth_texture = Image::new("images/world.topo.bathy.200412.3x5400x2700.jpg");
+    let emat = Lambertian::new(earth_texture, Rc::clone(&rng));
+    world.push(Sphere::new(Point3::new(400.0, 200.0, 400.0), 100.0, emat));
+
+    let pertext = Noise::new(0.1, 7, 10.0, 256, X_AXIS, Rc::clone(&rng));
+    world.push(Sphere::new(
+        Point3::new(220.0, 280.0, 300.0),
+        80.0,
+        Lambertian::new(pertext, Rc::clone(&rng)),
+    ));
+
+    let mut boxes2: Vec<RcHittable> = Vec::new();
+    let white = Lambertian::new(SolidColour::from_rgb(0.73, 0.73, 0.73), Rc::clone(&rng));
+    let ns = 1000;
+    for _j in 0..ns {
+        boxes2.push(Sphere::new(
+            Rc::clone(&Rc::clone(&rng)).vec3_in_range(0.0, 165.0),
+            10.0,
+            Rc::clone(&white),
+        ));
+    }
+
+    world.push(Translate::new(
+        Rotate::new(
+            BVH::new(&mut boxes2, 0.0, 1.0, Rc::clone(&rng)),
+            Y_AXIS,
+            15.0,
+        ),
+        Vec3::new(-100.0, 270.0, 395.0),
     ));
 
     world

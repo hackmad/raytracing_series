@@ -39,7 +39,7 @@ impl Rotate {
     /// Create a new axis aligned box.
     ///
     /// * `object`: Holds a `Hittable`.
-    /// * `axos`: Axis of rotation.
+    /// * `axis`: Axis of rotation.
     /// * `degrees: Float` - Rotation angle.
     pub fn new(object: RcHittable, axis: Axis, degrees: Float) -> RcHittable {
         let radians = degrees.to_radians();

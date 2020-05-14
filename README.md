@@ -86,23 +86,23 @@ sips -s format png image.ppm --out image.png
 
 ### Raytracing in One Weekend
 
-| Title              | Image                                                      | Title           | Image                                                |
-| ------------------ | ---------------------------------------------------------- | --------------- | ---------------------------------------------------- |
-| Lambertian Diffuse | <img src="./images/lambertian_diffuse.png" height="100" /> | Metal           | <img src="./images/metal.png" height="100" />        |
-| Dielectric         | <img src="./images/dielectric.png" height="100" />         | Wide Angle Lens | <img src="./images/wide_angle.png" height="100" />   |
-| Telephoto Lens     | <img src="./images/telephoto.png" height="100" />          | Defocus Blur    | <img src="./images/defocus_blur.png" height="100" /> |
-| Final Image        | <img src="./images/random_spheres.png" height="100" />     |                 |                                                      |
+| Title              | Image                                                     | Title           | Image                                               |
+| ------------------ | --------------------------------------------------------- | --------------- | --------------------------------------------------- |
+| Lambertian Diffuse | <img src="./images/lambertian_diffuse.png" width="200" /> | Metal           | <img src="./images/metal.png" width="200" />        |
+| Dielectric         | <img src="./images/dielectric.png" width="200" />         | Wide Angle Lens | <img src="./images/wide_angle.png" width="200" />   |
+| Telephoto Lens     | <img src="./images/telephoto.png" width="200" />          | Defocus Blur    | <img src="./images/defocus_blur.png" width="200" /> |
+| Final Image        | <img src="./images/random_spheres.png" width="200" />     |                 |                                                     |
 
 ### Raytracing The Next Week
 
-| Title              | Image                                                      | Title                       | Image                                                   |
-| ------------------ | ---------------------------------------------------------- | --------------------------- | ------------------------------------------------------- |
-| Motion Blur        | <img src="./images/motion_blur.png" height="100" />        | Motion Blur w/ BVH          | <img src="./images/motion_blur_bvh.png" height="100" /> |
-| Final Image w/ BVH | <img src="./images/random_spheres_bvh.png" height="100" /> | Solid &amp; Checker Texture | <img src="./images/checkered_floor.png" height="100" /> |
-| Checkered Spheres  | <img src="./images/checkered_spheres.png" height="100" />  | Perlin Noise Texture        | <img src="./images/perlin_spheres.png" height="100" />  |
-| Earth Textured     | <img src="./images/earth.png" height="100" />              | XY Rectangle &amp; Lights   | <img src="./images/simple_light.png" height="100" />    |
-| Empty Cornell Box  | <img src="./images/empty_cornell_box.png" width="200" />   | Standard Cornell Box        | <img src="./images/cornell_box.png" width="200" />      |
-| Smoke and Fog      | <img src="./images/smoke_and_fog.png" width="200" />       |                             |                                                         |
+| Title              | Image                                                     | Title                         | Image                                                  |
+| ------------------ | --------------------------------------------------------- | ----------------------------- | ------------------------------------------------------ |
+| Motion Blur        | <img src="./images/motion_blur.png" width="200" />        | Motion Blur w/ BVH            | <img src="./images/motion_blur_bvh.png" width="200" /> |
+| Final Image w/ BVH | <img src="./images/random_spheres_bvh.png" width="200" /> | Solid &amp; Checker Texture   | <img src="./images/checkered_floor.png" width="200" /> |
+| Checkered Spheres  | <img src="./images/checkered_spheres.png" width="200" />  | Perlin Noise Texture          | <img src="./images/perlin_spheres.png" width="200" />  |
+| Earth Texture      | <img src="./images/earth.png" width="200" />              | XY Rectangle &amp; Lights     | <img src="./images/simple_light.png" width="200" />    |
+| Empty Cornell Box  | <img src="./images/empty_cornell_box.png" width="200" />  | Standard Cornell Box          | <img src="./images/cornell_box.png" width="200" />     |
+| Smoke and Fog      | <img src="./images/smoke_and_fog.png" width="200" />      | Final Image (2k samples/pixel | <img src="./images/final_next_week.png" width="200" /> |
 
 #### Timing Benchmarks
 

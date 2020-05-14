@@ -8,7 +8,7 @@ mod noise;
 mod perlin;
 mod solid_colour;
 
-use super::algebra::{Colour, Point3, Vec3};
+use super::algebra::{Axis, Colour, Point3, Vec3};
 use super::common::{clamp, Float, RcRandomizer};
 use std::fmt;
 use std::rc::Rc;

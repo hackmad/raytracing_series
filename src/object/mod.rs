@@ -6,7 +6,6 @@
 mod aabb;
 mod bvh;
 mod constant_medium;
-mod flip_face;
 mod hit_record;
 mod hittable_list;
 mod moving_sphere;
@@ -45,9 +44,6 @@ pub use self::xz_rect::XZrect;
 
 /// Models an axis-aligned rectangle in the yz-plane.
 pub use self::yz_rect::YZrect;
-
-/// Flips the normal of a `Hittable` object.
-pub use self::flip_face::FlipFace;
 
 /// Models an axis-aligned box.
 pub use self::xyz_box::XYZbox;
@@ -88,10 +84,10 @@ pub trait Hittable: fmt::Display + fmt::Debug {
 /// Reference counted geometric object.
 pub type RcHittable = Rc<dyn Hittable>;
 
-/// Calculate 2-D `(u, v)` coordinates of a point on a sphere with center
+/// Calculate 2-D `(u, v)` coordinates of a point on a unit sphere with center
 /// `(0, 0, 0)`.
 pub fn get_sphere_uv(p: &Point3) -> (Float, Float) {
     let phi = p.z().atan2(p.x());
     let theta = p.y().asin();
-    (1.0 - (phi + PI) / (TWO_PI), (theta + PI_OVER_2) / PI)
+    (1.0 - (phi + PI) / TWO_PI, (theta + PI_OVER_2) / PI)
 }

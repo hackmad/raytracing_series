@@ -43,6 +43,30 @@ pub trait Randomizer: fmt::Debug {
     /// * `max` - Maximum bound
     fn usize_in_range(&self, min: usize, max: usize) -> usize;
 
+    /// Returns a random u8 value in [`min`, `max`].
+    ///
+    /// * `min` - Minimum bound
+    /// * `max` - Maximum bound
+    fn u8_in_range(&self, min: u8, max: u8) -> u8;
+
+    /// Returns a random u16 value in [`min`, `max`].
+    ///
+    /// * `min` - Minimum bound
+    /// * `max` - Maximum bound
+    fn u16_in_range(&self, min: u16, max: u16) -> u16;
+
+    /// Returns a random u32 value in [`min`, `max`].
+    ///
+    /// * `min` - Minimum bound
+    /// * `max` - Maximum bound
+    fn u32_in_range(&self, min: u32, max: u32) -> u32;
+
+    /// Returns a random u64 value in [`min`, `max`].
+    ///
+    /// * `min` - Minimum bound
+    /// * `max` - Maximum bound
+    fn u64_in_range(&self, min: u64, max: u64) -> u64;
+
     /// Returns a random vector with random components in [0, 1].
     fn vec3(&self) -> Vec3;
 

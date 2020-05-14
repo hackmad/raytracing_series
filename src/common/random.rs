@@ -69,6 +69,38 @@ where
         self.rng.borrow_mut().gen_range(min, max)
     }
 
+    /// Returns a random u8 value in [`min`, `max`].
+    ///
+    /// * `min` - Minimum bound
+    /// * `max` - Maximum bound
+    fn u8_in_range(&self, min: u8, max: u8) -> u8 {
+        self.rng.borrow_mut().gen_range(min, max)
+    }
+
+    /// Returns a random u16 value in [`min`, `max`].
+    ///
+    /// * `min` - Minimum bound
+    /// * `max` - Maximum bound
+    fn u16_in_range(&self, min: u16, max: u16) -> u16 {
+        self.rng.borrow_mut().gen_range(min, max)
+    }
+
+    /// Returns a random u32 value in [`min`, `max`].
+    ///
+    /// * `min` - Minimum bound
+    /// * `max` - Maximum bound
+    fn u32_in_range(&self, min: u32, max: u32) -> u32 {
+        self.rng.borrow_mut().gen_range(min, max)
+    }
+
+    /// Returns a random u64 value in [`min`, `max`].
+    ///
+    /// * `min` - Minimum bound
+    /// * `max` - Maximum bound
+    fn u64_in_range(&self, min: u64, max: u64) -> u64 {
+        self.rng.borrow_mut().gen_range(min, max)
+    }
+
     /// Returns a random vector with random components in [0, 1].
     fn vec3(&self) -> Vec3 {
         Vec3::new(self.float(), self.float(), self.float())

@@ -3,7 +3,7 @@
 //! A library for the 3-dimensional noise texture
 
 #![allow(dead_code)]
-use super::{Colour, Float, Perlin, Point3, RcRandomizer, RcTexture, Texture};
+use super::{Axis, Colour, Float, Perlin, Point3, RcRandomizer, RcTexture, Texture};
 use std::fmt;
 use std::rc::Rc;
 
@@ -21,6 +21,9 @@ pub struct Noise {
 
     /// Turbulence size.
     turbulence_size: Float,
+
+    /// Axis along which the marble grain aligns.
+    axis: Axis,
 }
 
 impl Noise {
@@ -30,12 +33,14 @@ impl Noise {
     /// * `turbulence_depth` - Turbulence depth.
     /// * `turbulence_size` - Turbulence size.
     /// * `size` - Grid size for Perlin noise.
+    /// * `axis` - Axis along which the marble grain aligns.
     /// * `rng` - Random number generator.
     pub fn new(
         frequency: Float,
         turbulence_depth: usize,
         turbulence_size: Float,
         size: usize,
+        axis: Axis,
         rng: RcRandomizer,
     ) -> RcTexture {
         Rc::new(Noise {
@@ -43,6 +48,7 @@ impl Noise {
             frequency,
             turbulence_depth,
             turbulence_size,
+            axis,
         })
     }
 }
@@ -62,6 +68,8 @@ impl Texture for Noise {
     /// * `p` - Intersection point.
     fn value(&self, _u: Float, _v: Float, p: &Point3) -> Colour {
         let turb = self.perlin.turbulence(p, self.turbulence_depth);
-        Colour::one() * 0.5 * (1.0 + (self.frequency * p.z() + self.turbulence_size * turb).sin())
+        Colour::one()
+            * 0.5
+            * (1.0 + (self.frequency * p[self.axis] + self.turbulence_size * turb).sin())
     }
 }

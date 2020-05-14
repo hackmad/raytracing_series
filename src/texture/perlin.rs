@@ -33,7 +33,7 @@ impl Perlin {
     /// * `rng` - Random number generator.
     pub fn new(size: usize, rng: RcRandomizer) -> Perlin {
         let random: Vec<Vec3> = (0..size)
-            .map(|_i| Rc::clone(&rng).vec3_in_range(-1.0, 1.0))
+            .map(|_i| Rc::clone(&rng).vec3_in_range(-1.0, 1.0).unit_vector())
             .collect();
 
         let perm_x = perlin_generate_perm(size, Rc::clone(&rng));
@@ -85,15 +85,15 @@ impl Perlin {
     /// * `p` - Point to evaluate the noise function.
     /// * `depth` - Number of iterations to evaluate noise function.
     pub fn turbulence(&self, p: &Point3, depth: usize) -> Float {
-        let init = (0.0, *p, 1.0);
+        let mut accum = 0.0;
+        let mut temp_p = *p;
+        let mut weight = 1.0;
 
-        let (accum, _, _) = (0..depth).fold(init, |(accum, temp_p, weight), _| {
-            (
-                accum + weight * self.noise(&temp_p),
-                temp_p * 2.0,
-                weight * 0.5,
-            )
-        });
+        for _i in 0..depth {
+            accum += weight * self.noise(&temp_p);
+            weight *= 0.5;
+            temp_p *= 2.0;
+        }
 
         accum.abs()
     }

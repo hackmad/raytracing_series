@@ -3,8 +3,8 @@
 //! A library for handling ray intersections with an axis aligned box.
 
 use super::{
-    FlipFace, Float, HitRecord, Hittable, HittableList, Point3, Ray, RcHittable, RcMaterial,
-    XYrect, XZrect, YZrect, AABB,
+    Float, HitRecord, Hittable, HittableList, Point3, Ray, RcHittable, RcMaterial, XYrect, XZrect,
+    YZrect, AABB,
 };
 use std::fmt;
 use std::rc::Rc;
@@ -50,14 +50,14 @@ impl XYZbox {
             p1.z(),
             Rc::clone(&material),
         ));
-        sides.add(FlipFace::new(XYrect::new(
+        sides.add(XYrect::new(
             p0.x(),
             p1.x(),
             p0.y(),
             p1.y(),
             p0.z(),
             Rc::clone(&material),
-        )));
+        ));
 
         sides.add(XZrect::new(
             p0.x(),
@@ -67,14 +67,14 @@ impl XYZbox {
             p1.y(),
             Rc::clone(&material),
         ));
-        sides.add(FlipFace::new(XZrect::new(
+        sides.add(XZrect::new(
             p0.x(),
             p1.x(),
             p0.z(),
             p1.z(),
             p0.y(),
             Rc::clone(&material),
-        )));
+        ));
 
         sides.add(YZrect::new(
             p0.y(),
@@ -84,14 +84,14 @@ impl XYZbox {
             p1.x(),
             Rc::clone(&material),
         ));
-        sides.add(FlipFace::new(YZrect::new(
+        sides.add(YZrect::new(
             p0.y(),
             p1.y(),
             p0.z(),
             p1.z(),
             p0.x(),
             Rc::clone(&material),
-        )));
+        ));
 
         Rc::new(XYZbox {
             box_min: p0,
