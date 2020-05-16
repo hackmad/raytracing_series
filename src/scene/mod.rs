@@ -865,6 +865,7 @@ fn final_next_week(rng: RcRandomizer) -> Vec<RcHittable> {
         50.0,
         Dielectric::new(1.5, Rc::clone(&rng)),
     ));
+
     world.push(Sphere::new(
         Point3::new(0.0, 150.0, 145.0),
         50.0,

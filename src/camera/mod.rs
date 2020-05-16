@@ -140,7 +140,7 @@ impl Camera {
     ///
     /// * `s`: Horizontal parameter.
     /// * `t`: Vertical parameter.
-    pub fn get_ray(self, s: Float, t: Float) -> Ray {
+    pub fn get_ray(&self, s: Float, t: Float) -> Ray {
         let rd = self.rng.clone().in_unit_disk() * self.lens_radius;
         let offset = self.u * rd.x() + self.v * rd.y();
         let time = self.rng.clone().float_in_range(self.time0, self.time1);

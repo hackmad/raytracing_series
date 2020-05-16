@@ -64,8 +64,8 @@ fn main() {
                 let u = (x + rng.clone().float()) / image_width;
                 let v = (y + rng.clone().float()) / image_height;
 
-                let r = scene.camera.clone().get_ray(u, v);
-                colour += ray_colour(&r, scene.background, &scene.world, config.max_depth);
+                let ray = scene.camera.get_ray(u, v);
+                colour += ray_colour(&ray, scene.background, &scene.world, config.max_depth);
             }
 
             let c = colour
@@ -75,7 +75,14 @@ fn main() {
         }
     }
 
-    eprintln!("Done: {} seconds", start.elapsed().as_secs_f32());
+    let seconds = start.elapsed().as_secs_f32();
+    if seconds < 60.0 {
+        eprintln!("Done: {:.2} seconds", seconds);
+    } else if seconds < 3600.0 {
+        eprintln!("Done: {:.2} minutes", seconds / 60.0);
+    } else {
+        eprintln!("Done: {:.2} hours", seconds / 3600.0);
+    }
 }
 
 /// Recursively traces a ray through the scene and generates the colour seen
@@ -100,7 +107,7 @@ fn ray_colour(ray: &Ray, background: BackgroundFn, world: &RcHittable, depth: u3
 
             // If material did not absorb the ray and scattered it, continue
             // tracing the new ray.
-            if let Some(sr) = rec.material.clone().scatter(ray, &rec) {
+            if let Some(sr) = Rc::clone(&rec.material).scatter(ray, &rec) {
                 emission + ray_colour(&sr.scattered, background, world, depth - 1) * sr.attenuation
             } else {
                 emission
