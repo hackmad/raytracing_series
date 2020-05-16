@@ -2,18 +2,18 @@
 //!
 //! A library for handling isotropic material for constant medium effects.
 
-use super::{HitRecord, Material, Ray, RcMaterial, RcRandomizer, RcTexture, ScatterResult};
+use super::{ArcMaterial, ArcRandomizer, ArcTexture, HitRecord, Material, Ray, ScatterResult};
 use std::fmt;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Models an isotropic material for constant medium.
 #[derive(Clone)]
 pub struct Isotropic {
     /// The diffuse colour provided by a texture.
-    albedo: RcTexture,
+    albedo: ArcTexture,
 
     /// Random number generator.
-    rng: RcRandomizer,
+    rng: ArcRandomizer,
 }
 
 impl Isotropic {
@@ -21,10 +21,10 @@ impl Isotropic {
     ///
     /// * `albedo` - Albedo
     /// * `rng` - Random number generator.
-    pub fn new(albedo: RcTexture, rng: RcRandomizer) -> RcMaterial {
-        Rc::new(Isotropic {
-            albedo: Rc::clone(&albedo),
-            rng: Rc::clone(&rng),
+    pub fn new(albedo: ArcTexture, rng: ArcRandomizer) -> ArcMaterial {
+        Arc::new(Isotropic {
+            albedo: Arc::clone(&albedo),
+            rng: Arc::clone(&rng),
         })
     }
 }
@@ -54,10 +54,10 @@ impl Material for Isotropic {
     /// * `rec` - The `HitRecord`.
     fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterResult> {
         // Scattering will pick a uniform random direction.
-        let scatter_direction = Rc::clone(&self.rng).in_unit_sphere();
+        let scatter_direction = self.rng.in_unit_sphere();
         Some(ScatterResult {
             scattered: Ray::new(rec.point, scatter_direction, ray_in.time),
-            attenuation: Rc::clone(&self.albedo).value(rec.u, rec.v, &rec.point),
+            attenuation: self.albedo.value(rec.u, rec.v, &rec.point),
         })
     }
 }

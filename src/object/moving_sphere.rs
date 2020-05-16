@@ -4,10 +4,10 @@
 //! along a linear path.
 
 use super::{
-    get_sphere_uv, Float, HitRecord, Hittable, Point3, Ray, RcHittable, RcMaterial, Vec3, AABB,
+    get_sphere_uv, ArcHittable, ArcMaterial, Float, HitRecord, Hittable, Point3, Ray, Vec3, AABB,
 };
 use std::fmt;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Models a sphere that moves along a linear path.
 #[derive(Debug, Clone)]
@@ -28,7 +28,7 @@ pub struct MovingSphere {
     radius: Float,
 
     /// Surface material.
-    material: RcMaterial,
+    material: ArcMaterial,
 }
 
 impl fmt::Display for MovingSphere {
@@ -43,7 +43,7 @@ impl fmt::Display for MovingSphere {
 }
 
 impl MovingSphere {
-    /// Create a new sphere.
+    /// Create a new moving sphere.
     ///
     /// * `center0` - Center at start time of motion.
     /// * `center1` - Center at end time of motion.
@@ -57,15 +57,15 @@ impl MovingSphere {
         time0: Float,
         time1: Float,
         radius: Float,
-        material: RcMaterial,
-    ) -> RcHittable {
-        Rc::new(MovingSphere {
+        material: ArcMaterial,
+    ) -> ArcHittable {
+        Arc::new(MovingSphere {
             center0,
             center1,
             time0,
             time1,
             radius,
-            material: Rc::clone(&material),
+            material: Arc::clone(&material),
         })
     }
 
@@ -100,7 +100,7 @@ impl MovingSphere {
             t,
             point,
             outward_normal,
-            Rc::clone(&self.material),
+            Arc::clone(&self.material),
             u,
             v,
         )

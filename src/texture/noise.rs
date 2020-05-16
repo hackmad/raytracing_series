@@ -3,15 +3,15 @@
 //! A library for the 3-dimensional noise texture
 
 #![allow(dead_code)]
-use super::{Axis, Colour, Float, Perlin, Point3, RcRandomizer, RcTexture, Texture};
+use super::{ArcRandomizer, ArcTexture, Axis, Colour, Float, Perlin, Point3, Texture};
 use std::fmt;
-use std::rc::Rc;
+use std::sync::{Arc, RwLock};
 
 /// Models a 3-dimension noiseboard pattern.
 #[derive(Debug, Clone)]
 pub struct Noise {
     /// Perlin noise generator.
-    perlin: Rc<Perlin>,
+    perlin: Arc<RwLock<Perlin>>,
 
     /// Scale.
     scale: Float,
@@ -41,10 +41,12 @@ impl Noise {
         turbulence_size: Float,
         grid_size: usize,
         axis: Axis,
-        rng: RcRandomizer,
-    ) -> RcTexture {
-        Rc::new(Noise {
-            perlin: Rc::new(Perlin::new(grid_size, Rc::clone(&rng))),
+        rng: ArcRandomizer,
+    ) -> ArcTexture {
+        let perlin = Arc::new(RwLock::new(Perlin::new(grid_size, rng)));
+
+        Arc::new(Noise {
+            perlin,
             scale,
             turbulence_depth,
             turbulence_size,
@@ -55,7 +57,7 @@ impl Noise {
 
 impl fmt::Display for Noise {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "noise(perlin: {})", self.perlin)
+        write!(f, "noise(perlin: {})", self.perlin.read().unwrap())
     }
 }
 
@@ -67,7 +69,9 @@ impl Texture for Noise {
     /// * `v` - Paramteric coordinate.
     /// * `p` - Intersection point.
     fn value(&self, _u: Float, _v: Float, p: &Point3) -> Colour {
-        let turb = self.turbulence_size * self.perlin.turbulence(p, self.turbulence_depth);
+        let perlin = self.perlin.read().unwrap();
+
+        let turb = self.turbulence_size * perlin.turbulence(p, self.turbulence_depth);
         let scale = self.scale * p[self.axis];
         Colour::one() * 0.5 * (1.0 + (scale + turb).sin())
     }

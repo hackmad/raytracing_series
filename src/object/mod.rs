@@ -18,11 +18,11 @@ mod xz_rect;
 mod yz_rect;
 
 use super::algebra::{Axis, Point3, Ray, Vec3, AXES};
-use super::common::{Float, RcRandomizer, INFINITY, PI, PI_OVER_2, TWO_PI};
-use super::material::{Isotropic, RcMaterial};
-use super::texture::RcTexture;
+use super::common::{ArcRandomizer, Float, INFINITY, PI, PI_OVER_2, TWO_PI};
+use super::material::{ArcMaterial, Isotropic};
+use super::texture::ArcTexture;
 use std::fmt;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Models a collection of geometric objects that support ray intersections.
 pub use self::hit_record::HitRecord;
@@ -81,8 +81,8 @@ pub trait Hittable: fmt::Display + fmt::Debug {
     fn bounding_box(&self, time0: Float, time1: Float) -> Option<AABB>;
 }
 
-/// Reference counted geometric object.
-pub type RcHittable = Rc<dyn Hittable>;
+/// Atomic reference counted `Hittable` object.
+pub type ArcHittable = Arc<dyn Hittable>;
 
 /// Calculate 2-D `(u, v)` coordinates of a point on a unit sphere with center
 /// `(0, 0, 0)`.

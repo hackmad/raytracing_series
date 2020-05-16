@@ -3,9 +3,9 @@
 //! A library for handling ray intersections with axis aligned rectangle in
 //! the yz-plane.
 
-use super::{Float, HitRecord, Hittable, Point3, Ray, RcHittable, RcMaterial, Vec3, AABB};
+use super::{ArcHittable, ArcMaterial, Float, HitRecord, Hittable, Point3, Ray, Vec3, AABB};
 use std::fmt;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Models an axis-aligned rectangle in the yz-plane.
 #[derive(Debug, Clone)]
@@ -26,7 +26,7 @@ pub struct YZrect {
     x: Float,
 
     /// Surface material.
-    material: RcMaterial,
+    material: ArcMaterial,
 }
 
 impl fmt::Display for YZrect {
@@ -54,15 +54,15 @@ impl YZrect {
         z0: Float,
         z1: Float,
         x: Float,
-        material: RcMaterial,
-    ) -> RcHittable {
-        Rc::new(YZrect {
+        material: ArcMaterial,
+    ) -> ArcHittable {
+        Arc::new(YZrect {
             y0,
             y1,
             z0,
             z1,
             x,
-            material: Rc::clone(&material),
+            material: Arc::clone(&material),
         })
     }
 }
@@ -90,7 +90,7 @@ impl Hittable for YZrect {
             t,
             ray.at(t),
             Vec3::new(1.0, 0.0, 0.0),
-            Rc::clone(&self.material),
+            Arc::clone(&self.material),
             (y - self.y0) / (self.y1 - self.y0),
             (z - self.z0) / (self.z1 - self.z0),
         ))

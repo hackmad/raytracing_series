@@ -3,14 +3,14 @@
 //! A library for handling ray intersections with a collection of
 //! geometric objects.
 
-use super::{Float, HitRecord, Hittable, Ray, RcHittable, AABB};
+use super::{ArcHittable, Float, HitRecord, Hittable, Ray, AABB};
 use std::fmt;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Models a collection of geometric objects that support ray intersections.
 #[derive(Debug, Clone)]
 pub struct HittableList {
-    objects: Vec<RcHittable>,
+    objects: Vec<ArcHittable>,
 }
 
 impl HittableList {
@@ -27,8 +27,8 @@ impl HittableList {
     }
 
     /// Add a new object to the list.
-    pub fn add(&mut self, object: RcHittable) {
-        self.objects.push(Rc::clone(&object));
+    pub fn add(&mut self, object: ArcHittable) {
+        self.objects.push(Arc::clone(&object));
     }
 }
 
@@ -63,7 +63,7 @@ impl Hittable for HittableList {
                         point,
                         normal,
                         front_face,
-                        material: Rc::clone(&material),
+                        material: Arc::clone(&material),
                         u,
                         v,
                     }),

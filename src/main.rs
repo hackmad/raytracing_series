@@ -21,7 +21,7 @@ use background::*;
 use common::*;
 use object::*;
 use scene::*;
-use std::rc::Rc;
+use std::sync::Arc;
 use std::time::Instant;
 
 /// Entry point for the recursive raytracer.
@@ -38,7 +38,7 @@ fn main() {
         config.image_width,
         config.image_height,
         config.bvh_enabled,
-        Rc::clone(&rng),
+        Arc::clone(&rng),
     );
 
     let image_width = config.image_width as Float;
@@ -92,7 +92,7 @@ fn main() {
 /// * `background` - The background.
 /// * `world` - The list of geometric objects.
 /// * `depth` - Maximum depth for recursion.
-fn ray_colour(ray: &Ray, background: BackgroundFn, world: &RcHittable, depth: u32) -> Colour {
+fn ray_colour(ray: &Ray, background: BackgroundFn, world: &ArcHittable, depth: u32) -> Colour {
     // Terminate the recursion if maximum depth is reached.
     if depth <= 0 {
         return Colour::zero();
@@ -107,7 +107,7 @@ fn ray_colour(ray: &Ray, background: BackgroundFn, world: &RcHittable, depth: u3
 
             // If material did not absorb the ray and scattered it, continue
             // tracing the new ray.
-            if let Some(sr) = Rc::clone(&rec.material).scatter(ray, &rec) {
+            if let Some(sr) = rec.material.scatter(ray, &rec) {
                 emission + ray_colour(&sr.scattered, background, world, depth - 1) * sr.attenuation
             } else {
                 emission

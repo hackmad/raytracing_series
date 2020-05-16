@@ -4,18 +4,18 @@
 //! 2 textures.
 
 #![allow(dead_code)]
-use super::{Colour, Float, Point3, RcTexture, Texture};
+use super::{ArcTexture, Colour, Float, Point3, Texture};
 use std::fmt;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Models a 3-dimension checkerboard pattern.
 #[derive(Debug, Clone)]
 pub struct Checker {
     /// Provides first colour for the checkerboard pattern.
-    odd: RcTexture,
+    odd: ArcTexture,
 
     /// Provides second colour for the checkerboard pattern.
-    even: RcTexture,
+    even: ArcTexture,
 
     /// Scale for the checker pattern.
     scale: Float,
@@ -26,10 +26,10 @@ impl Checker {
     ///
     /// * `t0` - Provides first colour for the checkerboard pattern.
     /// * `t1` - Provides second colour for the checkerboard pattern.
-    pub fn new(t0: RcTexture, t1: RcTexture) -> RcTexture {
-        Rc::new(Checker {
-            odd: Rc::clone(&t0),
-            even: Rc::clone(&t1),
+    pub fn new(t0: ArcTexture, t1: ArcTexture) -> ArcTexture {
+        Arc::new(Checker {
+            odd: Arc::clone(&t0),
+            even: Arc::clone(&t1),
             scale: 10.0,
         })
     }
@@ -38,8 +38,8 @@ impl Checker {
     /// * `t0` - Provides first colour for the checkerboard pattern.
     /// * `t1` - Provides second colour for the checkerboard pattern.
     /// * `s` - Scale factor.
-    pub fn scaled(t0: RcTexture, t1: RcTexture, s: Float) -> RcTexture {
-        Rc::new(Checker {
+    pub fn scaled(t0: ArcTexture, t1: ArcTexture, s: Float) -> ArcTexture {
+        Arc::new(Checker {
             odd: t0,
             even: t1,
             scale: s,

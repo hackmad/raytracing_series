@@ -2,21 +2,23 @@
 //!
 //! A library for handling reflective material.
 
-use super::{Float, HitRecord, Material, Ray, RcMaterial, RcRandomizer, RcTexture, ScatterResult};
+use super::{
+    ArcMaterial, ArcRandomizer, ArcTexture, Float, HitRecord, Material, Ray, ScatterResult,
+};
 use std::fmt;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Models a metal
 #[derive(Clone)]
 pub struct Metal {
     /// The diffuse colour provided by a texture.
-    albedo: RcTexture,
+    albedo: ArcTexture,
 
     /// Fuzziness factor used for blurred reflections.
     fuzz: Float,
 
     /// Random number generator.
-    rng: RcRandomizer,
+    rng: ArcRandomizer,
 }
 
 impl Metal {
@@ -25,11 +27,11 @@ impl Metal {
     /// * `albedo` - The diffuse colour provided by a texture.
     /// * `fuzz` - The fuzziness factor for blurred reflections.
     /// * `rng` - Random number generator.
-    pub fn new(albedo: RcTexture, fuzz: Float, rng: RcRandomizer) -> RcMaterial {
-        Rc::new(Metal {
-            albedo: Rc::clone(&albedo),
+    pub fn new(albedo: ArcTexture, fuzz: Float, rng: ArcRandomizer) -> ArcMaterial {
+        Arc::new(Metal {
+            albedo: Arc::clone(&albedo),
             fuzz,
-            rng: Rc::clone(&rng),
+            rng: Arc::clone(&rng),
         })
     }
 }
@@ -62,12 +64,12 @@ impl Material for Metal {
     fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterResult> {
         let reflected = ray_in.direction.unit_vector().reflect(rec.normal);
 
-        let scatter_direction = reflected + Rc::clone(&self.rng).in_unit_sphere() * self.fuzz;
+        let scatter_direction = reflected + self.rng.in_unit_sphere() * self.fuzz;
 
         if scatter_direction.dot(rec.normal) > 0.0 {
             Some(ScatterResult {
                 scattered: Ray::new(rec.point, scatter_direction, ray_in.time),
-                attenuation: Rc::clone(&self.albedo).value(rec.u, rec.v, &rec.point),
+                attenuation: self.albedo.value(rec.u, rec.v, &rec.point),
             })
         } else {
             None

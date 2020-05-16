@@ -2,9 +2,9 @@
 //!
 //! A library for handling surface intersection details.
 
-use super::{Float, Point3, Ray, RcMaterial, Vec3};
+use super::{ArcMaterial, Float, Point3, Ray, Vec3};
 use std::fmt;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Models information at surface intersections.
 #[derive(Debug, Clone)]
@@ -22,7 +22,7 @@ pub struct HitRecord {
     pub front_face: bool,
 
     /// The surface material.
-    pub material: RcMaterial,
+    pub material: ArcMaterial,
 
     /// The 2-D parametric u-coordinate of the surface.
     pub u: Float,
@@ -46,7 +46,7 @@ impl HitRecord {
         t: Float,
         point: Point3,
         outward_normal: Vec3,
-        material: RcMaterial,
+        material: ArcMaterial,
         u: Float,
         v: Float,
     ) -> HitRecord {
@@ -63,7 +63,7 @@ impl HitRecord {
             point,
             front_face,
             normal,
-            material: Rc::clone(&material),
+            material: Arc::clone(&material),
             u,
             v,
         }
@@ -76,7 +76,7 @@ impl HitRecord {
             point: p,
             front_face: self.front_face,
             normal: self.normal,
-            material: Rc::clone(&self.material),
+            material: Arc::clone(&self.material),
             u: self.u,
             v: self.v,
         }
@@ -97,7 +97,7 @@ impl HitRecord {
             point: self.point,
             front_face,
             normal,
-            material: Rc::clone(&self.material),
+            material: Arc::clone(&self.material),
             u: self.u,
             v: self.v,
         }

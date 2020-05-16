@@ -3,10 +3,10 @@
 //! A library for handling ray intersections with a sphere
 
 use super::{
-    get_sphere_uv, Float, HitRecord, Hittable, Point3, Ray, RcHittable, RcMaterial, Vec3, AABB,
+    get_sphere_uv, ArcHittable, ArcMaterial, Float, HitRecord, Hittable, Point3, Ray, Vec3, AABB,
 };
 use std::fmt;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Models a sphere.
 #[derive(Debug, Clone)]
@@ -18,7 +18,7 @@ pub struct Sphere {
     radius: Float,
 
     /// Surface material.
-    material: RcMaterial,
+    material: ArcMaterial,
 }
 
 impl fmt::Display for Sphere {
@@ -37,11 +37,11 @@ impl Sphere {
     /// * `center` - Center.
     /// * `radius` - Radius.
     /// * `material` - Surface material.
-    pub fn new(center: Vec3, radius: Float, material: RcMaterial) -> RcHittable {
-        Rc::new(Sphere {
+    pub fn new(center: Vec3, radius: Float, material: ArcMaterial) -> ArcHittable {
+        Arc::new(Sphere {
             center,
             radius,
-            material: Rc::clone(&material),
+            material: Arc::clone(&material),
         })
     }
 
@@ -63,7 +63,7 @@ impl Sphere {
             t,
             point,
             outward_normal,
-            Rc::clone(&self.material),
+            Arc::clone(&self.material),
             u,
             v,
         )

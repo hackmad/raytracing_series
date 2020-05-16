@@ -2,34 +2,33 @@
 //!
 //! A library for generating random numbers.
 
-use super::{Float, Randomizer, RcRandomizer, Vec3, PI};
+use super::{ArcRandomizer, Float, Randomizer, Vec3, PI};
 use rand::{thread_rng, Rng, RngCore, SeedableRng};
 use rand_chacha::ChaCha20Rng;
-use std::cell::RefCell;
 use std::fmt;
-use std::rc::Rc;
+use std::sync::Arc;
+use std::sync::Mutex;
 
 /// Random number generator.
-#[derive(Clone)]
 pub struct Random<T: RngCore> {
     /// The random number generator.
-    rng: RefCell<T>,
+    rng: Mutex<T>,
 }
 
 /// Create a new thread local random number generator.
-pub fn new_thread_rng() -> RcRandomizer {
-    Rc::new(Random {
-        rng: RefCell::new(thread_rng()),
+pub fn new_thread_rng() -> ArcRandomizer {
+    Arc::new(Random {
+        rng: Mutex::new(thread_rng()),
     })
 }
 
 /// Create a new seeded random number generator.
 ///
 /// * `seed`: Seed.
-pub fn new_seeded_rng(seed: u64) -> RcRandomizer {
+pub fn new_seeded_rng(seed: u64) -> ArcRandomizer {
     let rng: ChaCha20Rng = SeedableRng::seed_from_u64(seed);
-    Rc::new(Random {
-        rng: RefCell::new(rng),
+    Arc::new(Random {
+        rng: Mutex::new(rng),
     })
 }
 
@@ -37,7 +36,7 @@ impl<T> fmt::Debug for Random<T>
 where
     T: RngCore,
 {
-    /// This is here to squash complaints from using RcRandomizer in Hittable
+    /// This is here to squash complaints from using ArcRandomizer in Hittable
     /// because of Debug requirements.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("Random").finish()
@@ -50,7 +49,7 @@ where
 {
     /// Returns a random floating point value in [0, 1].
     fn float(&self) -> Float {
-        self.rng.borrow_mut().gen::<Float>()
+        self.rng.lock().unwrap().gen::<Float>()
     }
 
     /// Returns a random floating point values in [`min`, `max`].
@@ -58,7 +57,7 @@ where
     /// * `min` - Minimum bound
     /// * `max` - Maximum bound
     fn float_in_range(&self, min: Float, max: Float) -> Float {
-        self.rng.borrow_mut().gen_range(min, max)
+        self.rng.lock().unwrap().gen_range(min, max)
     }
 
     /// Returns a random usize value in [`min`, `max`].
@@ -66,7 +65,7 @@ where
     /// * `min` - Minimum bound
     /// * `max` - Maximum bound
     fn usize_in_range(&self, min: usize, max: usize) -> usize {
-        self.rng.borrow_mut().gen_range(min, max)
+        self.rng.lock().unwrap().gen_range(min, max)
     }
 
     /// Returns a random u8 value in [`min`, `max`].
@@ -74,7 +73,7 @@ where
     /// * `min` - Minimum bound
     /// * `max` - Maximum bound
     fn u8_in_range(&self, min: u8, max: u8) -> u8 {
-        self.rng.borrow_mut().gen_range(min, max)
+        self.rng.lock().unwrap().gen_range(min, max)
     }
 
     /// Returns a random u16 value in [`min`, `max`].
@@ -82,7 +81,7 @@ where
     /// * `min` - Minimum bound
     /// * `max` - Maximum bound
     fn u16_in_range(&self, min: u16, max: u16) -> u16 {
-        self.rng.borrow_mut().gen_range(min, max)
+        self.rng.lock().unwrap().gen_range(min, max)
     }
 
     /// Returns a random u32 value in [`min`, `max`].
@@ -90,7 +89,7 @@ where
     /// * `min` - Minimum bound
     /// * `max` - Maximum bound
     fn u32_in_range(&self, min: u32, max: u32) -> u32 {
-        self.rng.borrow_mut().gen_range(min, max)
+        self.rng.lock().unwrap().gen_range(min, max)
     }
 
     /// Returns a random u64 value in [`min`, `max`].
@@ -98,7 +97,7 @@ where
     /// * `min` - Minimum bound
     /// * `max` - Maximum bound
     fn u64_in_range(&self, min: u64, max: u64) -> u64 {
-        self.rng.borrow_mut().gen_range(min, max)
+        self.rng.lock().unwrap().gen_range(min, max)
     }
 
     /// Returns a random vector with random components in [0, 1].

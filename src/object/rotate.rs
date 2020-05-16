@@ -2,15 +2,15 @@
 //!
 //! A library for handling ray intersections with rotated objects.
 
-use super::{Axis, Float, HitRecord, Hittable, Point3, Ray, RcHittable, Vec3, AABB, INFINITY};
+use super::{ArcHittable, Axis, Float, HitRecord, Hittable, Point3, Ray, Vec3, AABB, INFINITY};
 use std::fmt;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Models a rotated object.
 #[derive(Debug, Clone)]
 pub struct Rotate {
     /// Holds a `Hittable`.
-    object: RcHittable,
+    object: ArcHittable,
 
     /// Axis of rotation.
     axis: Axis,
@@ -41,13 +41,13 @@ impl Rotate {
     /// * `object`: Holds a `Hittable`.
     /// * `axis`: Axis of rotation.
     /// * `degrees: Float` - Rotation angle.
-    pub fn new(object: RcHittable, axis: Axis, degrees: Float) -> RcHittable {
+    pub fn new(object: ArcHittable, axis: Axis, degrees: Float) -> ArcHittable {
         let radians = degrees.to_radians();
 
         let sin_theta = radians.sin();
         let cos_theta = radians.cos();
 
-        let bbox = Rc::clone(&object)
+        let bbox = object
             .bounding_box(0.0, 1.0) // Motion is not supported. So (0.0, 1.0) ok.
             .expect("Missing bounding box for rotated object");
 
@@ -75,8 +75,8 @@ impl Rotate {
             }
         }
 
-        Rc::new(Rotate {
-            object: Rc::clone(&object),
+        Arc::new(Rotate {
+            object: Arc::clone(&object),
             axis,
             sin_theta,
             cos_theta,
@@ -102,7 +102,7 @@ impl Hittable for Rotate {
 
         let rotated_r = Ray::new(Point3::new(ox, oy, oz), Point3::new(dx, dy, dz), ray.time);
 
-        if let Some(rec) = Rc::clone(&self.object).hit(&rotated_r, t_min, t_max) {
+        if let Some(rec) = self.object.hit(&rotated_r, t_min, t_max) {
             let px = self.cos_theta * rec.point[0] + self.sin_theta * rec.point[2];
             let py = rec.point[1];
             let pz = -self.sin_theta * rec.point[0] + self.cos_theta * rec.point[2];

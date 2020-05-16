@@ -9,9 +9,9 @@ mod perlin;
 mod solid_colour;
 
 use super::algebra::{Axis, Colour, Point3, Vec3};
-use super::common::{clamp, Float, RcRandomizer};
+use super::common::{clamp, ArcRandomizer, Float};
 use std::fmt;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Models a solid colour as a texture.
 pub use self::solid_colour::SolidColour;
@@ -38,5 +38,5 @@ pub trait Texture: fmt::Display + fmt::Debug {
     fn value(&self, u: Float, v: Float, p: &Point3) -> Colour;
 }
 
-/// Reference counted material.
-pub type RcTexture = Rc<dyn Texture>;
+/// Atomic reference counted `Texture`.
+pub type ArcTexture = Arc<dyn Texture>;

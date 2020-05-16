@@ -3,9 +3,8 @@
 //! A library for the 3-dimensional perlin noise texture
 
 #![allow(dead_code)]
-use super::{Float, Point3, RcRandomizer, Vec3};
+use super::{ArcRandomizer, Float, Point3, Vec3};
 use std::fmt;
-use std::rc::Rc;
 
 /// Perlin noise generator.
 #[derive(Clone)]
@@ -21,9 +20,6 @@ pub struct Perlin {
 
     /// Permutation for z-dimension.
     perm_z: Vec<usize>,
-
-    /// Random number generator.
-    rng: RcRandomizer,
 }
 
 impl Perlin {
@@ -31,21 +27,20 @@ impl Perlin {
     ///
     /// * `size` - Grid size.
     /// * `rng` - Random number generator.
-    pub fn new(size: usize, rng: RcRandomizer) -> Perlin {
+    pub fn new(size: usize, rng: ArcRandomizer) -> Perlin {
         let random: Vec<Vec3> = (0..size)
-            .map(|_i| Rc::clone(&rng).vec3_in_range(-1.0, 1.0).unit_vector())
+            .map(|_i| rng.vec3_in_range(-1.0, 1.0).unit_vector())
             .collect();
 
-        let perm_x = perlin_generate_perm(size, Rc::clone(&rng));
-        let perm_y = perlin_generate_perm(size, Rc::clone(&rng));
-        let perm_z = perlin_generate_perm(size, Rc::clone(&rng));
+        let perm_x = perlin_generate_perm(size, &rng);
+        let perm_y = perlin_generate_perm(size, &rng);
+        let perm_z = perlin_generate_perm(size, &rng);
 
         Perlin {
             random,
             perm_x,
             perm_y,
             perm_z,
-            rng: Rc::clone(&rng),
         }
     }
 
@@ -102,7 +97,7 @@ impl Perlin {
 /// Generate a random permuation.
 ///
 /// * `n` - Number of points.
-fn perlin_generate_perm(n: usize, rng: RcRandomizer) -> Vec<usize> {
+fn perlin_generate_perm(n: usize, rng: &ArcRandomizer) -> Vec<usize> {
     let mut p: Vec<usize> = (0..n).map(|x| x).collect();
     permute(&mut p, rng);
     p
@@ -111,7 +106,7 @@ fn perlin_generate_perm(n: usize, rng: RcRandomizer) -> Vec<usize> {
 /// Shuffle a vector in place.
 ///
 /// * `v` - Vector to shuffle.
-fn permute(v: &mut Vec<usize>, rng: RcRandomizer) {
+fn permute(v: &mut Vec<usize>, rng: &ArcRandomizer) {
     for i in (1..v.len()).rev() {
         let target = rng.usize_in_range(0, i);
 

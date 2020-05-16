@@ -2,9 +2,9 @@
 //!
 //! A library for handling solid colour as a texture.
 
-use super::{Colour, Float, Point3, RcTexture, Texture};
+use super::{ArcTexture, Colour, Float, Point3, Texture};
 use std::fmt;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Models a solid colour as a texture.
 #[derive(Debug, Clone)]
@@ -17,8 +17,8 @@ impl SolidColour {
     /// Creates a new solid texture from a `Colour` value.
     ///
     /// * `colour` - The colour.
-    pub fn new(colour: Colour) -> RcTexture {
-        Rc::new(SolidColour {
+    pub fn new(colour: Colour) -> ArcTexture {
+        Arc::new(SolidColour {
             colour_value: colour,
         })
     }
@@ -26,8 +26,8 @@ impl SolidColour {
     /// Creates a new solid texture from RGB colour values.
     ///
     /// * `colour` - The colour.
-    pub fn from_rgb(r: Float, g: Float, b: Float) -> RcTexture {
-        Rc::new(SolidColour {
+    pub fn from_rgb(r: Float, g: Float, b: Float) -> ArcTexture {
+        Arc::new(SolidColour {
             colour_value: Colour::new(r, g, b),
         })
     }

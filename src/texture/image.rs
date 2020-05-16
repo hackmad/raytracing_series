@@ -3,11 +3,10 @@
 //! A library for handling image textures.
 
 #![allow(dead_code)]
-use super::{clamp, Colour, Float, Point3, RcTexture, Texture};
+use super::{clamp, ArcTexture, Colour, Float, Point3, Texture};
 use image::{Rgb, RgbImage};
-use std::cell::RefCell;
 use std::fmt;
-use std::rc::Rc;
+use std::sync::{Arc, RwLock};
 
 /// Models an image texture
 #[derive(Clone)]
@@ -19,7 +18,7 @@ pub struct Image {
     height: u32,
 
     /// The image
-    img: Rc<RefCell<RgbImage>>,
+    img: Arc<RwLock<RgbImage>>,
 }
 
 impl Image {
@@ -27,7 +26,7 @@ impl Image {
     ///
     /// * `t0` - Provides first colour for the imageboard pattern.
     /// * `t1` - Provides second colour for the imageboard pattern.
-    pub fn new(path: &str) -> RcTexture {
+    pub fn new(path: &str) -> ArcTexture {
         // Read image and convert to RGB.
         let img = image::open(path)
             .expect(format!("Unable to open {}", path).as_ref())
@@ -38,9 +37,9 @@ impl Image {
         let width = img.width();
         let height = img.height();
 
-        let img = Rc::new(RefCell::new(img));
+        let img = Arc::new(RwLock::new(img));
 
-        Rc::new(Image { img, width, height })
+        Arc::new(Image { img, width, height })
     }
 }
 
@@ -86,7 +85,7 @@ impl Texture for Image {
             j = self.height - 1;
         }
 
-        let img = self.img.borrow();
+        let img = self.img.read().unwrap();
         let Rgb(p) = img.get_pixel(i, j);
 
         Colour::new(p[0] as Float, p[1] as Float, p[2] as Float) * COLOUR_SCALE

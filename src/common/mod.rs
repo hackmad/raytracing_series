@@ -6,7 +6,7 @@ mod random;
 
 use super::algebra::Vec3;
 use std::fmt;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Use f64 since it provides the wider range of math operations.
 pub type Float = f64;
@@ -94,8 +94,8 @@ pub trait Randomizer: fmt::Debug {
     fn in_unit_disk(&self) -> Vec3;
 }
 
-// Reference counted `Randomizer`.
-pub type RcRandomizer = Rc<dyn Randomizer>;
+// Atomic reference counted `Randomizer`.
+pub type ArcRandomizer = Arc<dyn Randomizer>;
 
 /// Clamp the given value.clamp
 ///

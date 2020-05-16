@@ -2,19 +2,19 @@
 //!
 //! A library for bounding volume hierarchy.
 
-use super::{Axis, Float, HitRecord, Hittable, Ray, RcHittable, RcRandomizer, AABB};
+use super::{ArcHittable, ArcRandomizer, Axis, Float, HitRecord, Hittable, Ray, AABB};
 use std::fmt;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Models a node in a bounding volume hierarchy.
 pub struct BVH {
     /// Left child. Leaf nodes would be any Hittable other than a BVH node.
-    left: RcHittable,
+    left: ArcHittable,
 
     /// Right child. Leaf nodes would be any Hittable other than a BVH node.
-    right: RcHittable,
+    right: ArcHittable,
 
-    /// Indicates `left` == `right`. This helps avoid using `Option<RcHittable>`
+    /// Indicates `left` == `right`. This helps avoid using `Option<ArcHittable>`
     /// for `left` and `right` and simplify the `split()` function.
     leaf: bool,
 
@@ -34,12 +34,12 @@ impl BVH {
     /// * `time1` - End time of motion.
     /// * `rng` - Random number generator.
     pub fn new(
-        objects: &mut Vec<RcHittable>,
+        objects: &mut Vec<ArcHittable>,
         time0: Float,
         time1: Float,
-        rng: RcRandomizer,
-    ) -> RcHittable {
-        split(objects, 0, objects.len(), time0, time1, Rc::clone(&rng))
+        rng: &ArcRandomizer,
+    ) -> ArcHittable {
+        split(objects, 0, objects.len(), time0, time1, rng)
     }
 }
 
@@ -115,17 +115,21 @@ impl Hittable for BVH {
 /// * `time1` - End time of motion.
 /// * `rng` - Random number generator.
 fn split(
-    objects: &mut Vec<RcHittable>,
+    objects: &mut Vec<ArcHittable>,
     start: usize,
     n: usize,
     time0: Float,
     time1: Float,
-    rng: RcRandomizer,
-) -> RcHittable {
+    rng: &ArcRandomizer,
+) -> ArcHittable {
     let axis = rng.clone().float_in_range(0.0, 2.0).round() as Axis;
 
     let (left, right, leaf) = if n == 1 {
-        (Rc::clone(&objects[start]), Rc::clone(&objects[start]), true)
+        (
+            Arc::clone(&objects[start]),
+            Arc::clone(&objects[start]),
+            true,
+        )
     } else {
         let end = start + n - 1;
         let slice = &mut objects[start..=end];
@@ -153,8 +157,8 @@ fn split(
 
         if n == 2 {
             (
-                Rc::clone(&objects[start]),
-                Rc::clone(&objects[start + 1]),
+                Arc::clone(&objects[start]),
+                Arc::clone(&objects[start + 1]),
                 false,
             )
         } else {
@@ -162,8 +166,8 @@ fn split(
             let even = n % 2 == 0;
             let half2 = if even { half } else { half + 1 };
 
-            let l = split(objects, start, half, time0, time1, Rc::clone(&rng));
-            let r = split(objects, start + half, half2, time0, time1, Rc::clone(&rng));
+            let l = split(objects, start, half, time0, time1, rng);
+            let r = split(objects, start + half, half2, time0, time1, rng);
             (l, r, false)
         }
     };
@@ -182,7 +186,7 @@ fn split(
         }
     };
 
-    Rc::new(BVH {
+    Arc::new(BVH {
         left,
         right,
         bbox,

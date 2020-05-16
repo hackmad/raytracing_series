@@ -4,26 +4,26 @@
 //! effects like smoke and fog.
 
 use super::{
-    Float, HitRecord, Hittable, Isotropic, Ray, RcHittable, RcMaterial, RcRandomizer, RcTexture,
-    Vec3, AABB, INFINITY,
+    ArcHittable, ArcMaterial, ArcRandomizer, ArcTexture, Float, HitRecord, Hittable, Isotropic,
+    Ray, Vec3, AABB, INFINITY,
 };
 use std::fmt;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Models a constant medium for effects like smoke and fog.
 #[derive(Debug, Clone)]
 pub struct ConstantMedium {
     /// Boundary
-    boundary: RcHittable,
+    boundary: ArcHittable,
 
     /// -1/ρ where ρ is the density.
     neg_inv_density: Float,
 
     /// Phase function (this will be an isotropic material).
-    phase_function: RcMaterial,
+    phase_function: ArcMaterial,
 
     /// Random number generator
-    rng: RcRandomizer,
+    rng: ArcRandomizer,
 }
 
 impl fmt::Display for ConstantMedium {
@@ -44,16 +44,16 @@ impl ConstantMedium {
     /// * `density` - Density of medium.
     /// * `albedo` - Provides diffuse colour.
     pub fn new(
-        boundary: RcHittable,
+        boundary: ArcHittable,
         density: Float,
-        albedo: RcTexture,
-        rng: RcRandomizer,
-    ) -> RcHittable {
-        Rc::new(ConstantMedium {
+        albedo: ArcTexture,
+        rng: ArcRandomizer,
+    ) -> ArcHittable {
+        Arc::new(ConstantMedium {
             boundary,
             neg_inv_density: -1.0 / density,
-            phase_function: Isotropic::new(albedo, Rc::clone(&rng)),
-            rng: Rc::clone(&rng),
+            phase_function: Isotropic::new(albedo, Arc::clone(&rng)),
+            rng: Arc::clone(&rng),
         })
     }
 }
@@ -67,15 +67,15 @@ impl Hittable for ConstantMedium {
     fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord> {
         // Print occasional samples when debugging. To enable, set enable_debug true.
         let enable_debug = false;
-        let debugging = enable_debug && Rc::clone(&self.rng).float() < 0.00001;
+        let debugging = enable_debug && self.rng.float() < 0.00001;
 
-        let mut t0 = if let Some(rec1) = Rc::clone(&self.boundary).hit(ray, -INFINITY, INFINITY) {
+        let mut t0 = if let Some(rec1) = self.boundary.hit(ray, -INFINITY, INFINITY) {
             rec1.t
         } else {
             return None;
         };
 
-        let mut t1 = if let Some(rec2) = Rc::clone(&self.boundary).hit(ray, t0 + 0.0001, INFINITY) {
+        let mut t1 = if let Some(rec2) = self.boundary.hit(ray, t0 + 0.0001, INFINITY) {
             rec2.t
         } else {
             return None;
@@ -102,7 +102,7 @@ impl Hittable for ConstantMedium {
 
         let ray_length = ray.direction.length();
         let distance_inside_boundary = (t1 - t0) * ray_length;
-        let hit_distance = self.neg_inv_density * Rc::clone(&self.rng).float().ln();
+        let hit_distance = self.neg_inv_density * self.rng.float().ln();
 
         if hit_distance > distance_inside_boundary {
             return None;
@@ -115,7 +115,7 @@ impl Hittable for ConstantMedium {
             t,
             ray.at(t),
             Vec3::new(1.0, 0.0, 0.0), // arbitrary normal
-            Rc::clone(&self.phase_function),
+            Arc::clone(&self.phase_function),
             0.0, // arbitrary
             1.0, // arbitrary
         );

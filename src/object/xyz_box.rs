@@ -3,11 +3,11 @@
 //! A library for handling ray intersections with an axis aligned box.
 
 use super::{
-    Float, HitRecord, Hittable, HittableList, Point3, Ray, RcHittable, RcMaterial, XYrect, XZrect,
-    YZrect, AABB,
+    ArcHittable, ArcMaterial, Float, HitRecord, Hittable, HittableList, Point3, Ray, XYrect,
+    XZrect, YZrect, AABB,
 };
 use std::fmt;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Models an axis-aligned box.
 /// **NOTE:** XYZbox is used to avoid conflict with Rust's `Box`.
@@ -20,7 +20,7 @@ pub struct XYZbox {
     box_max: Point3,
 
     /// Holds a `HittableList` containing the 6 axis aligned planes.
-    sides: RcHittable,
+    sides: ArcHittable,
 }
 
 impl fmt::Display for XYZbox {
@@ -39,7 +39,7 @@ impl XYZbox {
     /// * `p0` - Holds minimum (x0, y0, z0) coordinates.
     /// * `p1` - Holds maximum (x1, y1, z1) coordinates.
     /// * `material` - Surface material.
-    pub fn new(p0: Point3, p1: Point3, material: RcMaterial) -> RcHittable {
+    pub fn new(p0: Point3, p1: Point3, material: ArcMaterial) -> ArcHittable {
         let mut sides = HittableList::new();
 
         sides.add(XYrect::new(
@@ -48,7 +48,7 @@ impl XYZbox {
             p0.y(),
             p1.y(),
             p1.z(),
-            Rc::clone(&material),
+            Arc::clone(&material),
         ));
         sides.add(XYrect::new(
             p0.x(),
@@ -56,7 +56,7 @@ impl XYZbox {
             p0.y(),
             p1.y(),
             p0.z(),
-            Rc::clone(&material),
+            Arc::clone(&material),
         ));
 
         sides.add(XZrect::new(
@@ -65,7 +65,7 @@ impl XYZbox {
             p0.z(),
             p1.z(),
             p1.y(),
-            Rc::clone(&material),
+            Arc::clone(&material),
         ));
         sides.add(XZrect::new(
             p0.x(),
@@ -73,7 +73,7 @@ impl XYZbox {
             p0.z(),
             p1.z(),
             p0.y(),
-            Rc::clone(&material),
+            Arc::clone(&material),
         ));
 
         sides.add(YZrect::new(
@@ -82,7 +82,7 @@ impl XYZbox {
             p0.z(),
             p1.z(),
             p1.x(),
-            Rc::clone(&material),
+            Arc::clone(&material),
         ));
         sides.add(YZrect::new(
             p0.y(),
@@ -90,13 +90,13 @@ impl XYZbox {
             p0.z(),
             p1.z(),
             p0.x(),
-            Rc::clone(&material),
+            Arc::clone(&material),
         ));
 
-        Rc::new(XYZbox {
+        Arc::new(XYZbox {
             box_min: p0,
             box_max: p1,
-            sides: Rc::new(sides),
+            sides: Arc::new(sides),
         })
     }
 }

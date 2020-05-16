@@ -5,9 +5,9 @@
 
 #![allow(dead_code)]
 use super::algebra::{Point3, Ray, Vec3};
-use super::common::{Float, RcRandomizer};
+use super::common::{ArcRandomizer, Float};
 use std::fmt;
-use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct Camera {
@@ -42,7 +42,7 @@ pub struct Camera {
     time1: Float,
 
     /// Random number generator
-    rng: RcRandomizer,
+    rng: ArcRandomizer,
 }
 
 impl fmt::Display for Camera {
@@ -106,7 +106,7 @@ impl Camera {
         focus_dist: Float,
         time0: Float,
         time1: Float,
-        rng: RcRandomizer,
+        rng: ArcRandomizer,
     ) -> Camera {
         let theta = vfov.to_radians();
         let half_height = (theta / 2.0).tan();
@@ -130,7 +130,7 @@ impl Camera {
             w,
             time0,
             time1,
-            rng: Rc::clone(&rng),
+            rng: Arc::clone(&rng),
         }
     }
 
@@ -141,9 +141,9 @@ impl Camera {
     /// * `s`: Horizontal parameter.
     /// * `t`: Vertical parameter.
     pub fn get_ray(&self, s: Float, t: Float) -> Ray {
-        let rd = self.rng.clone().in_unit_disk() * self.lens_radius;
+        let rd = self.rng.in_unit_disk() * self.lens_radius;
         let offset = self.u * rd.x() + self.v * rd.y();
-        let time = self.rng.clone().float_in_range(self.time0, self.time1);
+        let time = self.rng.float_in_range(self.time0, self.time1);
 
         Ray::new(
             self.origin + offset,
