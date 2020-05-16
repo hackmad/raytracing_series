@@ -95,14 +95,14 @@ sips -s format png image.ppm --out image.png
 
 ### Raytracing The Next Week
 
-| Title              | Image                                                     | Title                         | Image                                                  |
-| ------------------ | --------------------------------------------------------- | ----------------------------- | ------------------------------------------------------ |
-| Motion Blur        | <img src="./images/motion_blur.png" width="200" />        | Motion Blur w/ BVH            | <img src="./images/motion_blur_bvh.png" width="200" /> |
-| Final Image w/ BVH | <img src="./images/random_spheres_bvh.png" width="200" /> | Solid &amp; Checker Texture   | <img src="./images/checkered_floor.png" width="200" /> |
-| Checkered Spheres  | <img src="./images/checkered_spheres.png" width="200" />  | Perlin Noise Texture          | <img src="./images/perlin_spheres.png" width="200" />  |
-| Earth Texture      | <img src="./images/earth.png" width="200" />              | XY Rectangle &amp; Lights     | <img src="./images/simple_light.png" width="200" />    |
-| Empty Cornell Box  | <img src="./images/empty_cornell_box.png" width="200" />  | Standard Cornell Box          | <img src="./images/cornell_box.png" width="200" />     |
-| Smoke and Fog      | <img src="./images/smoke_and_fog.png" width="200" />      | Final Image (1k samples/pixel | <img src="./images/final_next_week.png" width="200" /> |
+| Title              | Image                                                     | Title                       | Image                                                  |
+| ------------------ | --------------------------------------------------------- | --------------------------- | ------------------------------------------------------ |
+| Motion Blur        | <img src="./images/motion_blur.png" width="200" />        | Motion Blur w/ BVH          | <img src="./images/motion_blur_bvh.png" width="200" /> |
+| Final Image w/ BVH | <img src="./images/random_spheres_bvh.png" width="200" /> | Solid &amp; Checker Texture | <img src="./images/checkered_floor.png" width="200" /> |
+| Checkered Spheres  | <img src="./images/checkered_spheres.png" width="200" />  | Perlin Noise Texture        | <img src="./images/perlin_spheres.png" width="200" />  |
+| Earth Texture      | <img src="./images/earth.png" width="200" />              | XY Rectangle &amp; Lights   | <img src="./images/simple_light.png" width="200" />    |
+| Empty Cornell Box  | <img src="./images/empty_cornell_box.png" width="200" />  | Standard Cornell Box        | <img src="./images/cornell_box.png" width="200" />     |
+| Smoke and Fog      | <img src="./images/smoke_and_fog.png" width="200" />      | Final Image                 | <img src="./images/final_next_week.png" width="200" /> |
 
 #### Timing Benchmarks
 
