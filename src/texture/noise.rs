@@ -11,10 +11,10 @@ use std::rc::Rc;
 #[derive(Debug, Clone)]
 pub struct Noise {
     /// Perlin noise generator.
-    perlin: Perlin,
+    perlin: Rc<Perlin>,
 
-    /// Frequency.
-    frequency: Float,
+    /// Scale.
+    scale: Float,
 
     /// Turbulence depth.
     turbulence_depth: usize,
@@ -29,23 +29,23 @@ pub struct Noise {
 impl Noise {
     /// Creates a new noise texture.
     ///
-    /// * `frequency` - Scale.
+    /// * `scale` - Scale.
     /// * `turbulence_depth` - Turbulence depth.
     /// * `turbulence_size` - Turbulence size.
-    /// * `size` - Grid size for Perlin noise.
+    /// * `grid_size` - Grid size for Perlin noise.
     /// * `axis` - Axis along which the marble grain aligns.
     /// * `rng` - Random number generator.
     pub fn new(
-        frequency: Float,
+        scale: Float,
         turbulence_depth: usize,
         turbulence_size: Float,
-        size: usize,
+        grid_size: usize,
         axis: Axis,
         rng: RcRandomizer,
     ) -> RcTexture {
         Rc::new(Noise {
-            perlin: Perlin::new(size, Rc::clone(&rng)),
-            frequency,
+            perlin: Rc::new(Perlin::new(grid_size, Rc::clone(&rng))),
+            scale,
             turbulence_depth,
             turbulence_size,
             axis,
@@ -67,9 +67,8 @@ impl Texture for Noise {
     /// * `v` - Paramteric coordinate.
     /// * `p` - Intersection point.
     fn value(&self, _u: Float, _v: Float, p: &Point3) -> Colour {
-        let turb = self.perlin.turbulence(p, self.turbulence_depth);
-        Colour::one()
-            * 0.5
-            * (1.0 + (self.frequency * p[self.axis] + self.turbulence_size * turb).sin())
+        let turb = self.turbulence_size * self.perlin.turbulence(p, self.turbulence_depth);
+        let scale = self.scale * p[self.axis];
+        Colour::one() * 0.5 * (1.0 + (scale + turb).sin())
     }
 }
