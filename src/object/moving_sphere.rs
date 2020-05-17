@@ -142,7 +142,9 @@ impl Hittable for MovingSphere {
     /// * `time0` - Start time of motion.
     /// * `time1` - End time of motion.
     fn bounding_box(&self, time0: Float, time1: Float) -> Option<AABB> {
-        let r = Vec3::new(self.radius, self.radius, self.radius);
+        // Negative radii used to create hollow bubbles with dielectric materials.
+        let r = self.radius.abs();
+        let r = Vec3::new(r, r, r);
         let box0 = AABB::new(self.center(time0) - r, self.center(time0) + r);
         let box1 = AABB::new(self.center(time1) - r, self.center(time1) + r);
         Some(AABB::surrounding_box(box0, box1))

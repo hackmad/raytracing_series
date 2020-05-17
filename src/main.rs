@@ -64,15 +64,9 @@ fn main() {
     let current_progress = Mutex::new(0.0);
     let start = Instant::now();
 
-    (0..config.image_height).into_par_iter().for_each(|j| {
-        // Update progress in its own scope so it doesn't lock for the entire
-        // scanline.
-        {
-            let mut data = current_progress.lock().unwrap();
-            *data += percent_step;
-            eprint!("Progress: {:>6.2}%\r", *data);
-        }
+    eprint!("Progress: 0.0%\r");
 
+    (0..config.image_height).into_par_iter().for_each(|j| {
         // Process an entire scanline in one thread.
         for i in 0..config.image_width {
             let rgb = trace_ray(i, j, &config, &scene, Arc::clone(&rng)).to_rgb();
@@ -81,10 +75,15 @@ fn main() {
                 .expect("Unable to lock image buffer")
                 .put_pixel(i, config.image_height - 1 - j, image::Rgb(rgb));
         }
+
+        // Update progress.
+        let mut data = current_progress.lock().unwrap();
+        *data += percent_step;
+        eprint!("                 \rProgress: {:>6.2}%", *data);
     });
 
     // Write the output file.
-    eprint!("Writing output file\r");
+    eprint!("                 \rWriting output file...");
     imgbuf
         .lock()
         .expect("Unbale to lock image buffer for writing")
@@ -92,6 +91,7 @@ fn main() {
         .expect("Error writing output file");
 
     // Display stats.
+    eprint!("                      \r");
     let seconds = start.elapsed().as_secs_f32();
     if seconds < 60.0 {
         eprintln!("Done: {:.2} seconds", seconds);

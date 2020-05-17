@@ -56,11 +56,12 @@ impl XZrect {
         y: Float,
         material: ArcMaterial,
     ) -> ArcHittable {
+        // Guard against mixed up min/max values.
         Arc::new(XZrect {
-            x0,
-            x1,
-            z0,
-            z1,
+            x0: x0.min(x1),
+            x1: x0.max(x1),
+            z0: z0.min(z1),
+            z1: z0.max(z1),
             y,
             material: Arc::clone(&material),
         })
