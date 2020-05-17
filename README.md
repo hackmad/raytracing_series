@@ -23,39 +23,39 @@ cargo build --release
 Build and run with default settings:
 
 ```bash
-cargo run > image.ppm
+cargo run -o image.png
 ```
 
 ```bash
-cargo run --release > image.ppm
+cargo run --release -o image.png
 ```
 
 Run compiled versions with default settings:
 
 ```bash
-./target/debug/raytracing_series > image.ppm
+./target/debug/raytracing_series -o image.png
 ```
 
 ```bash
-./target/release/raytracing_series > image.ppm
+./target/release/raytracing_series -o image.png
 ```
 
 Run with program arguments:
 
 ```bash
-cargo run -- --scene metal -w 1200 -h 600 > image.ppm
+cargo run -- --scene metal -w 1200 -h 600 -o image.png
 ```
 
 ```bash
-cargo run --release -- --scene metal -w 1200 -h 600 > image.ppm
+cargo run --release -- --scene metal -w 1200 -h 600 -o image.png
 ```
 
 ```bash
-./target/debug/raytracing_series --scene metal -w 1200 -h 600 > image.ppm
+./target/debug/raytracing_series --scene metal -w 1200 -h 600 -o image.png
 ```
 
 ```bash
-./target/release/raytracing_series --scene metal -w 1200 -h 600 > image.ppm
+./target/release/raytracing_series --scene metal -w 1200 -h 600 -o image.png
 ```
 
 Get help on program arguments:
@@ -74,14 +74,6 @@ cargo run --release -- --help
 
 ```bash
 ./target/release/raytracing_series --help
-```
-
-## Images
-
-Convert ppm to png using `sips`:
-
-```bash
-sips -s format png image.ppm --out image.png
 ```
 
 ### Raytracing in One Weekend
@@ -106,38 +98,46 @@ sips -s format png image.ppm --out image.png
 
 #### Timing Benchmarks
 
+##### Single-threaded
+
 Without Bounding Volume Hierarchy:
 
 ```bash
 target/release/raytracing_series --scene random_spheres -w 1200 -h 600 \
-    --seed 8589869056 > random_spheres.ppm
+    --seed 8589869056 -t 1 -o random_spheres.png
 
-HittableList: 0.000042243 seconds
-Done: 1960.7145 seconds
-```
-
-```bash
-target/release/raytracing_series --scene motion_blur -w 1200 -h 600 \
-    --seed 8589869056 > motion_blur.ppm
-
-HittableList: 0.000036335 seconds
-Done: 2201.2559 seconds
+HittableList: 0.000061101 seconds
+Done: 28.45 minutes
 ```
 
 With Bounding Volume Hierarchy:
 
 ```bash
 target/release/raytracing_series --scene random_spheres --bvh -w 1200 -h 600 \
-    --seed 8589869056 > random_spheres_bvh.ppm
+    --seed 8589869056 -t 1 -o random_spheres_bvh.png
 
-BVH: 0.000402492 seconds
-Done: 824.07605 seconds
+BVH: 0.000398774 seconds
+Done: 9.33 minutese
 ```
+
+##### Multi-threaded
+
+Without Bounding Volume Hierarchy:
+
+````bash
+target/release/raytracing_series --scene random_spheres -w 1200 -h 600 \
+    --seed 8589869056 -t 4 -o random_spheres.png
+
+HittableList: 0.000035394 seconds
+Done: 10.89 minutes
+
+With Bounding Volume Hierarchy:
 
 ```bash
-target/release/raytracing_series --scene motion_blur --bvh -w 1200 -h 600 \
-    --seed 8589869056 > motion_blur_bvh.ppm
+target/release/raytracing_series --scene random_spheres --bvh -w 1200 -h 600 \
+    --seed 8589869056 -t 4 -o random_spheres_bvh.png
 
-BVH: 0.000610622 seconds
-Done: 913.7702 seconds
-```
+BVH: 0.000471452 seconds
+Done: 5.14 minutese
+````
+

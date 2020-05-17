@@ -3,7 +3,7 @@
 //! A library for generating random numbers.
 
 use super::{ArcRandomizer, Float, Randomizer, Vec3, PI};
-use rand::{thread_rng, Rng, RngCore, SeedableRng};
+use rand::{Rng, RngCore, SeedableRng};
 use rand_chacha::ChaCha20Rng;
 use std::fmt;
 use std::sync::Arc;
@@ -17,8 +17,9 @@ pub struct Random<T: RngCore> {
 
 /// Create a new thread local random number generator.
 pub fn new_thread_rng() -> ArcRandomizer {
+    let rng: ChaCha20Rng = SeedableRng::from_entropy();
     Arc::new(Random {
-        rng: Mutex::new(thread_rng()),
+        rng: Mutex::new(rng),
     })
 }
 

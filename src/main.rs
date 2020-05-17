@@ -2,8 +2,10 @@
 
 extern crate clap;
 extern crate image;
+extern crate num_cpus;
 extern crate rand;
 extern crate rand_chacha;
+extern crate rayon;
 
 mod algebra;
 mod app_config;
@@ -20,19 +22,29 @@ use app_config::*;
 use background::*;
 use common::*;
 use object::*;
+use rayon::prelude::*;
 use scene::*;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
 /// Entry point for the recursive raytracer.
 fn main() {
+    // Load the program configuration.
     let config = AppConfig::load();
 
+    // Configure number of threads.
+    rayon::ThreadPoolBuilder::new()
+        .num_threads(config.num_threads)
+        .build_global()
+        .unwrap();
+
+    // Create a random number generator.
     let rng = match config.seed {
         Some(seed) => new_seeded_rng(seed),
         None => new_thread_rng(),
     };
 
+    // Create the scene.
     let scene = Scene::new(
         config.scenery,
         config.image_width,
@@ -41,40 +53,45 @@ fn main() {
         Arc::clone(&rng),
     );
 
-    let image_width = config.image_width as Float;
-    let image_height = config.image_height as Float;
-    let percent_step = 100.0 / image_height;
+    // Allocate an image buffer.
+    let imgbuf = Mutex::new(image::ImageBuffer::new(
+        config.image_width,
+        config.image_height,
+    ));
 
+    // Tracking progress.
+    let percent_step = 100.0 / (config.image_height as Float);
+    let current_progress = Mutex::new(0.0);
     let start = Instant::now();
 
-    println!("P3\n{} {}\n255", config.image_width, config.image_height);
-
-    for j in (0..config.image_height).rev() {
-        let y = j as Float;
-
-        let progress = percent_step * (image_height - y);
-        eprint!("Progress: {:>6.2}%\r", progress);
-
-        for i in 0..config.image_width {
-            let x = i as Float;
-
-            let mut colour = Colour::zero();
-
-            for _s in 0..config.samples_per_pixel {
-                let u = (x + rng.clone().float()) / image_width;
-                let v = (y + rng.clone().float()) / image_height;
-
-                let ray = scene.camera.get_ray(u, v);
-                colour += ray_colour(&ray, scene.background, &scene.world, config.max_depth);
-            }
-
-            let c = colour
-                .to_colour_from_sample(config.samples_per_pixel)
-                .to_ppm();
-            println!("{}", c);
+    (0..config.image_height).into_par_iter().for_each(|j| {
+        // Update progress in its own scope so it doesn't lock for the entire
+        // scanline.
+        {
+            let mut data = current_progress.lock().unwrap();
+            *data += percent_step;
+            eprint!("Progress: {:>6.2}%\r", *data);
         }
-    }
 
+        // Process an entire scanline in one thread.
+        for i in 0..config.image_width {
+            let rgb = trace_ray(i, j, &config, &scene, Arc::clone(&rng)).to_rgb();
+            imgbuf
+                .lock()
+                .expect("Unable to lock image buffer")
+                .put_pixel(i, config.image_height - 1 - j, image::Rgb(rgb));
+        }
+    });
+
+    // Write the output file.
+    eprint!("Writing output file\r");
+    imgbuf
+        .lock()
+        .expect("Unbale to lock image buffer for writing")
+        .save(&config.output_path)
+        .expect("Error writing output file");
+
+    // Display stats.
     let seconds = start.elapsed().as_secs_f32();
     if seconds < 60.0 {
         eprintln!("Done: {:.2} seconds", seconds);
@@ -83,6 +100,31 @@ fn main() {
     } else {
         eprintln!("Done: {:.2} hours", seconds / 3600.0);
     }
+}
+
+/// Trace a ray through the scene return accumulated colour. The function will
+/// generate multiple samples per pixel.
+///
+/// * `i` - Pixel x-coordinate.
+/// * `j` - Pixel y-coordinate.
+/// * `config` - Program configuration.
+/// * `scene` - The scene.
+/// * `rng` - The random number generator.
+fn trace_ray(i: u32, j: u32, config: &AppConfig, scene: &Scene, rng: ArcRandomizer) -> Colour {
+    let x = i as Float;
+    let y = j as Float;
+
+    let mut colour = Colour::zero();
+
+    for _s in 0..config.samples_per_pixel {
+        let u = (x + rng.clone().float()) / (config.image_width as Float);
+        let v = (y + rng.clone().float()) / (config.image_height as Float);
+
+        let ray = scene.camera.get_ray(u, v);
+        colour += ray_colour(&ray, scene.background, &scene.world, config.max_depth);
+    }
+
+    colour.to_colour_from_sample(config.samples_per_pixel)
 }
 
 /// Recursively traces a ray through the scene and generates the colour seen

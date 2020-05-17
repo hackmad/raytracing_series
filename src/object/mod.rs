@@ -82,7 +82,7 @@ pub trait Hittable: fmt::Display + fmt::Debug {
 }
 
 /// Atomic reference counted `Hittable` object.
-pub type ArcHittable = Arc<dyn Hittable>;
+pub type ArcHittable = Arc<dyn Hittable + Send + Sync>;
 
 /// Calculate 2-D `(u, v)` coordinates of a point on a unit sphere with center
 /// `(0, 0, 0)`.

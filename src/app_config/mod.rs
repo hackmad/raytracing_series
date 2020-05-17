@@ -6,7 +6,7 @@ use super::scene::Scenery;
 use clap::{App, Arg};
 
 /// Program configuration.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub struct AppConfig {
     /// Image height.
     pub image_width: u32,
@@ -28,6 +28,12 @@ pub struct AppConfig {
 
     /// Random number seed.
     pub seed: Option<u64>,
+
+    /// Output file path.
+    pub output_path: String,
+
+    /// Number of threads.
+    pub num_threads: usize,
 }
 
 impl AppConfig {
@@ -97,6 +103,23 @@ impl AppConfig {
                     .takes_value(true)
                     .about("seed for rng number generator (debug)"),
             )
+            .arg(
+                Arg::with_name("out")
+                    .short('o')
+                    .long("out")
+                    .value_name("OUTPUT_PATH")
+                    .required(true)
+                    .takes_value(true)
+                    .about("output file path. file extension determines image type."),
+            )
+            .arg(
+                Arg::with_name("threads")
+                    .short('t')
+                    .long("threads")
+                    .value_name("THREADS")
+                    .takes_value(true)
+                    .about("number of threads to use (default = max logical cores)"),
+            )
             .get_matches();
 
         let image_width = match matches.value_of("image_width") {
@@ -133,6 +156,28 @@ impl AppConfig {
             _ => None,
         };
 
+        let output_path = match matches.value_of("out") {
+            Some(s) => s.to_string(),
+            _ => panic!("Missing output path"),
+        };
+
+        let max_threads = num_cpus::get();
+        let num_threads = match matches.value_of("threads") {
+            Some(s) => {
+                let n = s.parse::<usize>().expect("Invalid num threads");
+
+                if n == 0 {
+                    panic!("Invalid num threads");
+                } else if n > max_threads {
+                    panic!(format!("Num threads > max logical CPUs {}", max_threads));
+                }
+
+                n
+            }
+
+            _ => max_threads,
+        };
+
         AppConfig {
             image_width,
             image_height,
@@ -141,6 +186,8 @@ impl AppConfig {
             scenery: *scenery,
             bvh_enabled,
             seed,
+            output_path,
+            num_threads,
         }
     }
 }

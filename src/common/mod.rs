@@ -95,7 +95,7 @@ pub trait Randomizer: fmt::Debug {
 }
 
 // Atomic reference counted `Randomizer`.
-pub type ArcRandomizer = Arc<dyn Randomizer>;
+pub type ArcRandomizer = Arc<dyn Randomizer + Send + Sync>;
 
 /// Clamp the given value.clamp
 ///

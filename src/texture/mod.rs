@@ -39,4 +39,4 @@ pub trait Texture: fmt::Display + fmt::Debug {
 }
 
 /// Atomic reference counted `Texture`.
-pub type ArcTexture = Arc<dyn Texture>;
+pub type ArcTexture = Arc<dyn Texture + Send + Sync>;

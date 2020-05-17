@@ -53,4 +53,4 @@ pub trait Material: fmt::Display + fmt::Debug {
 }
 
 /// Atomic reference counted `Material`.
-pub type ArcMaterial = Arc<dyn Material>;
+pub type ArcMaterial = Arc<dyn Material + Send + Sync>;

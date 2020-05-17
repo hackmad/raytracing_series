@@ -89,17 +89,17 @@ impl Vec3 {
     }
 
     /// Returns the square of the length of the vector.
-    pub fn length_squared(self) -> Float {
+    pub fn length_squared(&self) -> Float {
         self.e[0] * self.e[0] + self.e[1] * self.e[1] + self.e[2] * self.e[2]
     }
 
     /// Returns the length of the vector.
-    pub fn length(self) -> Float {
+    pub fn length(&self) -> Float {
         self.length_squared().sqrt()
     }
 
     /// Returns the normalized unit vector.
-    pub fn unit_vector(self) -> Vec3 {
+    pub fn unit_vector(&self) -> Vec3 {
         let len = self.length().recip();
         Vec3 {
             e: [self.e[0] * len, self.e[1] * len, self.e[2] * len],
@@ -109,14 +109,14 @@ impl Vec3 {
     /// Returns the dot product with a vector `v`,
     ///
     /// * `v` - The other vector.
-    pub fn dot(self, v: Vec3) -> Float {
+    pub fn dot(&self, v: Vec3) -> Float {
         self.e[0] * v.e[0] + self.e[1] * v.e[1] + self.e[2] * v.e[2]
     }
 
     /// Returns the cross product with a vector `v`,
     ///
     /// * `v` - The other vector.
-    pub fn cross(self, v: Vec3) -> Vec3 {
+    pub fn cross(&self, v: Vec3) -> Vec3 {
         Vec3 {
             e: [
                 self.e[1] * v.e[2] - self.e[2] * v.e[1],
@@ -171,9 +171,9 @@ impl Vec3 {
         )
     }
 
-    /// Returns a string representing colour values for PPM file format.
-    pub fn to_ppm(self) -> String {
-        format!("{} {} {}", self.x() as u8, self.y() as u8, self.z() as u8)
+    /// Returns an array of `u8` to be used as rgb values.
+    pub fn to_rgb(self) -> [u8; 3] {
+        [self.x() as u8, self.y() as u8, self.z() as u8]
     }
 }
 
