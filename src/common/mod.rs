@@ -96,6 +96,11 @@ pub trait Randomizer: fmt::Debug {
 
     /// Returns a random point inside unit disk
     fn in_unit_disk(&self) -> Vec3;
+
+    /// Shuffle a `Vec<usize>` in place.
+    ///
+    /// * `v` - Vector to shuffle.
+    fn permute(&self, v: &mut Vec<usize>);
 }
 
 // Atomic reference counted `Randomizer`.

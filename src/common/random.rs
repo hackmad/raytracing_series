@@ -177,6 +177,22 @@ where
             }
         }
     }
+
+    /// Shuffle a `Vec<usize>` in place.
+    ///
+    /// * `v` - Vector to shuffle.
+    fn permute(&self, v: &mut Vec<usize>) {
+        let mut rng = self.rng.lock().unwrap();
+
+        for i in (1..v.len()).rev() {
+            let target = Random::in_range(&mut rng, 0, i);
+
+            let (x, y) = (v[i], v[target]);
+
+            v[i] = y;
+            v[target] = x;
+        }
+    }
 }
 
 /// This implements associated functions to help call methods on the random

@@ -48,24 +48,26 @@ impl Perlin {
     ///
     /// * `p` - Point to evaluate the noise function.
     pub fn noise(&self, p: &Point3) -> Float {
-        let i = p.x().floor();
-        let j = p.y().floor();
-        let k = p.z().floor();
+        let fx = p.x().floor();
+        let fy = p.y().floor();
+        let fz = p.z().floor();
 
-        let u = p.x() - i;
-        let v = p.y() - j;
-        let w = p.z() - k;
+        let u = p.x() - fx;
+        let v = p.y() - fy;
+        let w = p.z() - fz;
+
+        let i = fx as usize;
+        let j = fy as usize;
+        let k = fz as usize;
 
         let mut c = [[[Vec3::zero(); 2]; 2]; 2];
 
         for di in 0..2 {
-            let x = self.perm_x[((i + di as Float) as usize) & 255];
-
             for dj in 0..2 {
-                let y = self.perm_y[((j + dj as Float) as usize) & 255];
-
                 for dk in 0..2 {
-                    let z = self.perm_z[((k + dk as Float) as usize) & 255];
+                    let x = self.perm_x[(i + di) & 255];
+                    let y = self.perm_y[(j + dj) & 255];
+                    let z = self.perm_z[(k + dk) & 255];
 
                     c[di][dj][dk] = self.random[x ^ y ^ z];
                 }
@@ -99,22 +101,8 @@ impl Perlin {
 /// * `n` - Number of points.
 fn perlin_generate_perm(n: usize, rng: &ArcRandomizer) -> Vec<usize> {
     let mut p: Vec<usize> = (0..n).map(|x| x).collect();
-    permute(&mut p, rng);
+    rng.permute(&mut p);
     p
-}
-
-/// Shuffle a vector in place.
-///
-/// * `v` - Vector to shuffle.
-fn permute(v: &mut Vec<usize>, rng: &ArcRandomizer) {
-    for i in (1..v.len()).rev() {
-        let target = rng.usize_in_range(0, i);
-
-        let (x, y) = (v[i], v[target]);
-
-        v[i] = y;
-        v[target] = x;
-    }
 }
 
 /// Perform interpolation.
@@ -131,19 +119,19 @@ fn perlin_interp(c: &[[[Vec3; 2]; 2]; 2], u: Float, v: Float, w: Float) -> Float
     let mut accum = 0.0;
 
     for i in 0..2 {
-        let i1 = i as Float;
+        let ii = i as Float;
 
         for j in 0..2 {
-            let j1 = j as Float;
+            let jj = j as Float;
 
             for k in 0..2 {
-                let k1 = k as Float;
+                let kk = k as Float;
 
-                let weight_v = Vec3::new(u - i1, v - j1, w - k1);
+                let weight_v = Vec3::new(u - ii, v - jj, w - kk);
 
-                accum += (i1 * uu + (1.0 - i1) * (1.0 - uu))
-                    * (j1 * vv + (1.0 - j1) * (1.0 - vv))
-                    * (k1 * ww + (1.0 - k1) * (1.0 - ww))
+                accum += (ii * uu + (1.0 - ii) * (1.0 - uu))
+                    * (jj * vv + (1.0 - jj) * (1.0 - vv))
+                    * (kk * ww + (1.0 - kk) * (1.0 - ww))
                     * c[i][j][k].dot(weight_v);
             }
         }
