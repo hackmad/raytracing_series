@@ -179,9 +179,8 @@ where
     }
 }
 
-/// This implements associated functions to help call random number generator
-/// methods on the random number generator mutex so it doesn't have to be
-/// locked repeatedly to get multiple samples.
+/// This implements associated functions to help call methods on the random
+/// number generator mutex without locking repeatedly to get multiple samples.
 impl<T> Random<T>
 where
     T: RngCore,
