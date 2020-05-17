@@ -150,7 +150,8 @@ fn ray_colour(ray: &Ray, background: BackgroundFn, world: &ArcHittable, depth: u
             // If material did not absorb the ray and scattered it, continue
             // tracing the new ray.
             if let Some(sr) = rec.material.scatter(ray, &rec) {
-                emission + ray_colour(&sr.scattered, background, world, depth - 1) * sr.attenuation
+                let colour = ray_colour(&sr.scattered, background, world, depth - 1);
+                emission + sr.attenuation * colour
             } else {
                 emission
             }
