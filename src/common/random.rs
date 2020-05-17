@@ -2,12 +2,12 @@
 //!
 //! A library for generating random numbers.
 
-use super::{ArcRandomizer, Float, Randomizer, Vec3, PI};
+use super::{ArcRandomizer, Float, Randomizer, Vec3, TWO_PI};
+use rand::distributions::uniform::{SampleBorrow, SampleUniform};
 use rand::{Rng, RngCore, SeedableRng};
 use rand_chacha::ChaCha20Rng;
 use std::fmt;
-use std::sync::Arc;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex, MutexGuard};
 
 /// Random number generator.
 pub struct Random<T: RngCore> {
@@ -50,15 +50,17 @@ where
 {
     /// Returns a random floating point value in [0, 1].
     fn float(&self) -> Float {
-        self.rng.lock().unwrap().gen::<Float>()
+        let mut rng = self.rng.lock().unwrap();
+        Random::float(&mut rng)
     }
 
-    /// Returns a random floating point values in [`min`, `max`].
+    /// Returns a random floating point value in [`min`, `max`].
     ///
     /// * `min` - Minimum bound
     /// * `max` - Maximum bound
     fn float_in_range(&self, min: Float, max: Float) -> Float {
-        self.rng.lock().unwrap().gen_range(min, max)
+        let mut rng = self.rng.lock().unwrap();
+        Random::in_range(&mut rng, min, max)
     }
 
     /// Returns a random usize value in [`min`, `max`].
@@ -66,7 +68,8 @@ where
     /// * `min` - Minimum bound
     /// * `max` - Maximum bound
     fn usize_in_range(&self, min: usize, max: usize) -> usize {
-        self.rng.lock().unwrap().gen_range(min, max)
+        let mut rng = self.rng.lock().unwrap();
+        Random::in_range(&mut rng, min, max)
     }
 
     /// Returns a random u8 value in [`min`, `max`].
@@ -74,7 +77,8 @@ where
     /// * `min` - Minimum bound
     /// * `max` - Maximum bound
     fn u8_in_range(&self, min: u8, max: u8) -> u8 {
-        self.rng.lock().unwrap().gen_range(min, max)
+        let mut rng = self.rng.lock().unwrap();
+        Random::in_range(&mut rng, min, max)
     }
 
     /// Returns a random u16 value in [`min`, `max`].
@@ -82,7 +86,8 @@ where
     /// * `min` - Minimum bound
     /// * `max` - Maximum bound
     fn u16_in_range(&self, min: u16, max: u16) -> u16 {
-        self.rng.lock().unwrap().gen_range(min, max)
+        let mut rng = self.rng.lock().unwrap();
+        Random::in_range(&mut rng, min, max)
     }
 
     /// Returns a random u32 value in [`min`, `max`].
@@ -90,7 +95,8 @@ where
     /// * `min` - Minimum bound
     /// * `max` - Maximum bound
     fn u32_in_range(&self, min: u32, max: u32) -> u32 {
-        self.rng.lock().unwrap().gen_range(min, max)
+        let mut rng = self.rng.lock().unwrap();
+        Random::in_range(&mut rng, min, max)
     }
 
     /// Returns a random u64 value in [`min`, `max`].
@@ -98,12 +104,18 @@ where
     /// * `min` - Minimum bound
     /// * `max` - Maximum bound
     fn u64_in_range(&self, min: u64, max: u64) -> u64 {
-        self.rng.lock().unwrap().gen_range(min, max)
+        let mut rng = self.rng.lock().unwrap();
+        Random::in_range(&mut rng, min, max)
     }
 
     /// Returns a random vector with random components in [0, 1].
     fn vec3(&self) -> Vec3 {
-        Vec3::new(self.float(), self.float(), self.float())
+        let mut rng = self.rng.lock().unwrap();
+        Vec3::new(
+            Random::float(&mut rng),
+            Random::float(&mut rng),
+            Random::float(&mut rng),
+        )
     }
 
     /// Returns a random vector with random components in [`min`, `max`].
@@ -111,18 +123,16 @@ where
     /// * `min` - Minimum bound
     /// * `max` - Maximum bound
     fn vec3_in_range(&self, min: Float, max: Float) -> Vec3 {
-        Vec3::new(
-            self.float_in_range(min, max),
-            self.float_in_range(min, max),
-            self.float_in_range(min, max),
-        )
+        let mut rng = self.rng.lock().unwrap();
+        Random::vec3_in_range(&mut rng, min, max)
     }
 
     /// Returns a random vector within the unit sphere. This vector is not
     /// normalized.
     fn in_unit_sphere(&self) -> Vec3 {
+        let mut rng = self.rng.lock().unwrap();
         loop {
-            let p = self.vec3_in_range(-1.0, 1.0);
+            let p = Random::vec3_in_range(&mut rng, -1.0, 1.0);
             if p.length_squared() < 1.0 {
                 break p;
             }
@@ -132,8 +142,9 @@ where
     /// Returns a random unit vector by picking points on the unit sphere
     /// and then normalizing it.
     fn unit_vec3(&self) -> Vec3 {
-        let a = self.float_in_range(0.0, 2.0 * PI);
-        let z = self.float_in_range(-1.0, 1.0);
+        let mut rng = self.rng.lock().unwrap();
+        let a = Random::in_range(&mut rng, 0.0, TWO_PI);
+        let z = Random::in_range(&mut rng, -1.0, 1.0) as Float;
         let r = (1.0 - z * z).sqrt();
         Vec3::new(r * a.cos(), r * a.sin(), z)
     }
@@ -154,15 +165,51 @@ where
 
     /// Returns a random point inside unit disk
     fn in_unit_disk(&self) -> Vec3 {
+        let mut rng = self.rng.lock().unwrap();
         loop {
             let p = Vec3::new(
-                self.float_in_range(-1.0, 1.0),
-                self.float_in_range(-1.0, 1.0),
+                Random::in_range(&mut rng, -1.0, 1.0),
+                Random::in_range(&mut rng, -1.0, 1.0),
                 0.0,
             );
             if p.length_squared() < 1.0 {
                 break p;
             }
         }
+    }
+}
+
+/// This implements associated functions to help call random number generator
+/// methods on the random number generator mutex so it doesn't have to be
+/// locked repeatedly to get multiple samples.
+impl<T> Random<T>
+where
+    T: RngCore,
+{
+    /// Returns a random floating point value in [0, 1].
+    fn float(rng: &mut MutexGuard<'_, T>) -> Float {
+        rng.gen::<Float>()
+    }
+
+    /// Returns a random floating point values in [`min`, `max`].
+    ///
+    /// * `min` - Minimum bound
+    /// * `max` - Maximum bound
+    fn in_range<U: SampleUniform, B1, B2>(rng: &mut MutexGuard<'_, T>, min: B1, max: B2) -> U
+    where
+        B1: SampleBorrow<U> + Sized,
+        B2: SampleBorrow<U> + Sized,
+    {
+        rng.gen_range::<U, B1, B2>(min, max)
+    }
+
+    /// Returns a random unit vector by picking points on the unit sphere
+    /// and then normalizing it.
+    fn vec3_in_range(rng: &mut MutexGuard<'_, T>, min: Float, max: Float) -> Vec3 {
+        Vec3::new(
+            Random::in_range(rng, min, max),
+            Random::in_range(rng, min, max),
+            Random::in_range(rng, min, max),
+        )
     }
 }

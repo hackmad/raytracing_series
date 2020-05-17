@@ -27,6 +27,10 @@ pub const INFINITY: Float = std::f64::INFINITY;
 pub use self::random::{new_seeded_rng, new_thread_rng, Random};
 
 /// Define some utility functions for generating random values.
+///
+/// **NOTE**: The `*_in_range` functions could be done using generics but
+/// then they have to be moved into another trait. If we do it in here,
+/// we won't be able to use `Randomizer` as trait objects in `ArcRandomizer`.
 pub trait Randomizer: fmt::Debug {
     /// Returns a random floating point values in [0, 1].
     fn float(&self) -> Float;
