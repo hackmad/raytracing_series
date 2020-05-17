@@ -56,6 +56,9 @@ impl Noise {
 }
 
 impl fmt::Display for Noise {
+    /// Display the texture configuration.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "noise(perlin: {})", self.perlin.read().unwrap())
     }
@@ -73,6 +76,6 @@ impl Texture for Noise {
 
         let turb = self.turbulence_size * perlin.turbulence(p, self.turbulence_depth);
         let scale = self.scale * p[self.axis];
-        Colour::one() * 0.5 * (1.0 + (scale + turb).sin())
+        Colour::one() * (0.5 * (1.0 + (scale + turb).sin()))
     }
 }

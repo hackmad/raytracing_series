@@ -35,6 +35,9 @@ pub const Z_AXIS: Axis = 2;
 pub const AXES: &[Axis] = &[X_AXIS, Y_AXIS, Z_AXIS];
 
 impl fmt::Display for Vec3 {
+    /// Display the vector coordinates.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self.e)
     }

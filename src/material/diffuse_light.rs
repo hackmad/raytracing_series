@@ -30,12 +30,18 @@ impl DiffuseLight {
 }
 
 impl fmt::Display for DiffuseLight {
+    /// Display the diffuse light parameters configuration.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "diffuse_light(emit: {})", self.emit)
     }
 }
 
 impl fmt::Debug for DiffuseLight {
+    /// Display the diffuse light parameters configuration.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("DiffuseLight")
             .field("emit", &self.emit)

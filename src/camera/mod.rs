@@ -46,6 +46,9 @@ pub struct Camera {
 }
 
 impl fmt::Display for Camera {
+    /// Display the camera configuration.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,

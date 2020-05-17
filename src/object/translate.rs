@@ -17,6 +17,9 @@ pub struct Translate {
 }
 
 impl fmt::Display for Translate {
+    /// Display the translation parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,

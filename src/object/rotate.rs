@@ -26,6 +26,9 @@ pub struct Rotate {
 }
 
 impl fmt::Display for Rotate {
+    /// Display the rotation parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,

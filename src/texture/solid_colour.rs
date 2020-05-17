@@ -34,6 +34,9 @@ impl SolidColour {
 }
 
 impl fmt::Display for SolidColour {
+    /// Display the solid colour parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "solid_colour(colour_value: {}", self.colour_value)
     }

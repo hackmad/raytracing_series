@@ -33,6 +33,9 @@ impl HittableList {
 }
 
 impl fmt::Display for HittableList {
+    /// Display the objects in the list.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "[{:?}]", self.objects)
     }

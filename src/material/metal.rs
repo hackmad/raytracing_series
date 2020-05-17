@@ -37,12 +37,18 @@ impl Metal {
 }
 
 impl fmt::Display for Metal {
+    /// Display the metal parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "metal(albedo: {}, fuzz: {})", self.albedo, self.fuzz)
     }
 }
 
 impl fmt::Debug for Metal {
+    /// Display the metal parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Metal")
             .field("albedo", &self.albedo)

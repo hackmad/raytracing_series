@@ -48,6 +48,9 @@ impl Checker {
 }
 
 impl fmt::Display for Checker {
+    /// Display the checker parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "checker(odd: {}, even: {}", self.odd, self.even)
     }

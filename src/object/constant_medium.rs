@@ -27,6 +27,9 @@ pub struct ConstantMedium {
 }
 
 impl fmt::Display for ConstantMedium {
+    /// Display the constant medium parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,

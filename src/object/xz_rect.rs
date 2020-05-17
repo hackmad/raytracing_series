@@ -30,6 +30,9 @@ pub struct XZrect {
 }
 
 impl fmt::Display for XZrect {
+    /// Display the XZrect parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,

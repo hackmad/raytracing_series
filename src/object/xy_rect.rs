@@ -30,6 +30,9 @@ pub struct XYrect {
 }
 
 impl fmt::Display for XYrect {
+    /// Display the XYrect parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,

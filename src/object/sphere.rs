@@ -22,6 +22,9 @@ pub struct Sphere {
 }
 
 impl fmt::Display for Sphere {
+    /// Display the sphere parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,

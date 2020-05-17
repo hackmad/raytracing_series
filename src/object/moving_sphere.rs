@@ -32,6 +32,9 @@ pub struct MovingSphere {
 }
 
 impl fmt::Display for MovingSphere {
+    /// Display the moving sphere parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,

@@ -44,12 +44,18 @@ impl BVH {
 }
 
 impl fmt::Display for BVH {
+    /// Display the bounding volume hierarchy recursively.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "[{:?}]", self)
     }
 }
 
 impl fmt::Debug for BVH {
+    /// Display the bounding volume hierarchy recursively.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("BVH")
             .field("left", &self.left)

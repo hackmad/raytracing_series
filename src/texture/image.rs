@@ -44,12 +44,18 @@ impl Image {
 }
 
 impl fmt::Display for Image {
+    /// Display the image parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self)
     }
 }
 
 impl fmt::Debug for Image {
+    /// Display the image parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("Image")
             .field("width", &self.width)

@@ -30,12 +30,18 @@ impl Isotropic {
 }
 
 impl fmt::Display for Isotropic {
+    /// Display the isotropic parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "isotropic(albedo: {})", self.albedo)
     }
 }
 
 impl fmt::Debug for Isotropic {
+    /// Display the isotropic parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Isotropic")
             .field("albedo", &self.albedo)

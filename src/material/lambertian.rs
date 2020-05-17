@@ -30,12 +30,18 @@ impl Lambertian {
 }
 
 impl fmt::Display for Lambertian {
+    /// Display the lambertian parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "lambertian(albedo: {})", self.albedo)
     }
 }
 
 impl fmt::Debug for Lambertian {
+    /// Display the lambertian parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Lambertian")
             .field("albedo", &self.albedo)

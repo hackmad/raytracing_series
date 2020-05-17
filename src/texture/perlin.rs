@@ -153,12 +153,18 @@ fn perlin_interp(c: &[[[Vec3; 2]; 2]; 2], u: Float, v: Float, w: Float) -> Float
 }
 
 impl fmt::Display for Perlin {
+    /// Display the perlin noise parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self)
     }
 }
 
 impl fmt::Debug for Perlin {
+    /// Display the perlin noise parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Perlin")
             .field("random", &self.random)

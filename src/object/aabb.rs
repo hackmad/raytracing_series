@@ -18,6 +18,9 @@ pub struct AABB {
 }
 
 impl fmt::Display for AABB {
+    /// Display the min/max bounds of the AABB.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "aabb(min: {}, max: {})", self.min, self.max)
     }

@@ -34,6 +34,9 @@ impl Dielectric {
 }
 
 impl fmt::Display for Dielectric {
+    /// Display the dielectric parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
@@ -44,6 +47,9 @@ impl fmt::Display for Dielectric {
 }
 
 impl fmt::Debug for Dielectric {
+    /// Display the dielectric parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Dielectric")
             .field("ref_idx", &self.ref_idx)

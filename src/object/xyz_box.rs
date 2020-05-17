@@ -24,6 +24,9 @@ pub struct XYZbox {
 }
 
 impl fmt::Display for XYZbox {
+    /// Display the XYZbox parameters.
+    ///
+    /// * `f` - Formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,

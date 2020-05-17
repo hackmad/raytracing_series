@@ -40,7 +40,7 @@ where
     /// This is here to squash complaints from using ArcRandomizer in Hittable
     /// because of Debug requirements.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_struct("Random").finish()
+        f.debug_struct("Random<T>").finish()
     }
 }
 
