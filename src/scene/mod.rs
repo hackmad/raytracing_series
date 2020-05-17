@@ -823,7 +823,6 @@ fn cornell_box_smoke_and_fog(rng: ArcRandomizer) -> Vec<ArcHittable> {
 fn final_next_week(rng: ArcRandomizer) -> Vec<ArcHittable> {
     let mut world: Vec<ArcHittable> = Vec::new();
 
-    /*
     let ground = Lambertian::new(SolidColour::from_rgb(0.48, 0.83, 0.53), Arc::clone(&rng));
 
     let mut boxes1: Vec<ArcHittable> = Vec::new();
@@ -848,7 +847,6 @@ fn final_next_week(rng: ArcRandomizer) -> Vec<ArcHittable> {
     }
 
     world.push(BVH::new(&mut boxes1, 0.0, 1.0, &rng));
-    */
 
     let light = DiffuseLight::new(SolidColour::from_rgb(7.0, 7.0, 7.0), Arc::clone(&rng));
     world.push(XZrect::new(
@@ -882,7 +880,7 @@ fn final_next_week(rng: ArcRandomizer) -> Vec<ArcHittable> {
     world.push(Sphere::new(
         Point3::new(0.0, 150.0, 145.0),
         50.0,
-        Metal::new(SolidColour::from_rgb(0.8, 0.8, 0.9), 10.0, Arc::clone(&rng)),
+        Metal::new(SolidColour::from_rgb(0.8, 0.8, 0.9), 1.0, Arc::clone(&rng)),
     ));
 
     let boundary = Sphere::new(
