@@ -59,7 +59,7 @@ impl Material for Lambertian {
     /// * `ray_in` - Incident ray.
     /// * `rec` - The `HitRecord`.
     fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterResult> {
-        let scatter_direction = rec.normal + self.rng.in_unit_sphere();
+        let scatter_direction = rec.normal + self.rng.unit_vec3();
         Some(ScatterResult {
             scattered: Ray::new(rec.point, scatter_direction, ray_in.time),
             attenuation: self.albedo.value(rec.u, rec.v, &rec.point),
