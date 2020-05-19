@@ -35,6 +35,7 @@ pub enum Scenery {
     CornellBox,
     SmokeAndFog,
     FinalNextWeek,
+    RotateSpheres,
 }
 
 impl<'a> Scenery {
@@ -66,6 +67,7 @@ impl<'a> Scenery {
         map.insert("cornell_box", Scenery::CornellBox);
         map.insert("smoke_and_fog", Scenery::SmokeAndFog);
         map.insert("final_next_week", Scenery::FinalNextWeek);
+        map.insert("rotate_spheres", Scenery::RotateSpheres);
 
         map
     }
@@ -214,6 +216,13 @@ impl Scene {
             Scenery::FinalNextWeek => Scene::new_scene(
                 &final_next_week(Arc::clone(&rng)),
                 final_next_week_camera(image_width, image_height, Arc::clone(&rng)),
+                black_background,
+                bvh_enabled,
+                rng,
+            ),
+            Scenery::RotateSpheres => Scene::new_scene(
+                &rotate_spheres(Arc::clone(&rng)),
+                rotate_spheres_camera(image_width, image_height, Arc::clone(&rng)),
                 black_background,
                 bvh_enabled,
                 rng,
@@ -412,6 +421,21 @@ fn final_next_week_camera(image_width: u32, image_height: u32, rng: ArcRandomize
     Camera::new(
         Point3::new(478.0, 278.0, -600.0),
         Point3::new(278.0, 278.0, 0.0),
+        Vec3::new(0.0, 1.0, 0.0),
+        40.0,
+        (image_width as Float) / (image_height as Float),
+        0.0,
+        10.0,
+        0.0,
+        1.0,
+        Arc::clone(&rng),
+    )
+}
+
+fn rotate_spheres_camera(image_width: u32, image_height: u32, rng: ArcRandomizer) -> Camera {
+    Camera::new(
+        Point3::new(-1.4, -1.4, -1.4),
+        Point3::zero(),
         Vec3::new(0.0, 1.0, 0.0),
         40.0,
         (image_width as Float) / (image_height as Float),
@@ -934,6 +958,67 @@ fn final_next_week(rng: ArcRandomizer) -> Vec<ArcHittable> {
     world.push(Translate::new(
         Rotate::new(BVH::new(&mut boxes2, 0.0, 1.0, &rng), Y_AXIS, 15.0),
         Vec3::new(-100.0, 270.0, 395.0),
+    ));
+
+    world
+}
+
+fn rotate_spheres(rng: ArcRandomizer) -> Vec<ArcHittable> {
+    let mut world: Vec<ArcHittable> = Vec::new();
+
+    let red = Lambertian::new(SolidColour::from_rgb(0.8, 0.2, 0.2), Arc::clone(&rng));
+    let green = Lambertian::new(SolidColour::from_rgb(0.2, 0.8, 0.2), Arc::clone(&rng));
+    let blue = Lambertian::new(SolidColour::from_rgb(0.2, 0.2, 0.8), Arc::clone(&rng));
+    let metal = Metal::new(SolidColour::from_rgb(0.8, 0.8, 0.8), 0.25, Arc::clone(&rng));
+    let diffuse_light = DiffuseLight::new(SolidColour::from_rgb(1.0, 1.0, 1.0), Arc::clone(&rng));
+
+    world.push(Rotate::new(
+        Rotate::new(
+            XYrect::new(
+                -100.0,
+                100.0,
+                -100.0,
+                100.0,
+                -2.5,
+                Arc::clone(&diffuse_light),
+            ),
+            Y_AXIS,
+            45.0,
+        ),
+        X_AXIS,
+        -45.0,
+    ));
+
+    let max_angle = 90.0;
+    let max_radius = 0.1;
+    let n = 8;
+
+    for angle in (0..n).map(|i| i as Float * max_angle / (n as Float)) {
+        let f = 1.0 - angle / max_angle;
+
+        world.push(Rotate::new(
+            Sphere::new(Point3::new(f, 0.0, 0.0), max_radius * f, Arc::clone(&red)),
+            Z_AXIS,
+            angle,
+        ));
+
+        world.push(Rotate::new(
+            Sphere::new(Point3::new(0.0, 0.0, f), max_radius * f, Arc::clone(&green)),
+            Y_AXIS,
+            angle,
+        ));
+
+        world.push(Rotate::new(
+            Sphere::new(Point3::new(0.0, f, 0.0), max_radius * f, Arc::clone(&blue)),
+            X_AXIS,
+            angle,
+        ));
+    }
+
+    world.push(Sphere::new(
+        Point3::new(2.0, 2.0, 2.0),
+        2.0,
+        Arc::clone(&metal),
     ));
 
     world

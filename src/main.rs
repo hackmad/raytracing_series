@@ -91,7 +91,7 @@ fn main() {
         .expect("Error writing output file");
 
     // Display stats.
-    eprint!("                      \r");
+    eprint!("                                         \r");
     let seconds = start.elapsed().as_secs_f32();
     if seconds < 60.0 {
         eprintln!("Done: {:.2} seconds", seconds);

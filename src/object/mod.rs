@@ -17,7 +17,7 @@ mod xyz_box;
 mod xz_rect;
 mod yz_rect;
 
-use super::algebra::{Axis, Point3, Ray, Vec3, AXES};
+use super::algebra::{Axis, Point3, Ray, Vec3, AXES, X_AXIS, Y_AXIS, Z_AXIS};
 use super::common::{ArcRandomizer, Float, INFINITY, PI, PI_OVER_2, TWO_PI};
 use super::material::{ArcMaterial, Isotropic};
 use super::texture::ArcTexture;
