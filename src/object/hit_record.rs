@@ -102,6 +102,19 @@ impl HitRecord {
             v: self.v,
         }
     }
+
+    /// Returns a copy with the front_Face field flipped.
+    pub fn flip_front_face(&self) -> HitRecord {
+        HitRecord {
+            t: self.t,
+            point: self.point,
+            front_face: !self.front_face,
+            normal: self.normal,
+            material: Arc::clone(&self.material),
+            u: self.u,
+            v: self.v,
+        }
+    }
 }
 
 impl fmt::Display for HitRecord {

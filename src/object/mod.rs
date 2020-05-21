@@ -6,6 +6,7 @@
 mod aabb;
 mod bvh;
 mod constant_medium;
+mod flip_face;
 mod hit_record;
 mod hittable_list;
 mod moving_sphere;
@@ -59,6 +60,9 @@ pub use self::aabb::AABB;
 
 /// Models a bounding volume hierarchy.
 pub use self::bvh::BVH;
+
+/// Flips the normal of a `Hittable` object.
+pub use self::flip_face::FlipFace;
 
 /// Models a constant medium for effects like smoke and fog.
 pub use self::constant_medium::ConstantMedium;
