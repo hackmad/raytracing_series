@@ -193,6 +193,41 @@ where
             v[target] = x;
         }
     }
+
+    /// Returns a random vector based on p(direction) = cos(θ) / π.
+    fn cosine_direction(&self) -> Vec3 {
+        let mut rng = self.rng.lock().unwrap();
+
+        let r1 = Random::float(&mut rng);
+        let r2 = Random::float(&mut rng);
+        let z = (1.0 - r2).sqrt();
+
+        let phi = TWO_PI * r1;
+
+        let r2_sqrt = r2.sqrt();
+        let x = phi.cos() * r2_sqrt;
+        let y = phi.sin() * r2_sqrt;
+
+        Vec3::new(x, y, z)
+    }
+
+    // Return a random vector uniformly sampled from a sphere’s solid angle
+    // from a point outside the sphere
+    //
+    // * `distance_squared` - Square of distance to a point from center.
+    fn to_sphere(&self, radius: Float, distance_squared: Float) -> Vec3 {
+        let mut rng = self.rng.lock().unwrap();
+
+        let r1 = Random::float(&mut rng);
+        let r2 = Random::float(&mut rng);
+        let z = 1.0 + r2 * ((1.0 - radius * radius / distance_squared).sqrt() - 1.0);
+
+        let phi = TWO_PI * r1;
+        let x = phi.cos() * (1.0 - z * z).sqrt();
+        let y = phi.sin() * (1.0 - z * z).sqrt();
+
+        Vec3::new(x, y, z)
+    }
 }
 
 /// This implements associated functions to help call methods on the random

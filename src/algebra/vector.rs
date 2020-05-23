@@ -163,14 +163,19 @@ impl Vec3 {
     ///
     /// * `samples_per_pixel` - The number of samples per pixel.
     pub fn to_colour_from_sample(self, samples_per_pixel: u32) -> Colour {
+        // Replace NaN components with zero.
+        let r = if self.e[0].is_nan() { 0.0 } else { self.e[0] };
+        let g = if self.e[1].is_nan() { 0.0 } else { self.e[1] };
+        let b = if self.e[2].is_nan() { 0.0 } else { self.e[2] };
+
         // Divide the color total by the number of samples
         let s = 1.0 / samples_per_pixel as Float;
 
         // Gamma-correct for a gamma value of 2.0 (sqrt)
         Colour::new(
-            256.0 * clamp((self.x() * s).sqrt(), 0.0, 0.999),
-            256.0 * clamp((self.y() * s).sqrt(), 0.0, 0.999),
-            256.0 * clamp((self.z() * s).sqrt(), 0.0, 0.999),
+            256.0 * clamp((s * r).sqrt(), 0.0, 0.999),
+            256.0 * clamp((s * g).sqrt(), 0.0, 0.999),
+            256.0 * clamp((s * b).sqrt(), 0.0, 0.999),
         )
     }
 

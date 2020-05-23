@@ -3,7 +3,8 @@
 //! A library for handling ray intersections with a sphere
 
 use super::{
-    get_sphere_uv, ArcHittable, ArcMaterial, Float, HitRecord, Hittable, Point3, Ray, Vec3, AABB,
+    get_sphere_uv, ArcHittable, ArcMaterial, ArcRandomizer, Float, HitRecord, Hittable, Point3,
+    Ray, Vec3, AABB, INFINITY, ONB, RAY_EPSILON, TWO_PI,
 };
 use std::fmt;
 use std::sync::Arc;
@@ -19,6 +20,9 @@ pub struct Sphere {
 
     /// Surface material.
     material: ArcMaterial,
+
+    /// Random number generator.
+    rng: ArcRandomizer,
 }
 
 impl fmt::Display for Sphere {
@@ -40,11 +44,18 @@ impl Sphere {
     /// * `center` - Center.
     /// * `radius` - Radius.
     /// * `material` - Surface material.
-    pub fn new(center: Vec3, radius: Float, material: ArcMaterial) -> ArcHittable {
+    /// * `rng` - Random number generator.
+    pub fn new(
+        center: Vec3,
+        radius: Float,
+        material: ArcMaterial,
+        rng: ArcRandomizer,
+    ) -> ArcHittable {
         Arc::new(Sphere {
             center,
             radius,
             material: Arc::clone(&material),
+            rng: Arc::clone(&rng),
         })
     }
 
@@ -112,5 +123,31 @@ impl Hittable for Sphere {
         let r = self.radius.abs();
         let r = Vec3::new(r, r, r);
         Some(AABB::new(self.center - r, self.center + r))
+    }
+
+    /// Sample PDF value at hit point and given direction.
+    ///
+    /// * `origin` - Hit point.
+    /// * `v` - Direction to sample.
+    fn pdf_value(&self, origin: &Point3, v: &Vec3) -> Float {
+        if let Some(_) = self.hit(&Ray::new(*origin, *v, 0.0), RAY_EPSILON, INFINITY) {
+            let cos_theta_max =
+                (1.0 - self.radius * self.radius / (self.center - *origin).length_squared()).sqrt();
+            let solid_angle = TWO_PI * (1.0 - cos_theta_max);
+
+            1.0 / solid_angle
+        } else {
+            0.0
+        }
+    }
+
+    /// Generate a random direction towards this object.
+    ///
+    /// * `origin` - Hit point.
+    fn random(&self, origin: &Point3) -> Vec3 {
+        let direction = self.center - *origin;
+        let distance_squared = direction.length_squared();
+        let uvw = ONB::new(&direction);
+        uvw.local_from_vec3(&self.rng.to_sphere(self.radius, distance_squared))
     }
 }

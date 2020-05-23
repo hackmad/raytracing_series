@@ -2,7 +2,7 @@
 //!
 //! A library for handling isotropic material for constant medium effects.
 
-use super::{ArcMaterial, ArcRandomizer, ArcTexture, HitRecord, Material, Ray, ScatterResult};
+use super::{ArcMaterial, ArcRandomizer, ArcTexture, HitRecord, Material, Ray, ScatterRecord};
 use std::fmt;
 use std::sync::Arc;
 
@@ -58,12 +58,17 @@ impl Material for Isotropic {
     ///
     /// * `ray_in` - Incident ray.
     /// * `rec` - The `HitRecord`.
-    fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterResult> {
+    fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterRecord> {
         // Scattering will pick a uniform random direction.
         let scatter_direction = self.rng.in_unit_sphere();
-        Some(ScatterResult {
-            scattered: Ray::new(rec.point, scatter_direction, ray_in.time),
-            attenuation: self.albedo.value(rec.u, rec.v, &rec.point),
+        let scattered_ray = Some(Ray::new(rec.point, scatter_direction, ray_in.time));
+        let attenuation = self.albedo.value(rec.u, rec.v, &rec.point);
+
+        Some(ScatterRecord {
+            scattered_ray,
+            attenuation,
+            specular_ray: None,
+            pdf: None,
         })
     }
 }

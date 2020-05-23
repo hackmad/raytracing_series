@@ -18,54 +18,30 @@ mod xyz_box;
 mod xz_rect;
 mod yz_rect;
 
-use super::algebra::{Axis, Point3, Ray, Vec3, AXES, X_AXIS, Y_AXIS, Z_AXIS};
-use super::common::{ArcRandomizer, Float, INFINITY, PI, PI_OVER_2, TWO_PI};
+use super::algebra::{Axis, Point3, Ray, Vec3, AXES, ONB, X_AXIS, Y_AXIS, Z_AXIS};
+use super::common::{
+    ArcRandomizer, Float, INFINITY, PI, PI_OVER_2, RAY_EPSILON, RAY_EPSILON_2, TWO_PI,
+};
 use super::material::{ArcMaterial, Isotropic};
 use super::texture::ArcTexture;
 use std::fmt;
 use std::sync::Arc;
 
-/// Models a collection of geometric objects that support ray intersections.
-pub use self::hit_record::HitRecord;
-
-/// Models a list of objects that can handle intersections.
-pub use self::hittable_list::HittableList;
-
-/// Models a sphere.
-pub use self::sphere::Sphere;
-
-/// Models a sphere that moves along a linear path.
-pub use self::moving_sphere::MovingSphere;
-
-/// Models an axis-aligned rectangle in the xy-plane.
-pub use self::xy_rect::XYrect;
-
-/// Models an axis-aligned rectangle in the xz-plane.
-pub use self::xz_rect::XZrect;
-
-/// Models an axis-aligned rectangle in the yz-plane.
-pub use self::yz_rect::YZrect;
-
-/// Models an axis-aligned box.
-pub use self::xyz_box::XYZbox;
-
-/// Models a translated object.
-pub use self::translate::Translate;
-
-/// Models a rotated object.
-pub use self::rotate::Rotate;
-
-/// Models an axis aligned bounding box.
+/// Re-exports.
 pub use self::aabb::AABB;
-
-/// Models a bounding volume hierarchy.
 pub use self::bvh::BVH;
-
-/// Flips the normal of a `Hittable` object.
-pub use self::flip_face::FlipFace;
-
-/// Models a constant medium for effects like smoke and fog.
 pub use self::constant_medium::ConstantMedium;
+pub use self::flip_face::FlipFace;
+pub use self::hit_record::HitRecord;
+pub use self::hittable_list::HittableList;
+pub use self::moving_sphere::MovingSphere;
+pub use self::rotate::Rotate;
+pub use self::sphere::Sphere;
+pub use self::translate::Translate;
+pub use self::xy_rect::XYrect;
+pub use self::xyz_box::XYZbox;
+pub use self::xz_rect::XZrect;
+pub use self::yz_rect::YZrect;
 
 /// Models a geometric object that can handle intersections.
 pub trait Hittable: fmt::Display + fmt::Debug {
@@ -83,6 +59,21 @@ pub trait Hittable: fmt::Display + fmt::Debug {
     /// * `time0` - Start time of motion.
     /// * `time1` - End time of motion.
     fn bounding_box(&self, time0: Float, time1: Float) -> Option<AABB>;
+
+    /// Sample PDF value at hit point and given direction.
+    ///
+    /// * `origin` - Hit point.
+    /// * `v` - Direction to sample.
+    fn pdf_value(&self, _origin: &Point3, _v: &Vec3) -> Float {
+        0.0
+    }
+
+    /// Generate a random direction towards this object.
+    ///
+    /// * `origin` - Hit point.
+    fn random(&self, _origin: &Point3) -> Vec3 {
+        Vec3::new(1.0, 0.0, 0.0) // Arbitrary direction.
+    }
 }
 
 /// Atomic reference counted `Hittable` object.

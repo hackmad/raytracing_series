@@ -55,6 +55,10 @@ impl Material for DiffuseLight {
     /// * `ray_in` - Incident ray.
     /// * `rec` - The `HitRecord`.
     fn emission(&self, _ray_in: &Ray, rec: &HitRecord) -> Colour {
-        self.emit.value(rec.u, rec.v, &rec.point)
+        if rec.front_face {
+            self.emit.value(rec.u, rec.v, &rec.point)
+        } else {
+            Colour::zero()
+        }
     }
 }

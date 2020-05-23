@@ -3,21 +3,28 @@
 //! A library for handling ray intersections with a collection of
 //! geometric objects.
 
-use super::{ArcHittable, Float, HitRecord, Hittable, Ray, AABB};
+use super::{ArcHittable, ArcRandomizer, Float, HitRecord, Hittable, Point3, Ray, Vec3, AABB};
 use std::fmt;
 use std::sync::Arc;
 
 /// Models a collection of geometric objects that support ray intersections.
 #[derive(Debug, Clone)]
 pub struct HittableList {
+    /// List of objects.
     objects: Vec<ArcHittable>,
+
+    /// Random number generator.
+    rng: ArcRandomizer,
 }
 
 impl HittableList {
     /// Create a new collection of geometric objects.
-    pub fn new() -> HittableList {
+    ///
+    /// * `rng` - Random number generator.
+    pub fn new(rng: ArcRandomizer) -> HittableList {
         HittableList {
             objects: Vec::new(),
+            rng: Arc::clone(&rng),
         }
     }
 
@@ -101,6 +108,31 @@ impl Hittable for HittableList {
             }) {
             Ok(bbox) => bbox,
             _ => None,
+        }
+    }
+
+    /// Sample PDF value at hit point and given direction.
+    ///
+    /// * `origin` - Hit point.
+    /// * `v` - Direction to sample.
+    fn pdf_value(&self, origin: &Point3, v: &Vec3) -> Float {
+        let weight = 1.0 / (self.objects.len() as Float);
+        self.objects.iter().fold(0.0, |acc, object| {
+            acc + weight * object.pdf_value(origin, v)
+        })
+    }
+
+    /// Generate a random direction towards this object.
+    ///
+    /// * `origin` - Hit point.
+    fn random(&self, origin: &Point3) -> Vec3 {
+        let size = self.objects.len();
+        if size == 0 {
+            Vec3::zero()
+        } else if size == 1 {
+            self.objects[0].random(origin)
+        } else {
+            self.objects[self.rng.usize_in_range(0, size - 1)].random(origin)
         }
     }
 }

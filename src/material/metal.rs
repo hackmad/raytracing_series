@@ -3,7 +3,7 @@
 //! A library for handling reflective material.
 
 use super::{
-    ArcMaterial, ArcRandomizer, ArcTexture, Float, HitRecord, Material, Ray, ScatterResult,
+    ArcMaterial, ArcRandomizer, ArcTexture, Float, HitRecord, Material, Ray, ScatterRecord,
 };
 use std::fmt;
 use std::sync::Arc;
@@ -67,15 +67,17 @@ impl Material for Metal {
     ///
     /// * `ray_in` - Incident ray.
     /// * `rec` - The `HitRecord`.
-    fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterResult> {
+    fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterRecord> {
         let reflected = ray_in.direction.unit_vector().reflect(rec.normal);
 
         let scatter_direction = reflected + self.rng.in_unit_sphere() * self.fuzz;
 
         if scatter_direction.dot(rec.normal) > 0.0 {
-            Some(ScatterResult {
-                scattered: Ray::new(rec.point, scatter_direction, ray_in.time),
+            Some(ScatterRecord {
+                specular_ray: Some(Ray::new(rec.point, scatter_direction, ray_in.time)),
                 attenuation: self.albedo.value(rec.u, rec.v, &rec.point),
+                scattered_ray: None,
+                pdf: None,
             })
         } else {
             None
