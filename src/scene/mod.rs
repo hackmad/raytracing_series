@@ -280,13 +280,80 @@ fn cornell_box_camera(image_width: u32, image_height: u32, rng: ArcRandomizer) -
     )
 }
 
+fn light_box(size: Float, rng: ArcRandomizer) -> Vec<ArcHittable> {
+    let light = DiffuseLight::new(SolidColour::from_rgb(0.5, 0.7, 1.0), Arc::clone(&rng));
+    let top_light = FlipFace::new(XZrect::new(
+        -size,
+        size,
+        -size,
+        size,
+        size,
+        Arc::clone(&light),
+        Arc::clone(&rng),
+    ));
+    let bottom_light = XZrect::new(
+        -size,
+        size,
+        -size,
+        size,
+        -size,
+        Arc::clone(&light),
+        Arc::clone(&rng),
+    );
+    let back_light = XYrect::new(
+        -size,
+        size,
+        -size,
+        size,
+        -size,
+        Arc::clone(&light),
+        Arc::clone(&rng),
+    );
+    let front_light = FlipFace::new(XYrect::new(
+        -size,
+        size,
+        -size,
+        size,
+        size,
+        Arc::clone(&light),
+        Arc::clone(&rng),
+    ));
+    let left_light = FlipFace::new(YZrect::new(
+        -size,
+        size,
+        -size,
+        size,
+        size,
+        Arc::clone(&light),
+        Arc::clone(&rng),
+    ));
+    let right_light = YZrect::new(
+        -size,
+        size,
+        -size,
+        size,
+        -size,
+        Arc::clone(&light),
+        Arc::clone(&rng),
+    );
+
+    vec![
+        top_light,
+        bottom_light,
+        back_light,
+        front_light,
+        left_light,
+        right_light,
+    ]
+}
+
 fn diffuse_spheres(
     image_width: u32,
     image_height: u32,
     bvh_enabled: bool,
     rng: ArcRandomizer,
 ) -> Scene {
-    let world = vec![
+    let mut world = vec![
         Sphere::new(
             Point3::new(0.0, 0.0, -1.0),
             0.5,
@@ -301,9 +368,14 @@ fn diffuse_spheres(
         ),
     ];
 
+    let lights = light_box(1000.0, Arc::clone(&rng));
+    for light in lights.clone() {
+        world.push(Arc::clone(&light));
+    }
+
     Scene::new_scene(
         &world,
-        &Vec::new(),
+        &lights,
         default_camera(image_width, image_height, Arc::clone(&rng)),
         gradient_background,
         bvh_enabled,
@@ -317,7 +389,7 @@ fn metal_spheres(
     bvh_enabled: bool,
     rng: ArcRandomizer,
 ) -> Scene {
-    let world = vec![
+    let mut world = vec![
         Sphere::new(
             Point3::new(0.0, 0.0, -1.0),
             0.5,
@@ -344,9 +416,14 @@ fn metal_spheres(
         ),
     ];
 
+    let lights = light_box(1000.0, Arc::clone(&rng));
+    for light in lights.clone() {
+        world.push(Arc::clone(&light));
+    }
+
     Scene::new_scene(
         &world,
-        &Vec::new(),
+        &lights,
         default_camera(image_width, image_height, Arc::clone(&rng)),
         gradient_background,
         bvh_enabled,
@@ -397,9 +474,16 @@ fn dielectric_spheres(
     bvh_enabled: bool,
     rng: ArcRandomizer,
 ) -> Scene {
+    let mut world = dielectric_spheres_objects(Arc::clone(&rng));
+
+    let lights = light_box(1000.0, Arc::clone(&rng));
+    for light in lights.clone() {
+        world.push(Arc::clone(&light));
+    }
+
     Scene::new_scene(
-        &dielectric_spheres_objects(Arc::clone(&rng)),
-        &Vec::new(),
+        &world,
+        &lights,
         default_camera(image_width, image_height, Arc::clone(&rng)),
         gradient_background,
         bvh_enabled,
@@ -413,6 +497,13 @@ fn wide_angle_dielectric_spheres(
     bvh_enabled: bool,
     rng: ArcRandomizer,
 ) -> Scene {
+    let mut world = dielectric_spheres_objects(Arc::clone(&rng));
+
+    let lights = light_box(1000.0, Arc::clone(&rng));
+    for light in lights.clone() {
+        world.push(Arc::clone(&light));
+    }
+
     let camera = Camera::new(
         Point3::new(-2.0, 2.0, 1.0),
         Point3::new(0.0, 0.0, -1.0),
@@ -427,8 +518,8 @@ fn wide_angle_dielectric_spheres(
     );
 
     Scene::new_scene(
-        &dielectric_spheres_objects(Arc::clone(&rng)),
-        &Vec::new(),
+        &world,
+        &lights,
         camera,
         gradient_background,
         bvh_enabled,
@@ -442,6 +533,13 @@ fn telephoto_dielectric_spheres(
     bvh_enabled: bool,
     rng: ArcRandomizer,
 ) -> Scene {
+    let mut world = dielectric_spheres_objects(Arc::clone(&rng));
+
+    let lights = light_box(1000.0, Arc::clone(&rng));
+    for light in lights.clone() {
+        world.push(Arc::clone(&light));
+    }
+
     let camera = Camera::new(
         Point3::new(-2.0, 2.0, 1.0),
         Point3::new(0.0, 0.0, -1.0),
@@ -456,8 +554,8 @@ fn telephoto_dielectric_spheres(
     );
 
     Scene::new_scene(
-        &dielectric_spheres_objects(Arc::clone(&rng)),
-        &Vec::new(),
+        &world,
+        &lights,
         camera,
         gradient_background,
         bvh_enabled,
@@ -471,6 +569,13 @@ fn defocus_blue_dielectric_spheres(
     bvh_enabled: bool,
     rng: ArcRandomizer,
 ) -> Scene {
+    let mut world = dielectric_spheres_objects(Arc::clone(&rng));
+
+    let lights = light_box(1000.0, Arc::clone(&rng));
+    for light in lights.clone() {
+        world.push(Arc::clone(&light));
+    }
+
     let lookfrom = Point3::new(3.0, 3.0, 2.0);
     let lookat = Point3::new(0.0, 0.0, -1.0);
 
@@ -488,8 +593,8 @@ fn defocus_blue_dielectric_spheres(
     );
 
     Scene::new_scene(
-        &dielectric_spheres_objects(Arc::clone(&rng)),
-        &Vec::new(),
+        &world,
+        &lights,
         camera,
         gradient_background,
         bvh_enabled,
@@ -606,9 +711,16 @@ fn final_one_weekend(
     bvh_enabled: bool,
     rng: ArcRandomizer,
 ) -> Scene {
+    let mut world = random_spheres(false, false, Arc::clone(&rng));
+
+    let lights = light_box(1000.0, Arc::clone(&rng));
+    for light in lights.clone() {
+        world.push(Arc::clone(&light));
+    }
+
     Scene::new_scene(
-        &random_spheres(false, false, Arc::clone(&rng)),
-        &Vec::new(),
+        &world,
+        &lights,
         random_spheres_camera(image_width, image_height, Arc::clone(&rng)),
         gradient_background,
         bvh_enabled,
@@ -622,9 +734,16 @@ fn motion_blur(
     bvh_enabled: bool,
     rng: ArcRandomizer,
 ) -> Scene {
+    let mut world = random_spheres(true, false, Arc::clone(&rng));
+
+    let lights = light_box(1000.0, Arc::clone(&rng));
+    for light in lights.clone() {
+        world.push(Arc::clone(&light));
+    }
+
     Scene::new_scene(
-        &random_spheres(true, false, Arc::clone(&rng)),
-        &Vec::new(),
+        &world,
+        &lights,
         random_spheres_camera(image_width, image_height, Arc::clone(&rng)),
         gradient_background,
         bvh_enabled,
@@ -638,9 +757,16 @@ fn checkered_floor(
     bvh_enabled: bool,
     rng: ArcRandomizer,
 ) -> Scene {
+    let mut world = random_spheres(true, true, Arc::clone(&rng));
+
+    let lights = light_box(1000.0, Arc::clone(&rng));
+    for light in lights.clone() {
+        world.push(Arc::clone(&light));
+    }
+
     Scene::new_scene(
-        &random_spheres(true, true, Arc::clone(&rng)),
-        &Vec::new(),
+        &world,
+        &lights,
         random_spheres_camera(image_width, image_height, Arc::clone(&rng)),
         gradient_background,
         bvh_enabled,
@@ -675,9 +801,14 @@ fn checkered_spheres(
         Arc::clone(&rng),
     ));
 
+    let lights = light_box(1000.0, Arc::clone(&rng));
+    for light in lights.clone() {
+        world.push(Arc::clone(&light));
+    }
+
     Scene::new_scene(
         &world,
-        &Vec::new(),
+        &lights,
         checkered_spheres_camera(image_width, image_height, Arc::clone(&rng)),
         gradient_background,
         bvh_enabled,
@@ -731,9 +862,14 @@ fn perlin_spheres(
         Arc::clone(&rng),
     ));
 
+    let lights = light_box(3000.0, Arc::clone(&rng));
+    for light in lights.clone() {
+        world.push(Arc::clone(&light));
+    }
+
     Scene::new_scene(
         &world,
-        &Vec::new(),
+        &lights,
         checkered_spheres_camera(image_width, image_height, Arc::clone(&rng)),
         gradient_background,
         bvh_enabled,
@@ -753,6 +889,11 @@ fn earth(image_width: u32, image_height: u32, bvh_enabled: bool, rng: ArcRandomi
         Arc::clone(&rng),
     ));
 
+    let lights = light_box(1000.0, Arc::clone(&rng));
+    for light in lights.clone() {
+        world.push(Arc::clone(&light));
+    }
+
     let camera = Camera::new(
         Point3::new(0.0, 0.0, 12.0),
         Point3::zero(),
@@ -768,7 +909,7 @@ fn earth(image_width: u32, image_height: u32, bvh_enabled: bool, rng: ArcRandomi
 
     Scene::new_scene(
         &world,
-        &Vec::new(),
+        &lights,
         camera,
         gradient_background,
         bvh_enabled,
@@ -1250,28 +1391,11 @@ fn rotate_spheres(
     let green = Lambertian::new(SolidColour::from_rgb(0.2, 0.8, 0.2), Arc::clone(&rng));
     let blue = Lambertian::new(SolidColour::from_rgb(0.2, 0.2, 0.8), Arc::clone(&rng));
     let metal = Metal::new(SolidColour::from_rgb(0.8, 0.8, 0.8), 0.25, Arc::clone(&rng));
-    let diffuse_light = DiffuseLight::new(SolidColour::from_rgb(1.0, 1.0, 1.0), Arc::clone(&rng));
 
-    let rect_light = Rotate::new(
-        Rotate::new(
-            XYrect::new(
-                -100.0,
-                100.0,
-                -100.0,
-                100.0,
-                -2.5,
-                Arc::clone(&diffuse_light),
-                Arc::clone(&rng),
-            ),
-            Y_AXIS,
-            45.0,
-        ),
-        X_AXIS,
-        -45.0,
-    );
-    world.push(Arc::clone(&rect_light));
-
-    let lights = vec![Arc::clone(&rect_light)];
+    let lights = light_box(1000.0, Arc::clone(&rng));
+    for light in lights.clone() {
+        world.push(Arc::clone(&light));
+    }
 
     let max_angle = 90.0;
     let max_radius = 0.1;

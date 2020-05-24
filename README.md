@@ -12,59 +12,33 @@ Completed work from each book is tagged as a release which can be found
 [here](https://github.com/hackmad/raytracing_series/releases).
 
 The images shown below are based on those versions. Not all scenes are
-available in each release due to changes in the algorithms in successive
-books.
+available in each release and may look different due to changes in the
+algorithms in successive books.
 
 ## Building and Running
 
-Build debug profile:
+Build debug profile. The executable will be `target/debug/raytracing_series`.
 
 ```bash
 cargo build
 ```
 
-Build release profile (generally much faster):
+Use `--release` when building/running for faster executable. The executable
+will be `target/release/raytracing_series`.
 
 ```bash
 cargo build --release
 ```
 
-Build and run with default settings:
+Run with program arguments (note that `--` is needed after arguments for cargo
+and before program arguments can be supplied):
 
 ```bash
-cargo run -o image.png
+cargo run -- --scene cornell_box -w 1200 -h 600 -o image.png
 ```
 
 ```bash
-cargo run --release -o image.png
-```
-
-Run compiled versions with default settings:
-
-```bash
-./target/debug/raytracing_series -o image.png
-```
-
-```bash
-./target/release/raytracing_series -o image.png
-```
-
-Run with program arguments:
-
-```bash
-cargo run -- --scene metal -w 1200 -h 600 -o image.png
-```
-
-```bash
-cargo run --release -- --scene metal -w 1200 -h 600 -o image.png
-```
-
-```bash
-./target/debug/raytracing_series --scene metal -w 1200 -h 600 -o image.png
-```
-
-```bash
-./target/release/raytracing_series --scene metal -w 1200 -h 600 -o image.png
+./target/debug/raytracing_series --scene cornell_box -w 1200 -h 600 -o image.png
 ```
 
 Get help on program arguments:
@@ -74,15 +48,7 @@ cargo run -- --help
 ```
 
 ```bash
-cargo run --release -- --help
-```
-
-```bash
 ./target/debug/raytracing_series --help
-```
-
-```bash
-./target/release/raytracing_series --help
 ```
 
 ### Raytracing in One Weekend
