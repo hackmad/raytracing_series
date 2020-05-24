@@ -74,6 +74,7 @@ impl<'a> Scenery {
 }
 
 /// Models a scene.
+#[derive(Clone)]
 pub struct Scene {
     /// The camera.
     pub camera: Camera,

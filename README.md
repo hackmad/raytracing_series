@@ -6,6 +6,15 @@ Reference: https://raytracing.github.io
 
 - [NASA Visible Earth](https://visibleearth.nasa.gov/images/73909/december-blue-marble-next-generation-w-topography-and-bathymetry) for the image texture.
 
+## Releases
+
+Completed work from each book is tagged as a release which can be found
+[here](https://github.com/hackmad/raytracing_series/releases).
+
+The images shown below are based on those versions. Not all scenes are
+available in each release due to changes in the algorithms in successive
+books.
+
 ## Building and Running
 
 Build debug profile:
