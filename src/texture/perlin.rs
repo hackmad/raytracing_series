@@ -65,9 +65,9 @@ impl Perlin {
         for di in 0..2 {
             for dj in 0..2 {
                 for dk in 0..2 {
-                    let x = self.perm_x[(i + di) & 255];
-                    let y = self.perm_y[(j + dj) & 255];
-                    let z = self.perm_z[(k + dk) & 255];
+                    let x = self.perm_x[(i.wrapping_add(di)) & 255];
+                    let y = self.perm_y[(j.wrapping_add(dj)) & 255];
+                    let z = self.perm_z[(k.wrapping_add(dk)) & 255];
 
                     c[di][dj][dk] = self.random[x ^ y ^ z];
                 }
