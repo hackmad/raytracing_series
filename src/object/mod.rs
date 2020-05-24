@@ -20,7 +20,7 @@ mod yz_rect;
 
 use super::algebra::{Axis, Point3, Ray, Vec3, AXES, ONB, X_AXIS, Y_AXIS, Z_AXIS};
 use super::common::{
-    ArcRandomizer, Float, INFINITY, PI, PI_OVER_2, RAY_EPSILON, RAY_EPSILON_2, TWO_PI,
+    ArcRandomizer, Float, INFINITY, MIN_THICKNESS, PI, PI_OVER_2, RAY_EPSILON, TWO_PI,
 };
 use super::material::{ArcMaterial, Isotropic};
 use super::texture::ArcTexture;
@@ -64,14 +64,14 @@ pub trait Hittable: fmt::Display + fmt::Debug {
     ///
     /// * `origin` - Hit point.
     /// * `v` - Direction to sample.
-    fn pdf_value(&self, _origin: &Point3, _v: &Vec3) -> Float {
+    fn pdf_value(&self, _origin: Point3, _v: Vec3) -> Float {
         0.0
     }
 
     /// Generate a random direction towards this object.
     ///
     /// * `origin` - Hit point.
-    fn random(&self, _origin: &Point3) -> Vec3 {
+    fn random(&self, _origin: Point3) -> Vec3 {
         Vec3::new(1.0, 0.0, 0.0) // Arbitrary direction.
     }
 }

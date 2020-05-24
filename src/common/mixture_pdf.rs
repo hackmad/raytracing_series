@@ -44,7 +44,7 @@ impl PDF for MixturePDF {
     /// Returns the value of a PDF at a location.
     ///
     /// * `direction` - Direction of surface normal.
-    fn value(&self, direction: &Vec3) -> Float {
+    fn value(&self, direction: Vec3) -> Float {
         0.5 * self.p[0].value(direction) + 0.5 * self.p[1].value(direction)
     }
 

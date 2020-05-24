@@ -115,17 +115,18 @@ impl Hittable for HittableList {
     ///
     /// * `origin` - Hit point.
     /// * `v` - Direction to sample.
-    fn pdf_value(&self, origin: &Point3, v: &Vec3) -> Float {
+    fn pdf_value(&self, origin: Point3, v: Vec3) -> Float {
         let weight = 1.0 / (self.objects.len() as Float);
-        self.objects.iter().fold(0.0, |acc, object| {
-            acc + weight * object.pdf_value(origin, v)
+
+        self.objects.iter().fold(0.0, |sum, object| {
+            sum + weight * object.pdf_value(origin, v)
         })
     }
 
     /// Generate a random direction towards this object.
     ///
     /// * `origin` - Hit point.
-    fn random(&self, origin: &Point3) -> Vec3 {
+    fn random(&self, origin: Point3) -> Vec3 {
         let size = self.objects.len();
         if size == 0 {
             Vec3::zero()

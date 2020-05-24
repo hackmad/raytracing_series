@@ -129,10 +129,10 @@ impl Hittable for Sphere {
     ///
     /// * `origin` - Hit point.
     /// * `v` - Direction to sample.
-    fn pdf_value(&self, origin: &Point3, v: &Vec3) -> Float {
-        if let Some(_) = self.hit(&Ray::new(*origin, *v, 0.0), RAY_EPSILON, INFINITY) {
+    fn pdf_value(&self, origin: Point3, v: Vec3) -> Float {
+        if let Some(_) = self.hit(&Ray::new(origin, v, 0.0), RAY_EPSILON, INFINITY) {
             let cos_theta_max =
-                (1.0 - self.radius * self.radius / (self.center - *origin).length_squared()).sqrt();
+                (1.0 - self.radius * self.radius / (self.center - origin).length_squared()).sqrt();
             let solid_angle = TWO_PI * (1.0 - cos_theta_max);
 
             1.0 / solid_angle
@@ -144,10 +144,10 @@ impl Hittable for Sphere {
     /// Generate a random direction towards this object.
     ///
     /// * `origin` - Hit point.
-    fn random(&self, origin: &Point3) -> Vec3 {
-        let direction = self.center - *origin;
+    fn random(&self, origin: Point3) -> Vec3 {
+        let direction = self.center - origin;
         let distance_squared = direction.length_squared();
-        let uvw = ONB::new(&direction);
+        let uvw = ONB::new(direction);
         uvw.local_from_vec3(&self.rng.to_sphere(self.radius, distance_squared))
     }
 }

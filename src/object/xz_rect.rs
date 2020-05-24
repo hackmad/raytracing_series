@@ -5,7 +5,7 @@
 
 use super::{
     ArcHittable, ArcMaterial, ArcRandomizer, Float, HitRecord, Hittable, Point3, Ray, Vec3, AABB,
-    INFINITY, RAY_EPSILON, RAY_EPSILON_2,
+    INFINITY, MIN_THICKNESS, RAY_EPSILON,
 };
 use std::fmt;
 use std::sync::Arc;
@@ -28,6 +28,9 @@ pub struct XZrect {
     /// Y-coordinate of plane.
     y: Float,
 
+    /// Area
+    area: Float,
+
     /// Surface material.
     material: ArcMaterial,
 
@@ -42,8 +45,8 @@ impl fmt::Display for XZrect {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "xz_rect(x0: {}, x1: {}, z0: {}, z1:{}, y: {}, material: {})",
-            self.x0, self.x1, self.z0, self.z1, self.y, self.material
+            "xz_rect(x0: {}, x1: {}, z0: {}, z1:{}, y: {}, area: {}, material: {})",
+            self.x0, self.x1, self.z0, self.z1, self.y, self.area, self.material
         )
     }
 }
@@ -67,13 +70,13 @@ impl XZrect {
         material: ArcMaterial,
         rng: ArcRandomizer,
     ) -> ArcHittable {
-        // Guard against mixed up min/max values.
         Arc::new(XZrect {
-            x0: x0.min(x1),
-            x1: x0.max(x1),
-            z0: z0.min(z1),
-            z1: z0.max(z1),
+            x0,
+            x1,
+            z0,
+            z1,
             y,
+            area: (x1 - x0) * (z1 - z0),
             material: Arc::clone(&material),
             rng: Arc::clone(&rng),
         })
@@ -117,24 +120,21 @@ impl Hittable for XZrect {
         // The bounding box must have non-zero width in each dimension, so pad
         // the Z dimension a small amount.
         Some(AABB::new(
-            Point3::new(self.x0, self.y - RAY_EPSILON_2, self.z0),
-            Point3::new(self.x1, self.y + RAY_EPSILON_2, self.z1),
+            Point3::new(self.x0, self.y - MIN_THICKNESS, self.z0),
+            Point3::new(self.x1, self.y + MIN_THICKNESS, self.z1),
         ))
     }
 
     /// Sample PDF value at hit point and given direction.
     ///
-    /// * `o` - Hit point.
+    /// * `origin` - Hit point.
     /// * `v` - Direction to sample.
-    fn pdf_value(&self, o: &Point3, v: &Vec3) -> Float {
-        if let Some(rec) = self.hit(&Ray::new(*o, *v, 0.0), RAY_EPSILON, INFINITY) {
-            let area = (self.x1 - self.x0) * (self.z1 - self.z0);
-
+    fn pdf_value(&self, origin: Point3, v: Vec3) -> Float {
+        let ray = Ray::new(origin, v, 0.0);
+        if let Some(rec) = self.hit(&ray, RAY_EPSILON, INFINITY) {
             let distance_squared = rec.t * rec.t * v.length_squared();
-
-            let cosine = v.dot(rec.normal).abs() / v.length_squared();
-
-            distance_squared / (cosine * area)
+            let cosine = v.dot(rec.normal).abs() / v.length();
+            distance_squared / (cosine * self.area)
         } else {
             0.0
         }
@@ -143,10 +143,10 @@ impl Hittable for XZrect {
     /// Generate a random direction towards this object.
     ///
     /// * `origin` - Hit point.
-    fn random(&self, origin: &Point3) -> Vec3 {
+    fn random(&self, origin: Point3) -> Vec3 {
         let x = self.rng.float_in_range(self.x0, self.x1);
         let z = self.rng.float_in_range(self.z0, self.z1);
         let random_point = Point3::new(x, self.y, z);
-        random_point - *origin
+        random_point - origin
     }
 }

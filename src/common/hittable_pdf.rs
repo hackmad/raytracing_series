@@ -22,10 +22,10 @@ impl HittablePDF {
     ///
     /// * `object` - Surface normal.
     /// * `rng` - Random number generator.
-    pub fn new(object: ArcHittable, origin: &Point3) -> HittablePDF {
+    pub fn new(object: ArcHittable, origin: Point3) -> HittablePDF {
         HittablePDF {
             object: Arc::clone(&object),
-            origin: *origin,
+            origin,
         }
     }
 }
@@ -34,12 +34,12 @@ impl PDF for HittablePDF {
     /// Returns the value of a PDF at a location.
     ///
     /// * `direction` - Direction of surface normal.
-    fn value(&self, direction: &Vec3) -> Float {
-        self.object.pdf_value(&self.origin, direction)
+    fn value(&self, direction: Vec3) -> Float {
+        self.object.pdf_value(self.origin, direction)
     }
 
     /// Returns a random direction based on PDF.
     fn generate(&self) -> Vec3 {
-        self.object.random(&self.origin)
+        self.object.random(self.origin)
     }
 }

@@ -214,17 +214,21 @@ where
     // Return a random vector uniformly sampled from a sphere’s solid angle
     // from a point outside the sphere
     //
-    // * `distance_squared` - Square of distance to a point from center.
+    // * `distance_squared` - Square of distance to a point from sphere center.
     fn to_sphere(&self, radius: Float, distance_squared: Float) -> Vec3 {
         let mut rng = self.rng.lock().unwrap();
 
         let r1 = Random::float(&mut rng);
         let r2 = Random::float(&mut rng);
-        let z = 1.0 + r2 * ((1.0 - radius * radius / distance_squared).sqrt() - 1.0);
+
+        let r_squared_over_d_squared = radius * radius / distance_squared;
+        let z = 1.0 + r2 * ((1.0 - r_squared_over_d_squared).sqrt() - 1.0);
 
         let phi = TWO_PI * r1;
-        let x = phi.cos() * (1.0 - z * z).sqrt();
-        let y = phi.sin() * (1.0 - z * z).sqrt();
+
+        let sqrt_one_minus_z_squared = (1.0 - z * z).sqrt();
+        let x = phi.cos() * sqrt_one_minus_z_squared;
+        let y = phi.sin() * sqrt_one_minus_z_squared;
 
         Vec3::new(x, y, z)
     }

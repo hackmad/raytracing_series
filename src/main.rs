@@ -141,43 +141,46 @@ fn ray_colour(ray: &Ray, scene: &Scene, rng: &ArcRandomizer, depth: u32) -> Colo
     // Note the RAY_EPSILON is used to avoid starting the ray inside the
     // surface caused due to floating point approximation errors generated
     // by the intersection routine.
-    match scene.world.hit(&ray, RAY_EPSILON, INFINITY) {
-        Some(rec) => {
-            let emission = rec.material.emission(ray, &rec);
+    let hit = scene.world.hit(&ray, RAY_EPSILON, INFINITY);
+    if hit.is_none() {
+        return (scene.background)(ray);
+    }
 
-            // If material did not absorb the ray and scattered it, continue
-            // tracing the new ray.
-            if let Some(sr) = rec.material.scatter(ray, &rec) {
-                if let Some(specular_ray) = sr.specular_ray {
-                    // Specular materials
-                    let colour = ray_colour(&specular_ray, scene, rng, depth - 1);
+    let rec = hit.unwrap();
 
-                    sr.attenuation * colour
-                } else if let Some(scattered_ray) = sr.scattered_ray {
-                    // This handles isotropic material.
-                    let colour = ray_colour(&scattered_ray, scene, rng, depth - 1);
+    let emission = rec.material.emission(ray, &rec);
 
-                    emission + sr.attenuation * colour
-                } else if let Some(pdf) = sr.pdf {
-                    // Diffuse material
-                    let light = HittablePDF::new(Arc::clone(&scene.lights), &rec.point);
-                    let p = MixturePDF::new(Arc::new(light), Arc::clone(&pdf), Arc::clone(&rng));
-                    let scattered = Ray::new(rec.point, p.generate(), ray.time);
-                    let pdf_val = p.value(&scattered.direction);
+    // If material did not absorb the ray and scattered it, continue tracing
+    // the new ray.
+    let scatter = rec.material.scatter(ray, &rec);
+    if scatter.is_none() {
+        return emission;
+    }
 
-                    let scattering_pdf = rec.material.scattering_pdf(&ray, &rec, &scattered);
+    let sr = scatter.unwrap();
 
-                    let colour = ray_colour(&scattered, scene, rng, depth - 1);
+    if let Some(specular_ray) = sr.specular_ray {
+        // Specular materials
+        let colour = ray_colour(&specular_ray, scene, rng, depth - 1);
 
-                    emission + (sr.attenuation * scattering_pdf / pdf_val) * colour
-                } else {
-                    emission
-                }
-            } else {
-                emission
-            }
-        }
+        sr.attenuation * colour
+    } else if let Some(scattered_ray) = sr.scattered_ray {
+        // This handles isotropic material.
+        let colour = ray_colour(&scattered_ray, scene, rng, depth - 1);
 
-        _ => (scene.background)(ray),
+        emission + sr.attenuation * colour
+    } else if let Some(pdf) = sr.pdf {
+        // Diffuse material
+        let light_pdf = HittablePDF::new(Arc::clone(&scene.lights), rec.point);
+        let p = MixturePDF::new(Arc::new(light_pdf), Arc::clone(&pdf), Arc::clone(&rng));
+
+        let scattered = Ray::new(rec.point, p.generate(), ray.time);
+        let pdf_val = p.value(scattered.direction);
+
+        let scattering_pdf = rec.material.scattering_pdf(&ray, &rec, &scattered);
+        let colour = ray_colour(&scattered, scene, rng, depth - 1);
+        emission + sr.attenuation * scattering_pdf * colour / pdf_val
+    } else {
+        emission
     }
 }

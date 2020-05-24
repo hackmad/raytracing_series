@@ -31,8 +31,8 @@ pub const INFINITY: Float = std::f64::INFINITY;
 /// Used to offset ray positions and AAB boundaries to avoid intersection issues.
 pub const RAY_EPSILON: Float = 0.001;
 
-/// Used to offset ray positions and AAB boundaries to avoid intersection issues.
-pub const RAY_EPSILON_2: Float = 0.0001;
+/// Minimum thickness of AABB used for 2-d shapes like planes.
+pub const MIN_THICKNESS: Float = 0.0001;
 
 /// Re-exports.
 pub use self::cosine_pdf::CosinePDF;
@@ -135,7 +135,7 @@ pub trait PDF: fmt::Debug {
     /// Returns the value of a PDF at a location.
     ///
     /// * `direction` - Direction of surface normal.
-    fn value(&self, direction: &Vec3) -> Float;
+    fn value(&self, direction: Vec3) -> Float;
 
     /// Returns a random direction based on PDF.
     fn generate(&self) -> Vec3;

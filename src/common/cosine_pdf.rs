@@ -22,7 +22,7 @@ impl CosinePDF {
     ///
     /// * `n` - Surface normal.
     /// * `rng` - Random number generator.
-    pub fn new(n: &Vec3, rng: ArcRandomizer) -> CosinePDF {
+    pub fn new(n: Vec3, rng: ArcRandomizer) -> CosinePDF {
         CosinePDF {
             uvw: ONB::new(n),
             rng: Arc::clone(&rng),
@@ -34,7 +34,7 @@ impl PDF for CosinePDF {
     /// Returns the value of a PDF at a location.
     ///
     /// * `direction` - Direction of surface normal.
-    fn value(&self, direction: &Vec3) -> Float {
+    fn value(&self, direction: Vec3) -> Float {
         let cosine = direction.unit_vector().dot(self.uvw.w());
         if cosine <= 0.0 {
             0.0

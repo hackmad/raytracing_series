@@ -18,7 +18,7 @@ impl ONB {
     /// w-axis and generating `u` and `v` that are mutually orthogonal with it.
     ///
     /// * `n` - Any vector (usually a normal vector on a surface).
-    pub fn new(n: &Vec3) -> ONB {
+    pub fn new(n: Vec3) -> ONB {
         let w = n.unit_vector();
 
         let a = if w.x().abs() > 0.9 {

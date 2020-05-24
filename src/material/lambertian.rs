@@ -62,7 +62,7 @@ impl Material for Lambertian {
     /// * `ray_in` - Incident ray.
     /// * `rec` - The `HitRecord`.
     fn scatter(&self, _ray_in: &Ray, rec: &HitRecord) -> Option<ScatterRecord> {
-        let pdf = CosinePDF::new(&rec.normal, Arc::clone(&self.rng));
+        let pdf = CosinePDF::new(rec.normal, Arc::clone(&self.rng));
 
         Some(ScatterRecord {
             attenuation: self.albedo.value(rec.u, rec.v, &rec.point),
