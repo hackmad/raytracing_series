@@ -2,7 +2,7 @@
 //!
 //! A library for handling ray intersections with translated objects.
 
-use super::{ArcHittable, Float, HitRecord, Hittable, Ray, Vec3, AABB};
+use super::{ArcHittable, Float, HitRecord, Hittable, Point3, Ray, Vec3, AABB};
 use std::fmt;
 use std::sync::Arc;
 
@@ -70,5 +70,20 @@ impl Hittable for Translate {
         } else {
             None
         }
+    }
+
+    /// Sample PDF value at hit point and given direction.
+    ///
+    /// * `origin` - Hit point.
+    /// * `v` - Direction to sample.
+    fn pdf_value(&self, origin: Point3, v: Vec3) -> Float {
+        self.object.pdf_value(origin - self.offset, v)
+    }
+
+    /// Generate a random direction towards this object.
+    ///
+    /// * `origin` - Hit point.
+    fn random(&self, origin: Point3) -> Vec3 {
+        self.object.random(origin - self.offset)
     }
 }
