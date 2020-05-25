@@ -84,7 +84,7 @@ impl RecursiveTracer {
         if let Some(specular_ray) = sr.specular_ray {
             // Specular materials
             let colour = self.ray_colour(&specular_ray, depth - 1);
-            sr.attenuation * colour
+            emission + sr.attenuation * colour
         } else if let Some(scattered_ray) = sr.scattered_ray {
             // This handles isotropic material.
             let colour = self.ray_colour(&scattered_ray, depth - 1);

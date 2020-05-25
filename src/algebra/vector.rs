@@ -133,7 +133,7 @@ impl Vec3 {
     ///
     /// * `n` - The vector along which to perform reflection.
     pub fn reflect(self, n: Vec3) -> Vec3 {
-        self - n * self.dot(n) * (2.0 as Float)
+        self - 2.0 * self.dot(n) * n
     }
 
     /// Returns the refracted vector at a surface with normal `n` given the

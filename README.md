@@ -72,6 +72,12 @@ cargo run -- --help
 | Smoke and Fog           | <img src="./images/smoke_and_fog.png" width="200" />         | Final Image                 | <img src="./images/final_next_week.png" width="200" /> |
 | Rotation around X, Y, Z | <img src="./images/rotate_spheres.png" width="200" />        |                             |                                                        |
 
+### Raytracing The Rest Of Your Life
+
+| Title       | Image                                                          | Title | Image |
+| ----------- | -------------------------------------------------------------- | ----- | ----- |
+| Final Image | <img src="./images/final_rest_of_your_life.png" width="200" /> |       |       |
+
 #### Timing Benchmarks
 
 ##### Single-threaded

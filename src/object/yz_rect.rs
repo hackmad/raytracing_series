@@ -132,8 +132,14 @@ impl Hittable for YZrect {
     fn pdf_value(&self, origin: Point3, v: Vec3) -> Float {
         let ray = Ray::new(origin, v, 0.0);
         if let Some(rec) = self.hit(&ray, RAY_EPSILON, INFINITY) {
-            let distance_squared = rec.t * rec.t * v.length_squared();
-            let cosine = v.dot(rec.normal).abs() / v.length();
+            // Distance to hit is rec.t * v.length().
+            // So distance^2 = rec.t * rec.t * v.length_squared().
+            let v_len_sq = v.length_squared();
+            let v_len = v_len_sq.sqrt();
+
+            let distance_squared = rec.t * rec.t * v_len_sq;
+            let cosine = v.dot(rec.normal).abs() / v_len;
+
             distance_squared / (cosine * self.area)
         } else {
             0.0

@@ -4,7 +4,7 @@
 
 use super::{
     ArcHittable, ArcMaterial, ArcRandomizer, FlipFace, Float, HitRecord, Hittable, HittableList,
-    Point3, Ray, XYrect, XZrect, YZrect, AABB,
+    Point3, Ray, Vec3, XYrect, XZrect, YZrect, AABB,
 };
 use std::fmt;
 use std::sync::Arc;
@@ -127,5 +127,20 @@ impl Hittable for XYZbox {
     /// * `_time1` - End time of motion (ignored).
     fn bounding_box(&self, _time0: Float, _time1: Float) -> Option<AABB> {
         Some(AABB::new(self.box_min, self.box_max))
+    }
+
+    /// Sample PDF value at hit point and given direction.
+    ///
+    /// * `origin` - Hit point.
+    /// * `v` - Direction to sample.
+    fn pdf_value(&self, origin: Point3, v: Vec3) -> Float {
+        self.sides.pdf_value(origin, v)
+    }
+
+    /// Generate a random direction towards this object.
+    ///
+    /// * `origin` - Hit point.
+    fn random(&self, origin: Point3) -> Vec3 {
+        self.sides.random(origin)
     }
 }

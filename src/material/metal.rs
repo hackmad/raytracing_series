@@ -70,7 +70,7 @@ impl Material for Metal {
     fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterRecord> {
         let reflected = ray_in.direction.unit_vector().reflect(rec.normal);
 
-        let scatter_direction = reflected + self.rng.in_unit_sphere() * self.fuzz;
+        let scatter_direction = reflected + self.fuzz * self.rng.in_unit_sphere();
 
         if scatter_direction.dot(rec.normal) > 0.0 {
             Some(ScatterRecord {
