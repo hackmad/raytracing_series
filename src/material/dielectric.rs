@@ -2,7 +2,7 @@
 //!
 //! A library for handling dielectric material.
 
-use super::{ArcMaterial, ArcRandomizer, Colour, Float, HitRecord, Material, Ray, ScatterResult};
+use super::{ArcMaterial, ArcRandomizer, Colour, Float, HitRecord, Material, Ray, ScatterRecord};
 use std::fmt;
 use std::sync::Arc;
 
@@ -79,7 +79,7 @@ impl Material for Dielectric {
     ///
     /// * `ray_in` - Incident ray.
     /// * `rec` - The `HitRecord`.
-    fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterResult> {
+    fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterRecord> {
         // No attenuation
         let attenuation = Colour::new(1.0, 1.0, 1.0);
 
@@ -90,29 +90,36 @@ impl Material for Dielectric {
         };
 
         let unit_direction = ray_in.direction.unit_vector();
+        let unit_normal = rec.normal.unit_vector();
 
-        let cos_theta = -unit_direction.dot(rec.normal).min(1.0);
+        let cos_theta = -unit_direction.dot(unit_normal).min(1.0);
         let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
 
         if etai_over_etat * sin_theta > 1.0 {
-            let reflected = unit_direction.reflect(rec.normal);
-            Some(ScatterResult {
-                scattered: Ray::new(rec.point, reflected, ray_in.time),
+            let reflected = unit_direction.reflect(unit_normal);
+            Some(ScatterRecord {
+                specular_ray: Some(Ray::new(rec.point, reflected, ray_in.time)),
                 attenuation,
+                scattered_ray: None,
+                pdf: None,
             })
         } else {
             let reflect_prob = schlick(cos_theta, etai_over_etat);
             if self.rng.float() < reflect_prob {
-                let reflected = unit_direction.reflect(rec.normal);
-                Some(ScatterResult {
-                    scattered: Ray::new(rec.point, reflected, ray_in.time),
+                let reflected = unit_direction.reflect(unit_normal);
+                Some(ScatterRecord {
+                    specular_ray: Some(Ray::new(rec.point, reflected, ray_in.time)),
                     attenuation,
+                    scattered_ray: None,
+                    pdf: None,
                 })
             } else {
-                let refracted = unit_direction.refract(rec.normal, etai_over_etat);
-                Some(ScatterResult {
-                    scattered: Ray::new(rec.point, refracted, ray_in.time),
+                let refracted = unit_direction.refract(unit_normal, etai_over_etat);
+                Some(ScatterRecord {
+                    specular_ray: Some(Ray::new(rec.point, refracted, ray_in.time)),
                     attenuation,
+                    scattered_ray: None,
+                    pdf: None,
                 })
             }
         }

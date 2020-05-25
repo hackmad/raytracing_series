@@ -32,11 +32,7 @@ impl AABB {
     /// * `min` - Minimum bounds for the x, y and z dimensions.
     /// * `max` - Maximum bounds for the x, y and z dimensions.
     pub fn new(min: Point3, max: Point3) -> AABB {
-        // Guard against mixed up min/max values.
-        AABB {
-            min: Point3::new(min[0].min(max[0]), min[1].min(max[1]), min[2].min(max[2])),
-            max: Point3::new(min[0].max(max[0]), min[1].max(max[1]), min[2].max(max[2])),
-        }
+        AABB { min, max }
     }
 
     /// Create a box the surrounds the given 2 boxes.

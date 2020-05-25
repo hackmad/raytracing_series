@@ -131,9 +131,9 @@ impl Vec3 {
 
     /// Returns the reflection along a vector `n`.
     ///
-    /// * `n` - The vector along which to perform reflection.
+    /// * `n` - The unit vector along which to perform reflection.
     pub fn reflect(self, n: Vec3) -> Vec3 {
-        self - n * self.dot(n) * (2.0 as Float)
+        self - 2.0 * self.dot(n) * n
     }
 
     /// Returns the refracted vector at a surface with normal `n` given the
@@ -141,6 +141,9 @@ impl Vec3 {
     /// The ratio should be calculated as refractive index of material where
     /// the ray came from `𝜂i` and the refractive index of material where the
     /// ray is transmitted `𝜂t`.
+    ///
+    /// * `n` - Unit normal.
+    /// * `etai_over_etat` - Ratio of refractive indices of 2 materials.
     pub fn refract(self, n: Vec3, etai_over_etat: Float) -> Vec3 {
         let cos_theta = -self.dot(n);
         let r_out_parallel = (self + n * cos_theta) * etai_over_etat;
@@ -163,14 +166,19 @@ impl Vec3 {
     ///
     /// * `samples_per_pixel` - The number of samples per pixel.
     pub fn to_colour_from_sample(self, samples_per_pixel: u32) -> Colour {
+        // Replace NaN components with zero.
+        let r = if self.e[0].is_nan() { 0.0 } else { self.e[0] };
+        let g = if self.e[1].is_nan() { 0.0 } else { self.e[1] };
+        let b = if self.e[2].is_nan() { 0.0 } else { self.e[2] };
+
         // Divide the color total by the number of samples
         let s = 1.0 / samples_per_pixel as Float;
 
         // Gamma-correct for a gamma value of 2.0 (sqrt)
         Colour::new(
-            256.0 * clamp((self.x() * s).sqrt(), 0.0, 0.999),
-            256.0 * clamp((self.y() * s).sqrt(), 0.0, 0.999),
-            256.0 * clamp((self.z() * s).sqrt(), 0.0, 0.999),
+            256.0 * clamp((s * r).sqrt(), 0.0, 0.999),
+            256.0 * clamp((s * g).sqrt(), 0.0, 0.999),
+            256.0 * clamp((s * b).sqrt(), 0.0, 0.999),
         )
     }
 

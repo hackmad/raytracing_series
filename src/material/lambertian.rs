@@ -2,7 +2,10 @@
 //!
 //! A library for handling Lambertian diffuse material.
 
-use super::{ArcMaterial, ArcRandomizer, ArcTexture, HitRecord, Material, Ray, ScatterResult};
+use super::{
+    ArcMaterial, ArcRandomizer, ArcTexture, CosinePDF, Float, HitRecord, Material, Ray,
+    ScatterRecord, PI,
+};
 use std::fmt;
 use std::sync::Arc;
 
@@ -58,11 +61,31 @@ impl Material for Lambertian {
     ///
     /// * `ray_in` - Incident ray.
     /// * `rec` - The `HitRecord`.
-    fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterResult> {
-        let scatter_direction = rec.normal + self.rng.unit_vec3();
-        Some(ScatterResult {
-            scattered: Ray::new(rec.point, scatter_direction, ray_in.time),
+    fn scatter(&self, _ray_in: &Ray, rec: &HitRecord) -> Option<ScatterRecord> {
+        let pdf = CosinePDF::new(rec.normal, Arc::clone(&self.rng));
+
+        Some(ScatterRecord {
             attenuation: self.albedo.value(rec.u, rec.v, &rec.point),
+            pdf: Some(Arc::new(pdf)),
+            scattered_ray: None, // pdf handles it
+            specular_ray: None,
         })
+    }
+
+    /// Return the PDF value at a point on the surface. Used for impportance
+    /// sampling.
+    ///
+    /// * `ray_in` - Incident ray.
+    /// * `rec` - The `HitRecord`.
+    /// * `scattered` - The scattered ray.
+    fn scattering_pdf(&self, _ray_in: &Ray, rec: &HitRecord, scattered: &Ray) -> Float {
+        let n = rec.normal.unit_vector();
+        let v = scattered.direction.unit_vector();
+        let cosine = n.dot(v);
+        if cosine < 0.0 {
+            0.0
+        } else {
+            cosine / PI
+        }
     }
 }

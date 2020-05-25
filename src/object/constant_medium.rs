@@ -5,7 +5,7 @@
 
 use super::{
     ArcHittable, ArcMaterial, ArcRandomizer, ArcTexture, Float, HitRecord, Hittable, Isotropic,
-    Ray, Vec3, AABB, INFINITY,
+    Ray, Vec3, AABB, INFINITY, MIN_THICKNESS,
 };
 use std::fmt;
 use std::sync::Arc;
@@ -72,17 +72,17 @@ impl Hittable for ConstantMedium {
         let enable_debug = false;
         let debugging = enable_debug && self.rng.float() < 0.00001;
 
-        let mut t0 = if let Some(rec1) = self.boundary.hit(ray, -INFINITY, INFINITY) {
-            rec1.t
-        } else {
+        let rec1 = self.boundary.hit(ray, -INFINITY, INFINITY);
+        if rec1.is_none() {
             return None;
-        };
+        }
+        let mut t0 = rec1.unwrap().t;
 
-        let mut t1 = if let Some(rec2) = self.boundary.hit(ray, t0 + 0.0001, INFINITY) {
-            rec2.t
-        } else {
+        let rec2 = self.boundary.hit(ray, t0 + MIN_THICKNESS, INFINITY);
+        if rec2.is_none() {
             return None;
-        };
+        }
+        let mut t1 = rec2.unwrap().t;
 
         if debugging {
             eprintln!("\nt0={}, t1={}", t0, t1);

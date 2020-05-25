@@ -2,9 +2,14 @@
 //!
 //! A library of common utility functinos.
 
+mod cosine_pdf;
+mod hittable_pdf;
+mod mixture_pdf;
 mod random;
+mod util;
 
-use super::algebra::Vec3;
+use super::algebra::{Point3, Vec3, ONB};
+use super::object::ArcHittable;
 use std::fmt;
 use std::sync::Arc;
 
@@ -23,8 +28,18 @@ pub const PI_OVER_2: Float = 0.5 * PI;
 /// The constant `+∞`.
 pub const INFINITY: Float = std::f64::INFINITY;
 
-/// Random number generator.
+/// Used to offset ray positions and AAB boundaries to avoid intersection issues.
+pub const RAY_EPSILON: Float = 0.001;
+
+/// Minimum thickness of AABB used for 2-d shapes like planes.
+pub const MIN_THICKNESS: Float = 0.0001;
+
+/// Re-exports.
+pub use self::cosine_pdf::CosinePDF;
+pub use self::hittable_pdf::HittablePDF;
+pub use self::mixture_pdf::MixturePDF;
 pub use self::random::{new_seeded_rng, new_thread_rng, Random};
+pub use self::util::*;
 
 /// Define some utility functions for generating random values.
 ///
@@ -34,6 +49,11 @@ pub use self::random::{new_seeded_rng, new_thread_rng, Random};
 pub trait Randomizer: fmt::Debug {
     /// Returns a random floating point values in [0, 1].
     fn float(&self) -> Float;
+
+    /// Returns `n` random floating point values in [0, 1].
+    ///
+    /// * `n` - Number of samples.
+    fn float_vec(&self, n: usize) -> Vec<Float>;
 
     /// Returns a random floating point value in [`min`, `max`].
     ///
@@ -71,6 +91,13 @@ pub trait Randomizer: fmt::Debug {
     /// * `max` - Maximum bound
     fn u64_in_range(&self, min: u64, max: u64) -> u64;
 
+    /// Returns `n` random floating point values in [`min`, `max`].
+    ///
+    /// * `n` - Number of samples.
+    /// * `min` - Minimum bound
+    /// * `max` - Maximum bound
+    fn float_vec_in_range(&self, n: usize, min: Float, max: Float) -> Vec<Float>;
+
     /// Returns a random vector with random components in [0, 1].
     fn vec3(&self) -> Vec3;
 
@@ -101,22 +128,30 @@ pub trait Randomizer: fmt::Debug {
     ///
     /// * `v` - Vector to shuffle.
     fn permute(&self, v: &mut Vec<usize>);
+
+    /// Returns a random vector based on p(direction) = cos(θ) / π.
+    fn cosine_direction(&self) -> Vec3;
+
+    // Return a random vector uniformly sampled from a sphere’s solid angle
+    // from a point outside the sphere
+    //
+    // * `distance_squared` - Square of distance to a point from center.
+    fn to_sphere(&self, radius: Float, distance_squared: Float) -> Vec3;
 }
 
 // Atomic reference counted `Randomizer`.
 pub type ArcRandomizer = Arc<dyn Randomizer + Send + Sync>;
 
-/// Clamp the given value.clamp
-///
-/// * `x` - The value to clamp.
-/// * `min` - Minimum bound.
-/// * `max` - Maximum bound.
-pub fn clamp(x: Float, min: Float, max: Float) -> Float {
-    if x < min {
-        min
-    } else if x > max {
-        max
-    } else {
-        x
-    }
+/// Probability density functions.
+pub trait PDF: fmt::Debug {
+    /// Returns the value of a PDF at a location.
+    ///
+    /// * `direction` - Direction of surface normal.
+    fn value(&self, direction: Vec3) -> Float;
+
+    /// Returns a random direction based on PDF.
+    fn generate(&self) -> Vec3;
 }
+
+// Atomic reference counted `PDF`.
+pub type ArcPDF = Arc<dyn PDF + Send + Sync>;

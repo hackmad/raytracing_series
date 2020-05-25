@@ -3,7 +3,10 @@
 //! A library for handling ray intersections with axis aligned rectangle in
 //! the xz-plane.
 
-use super::{ArcHittable, ArcMaterial, Float, HitRecord, Hittable, Point3, Ray, Vec3, AABB};
+use super::{
+    ArcHittable, ArcMaterial, ArcRandomizer, Float, HitRecord, Hittable, Point3, Ray, Vec3, AABB,
+    INFINITY, MIN_THICKNESS, RAY_EPSILON,
+};
 use std::fmt;
 use std::sync::Arc;
 
@@ -25,8 +28,14 @@ pub struct XZrect {
     /// Y-coordinate of plane.
     y: Float,
 
+    /// Area
+    area: Float,
+
     /// Surface material.
     material: ArcMaterial,
+
+    /// Random number generator.
+    rng: ArcRandomizer,
 }
 
 impl fmt::Display for XZrect {
@@ -36,8 +45,8 @@ impl fmt::Display for XZrect {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "xz_rect(x0: {}, x1: {}, z0: {}, z1:{}, y: {}, material: {})",
-            self.x0, self.x1, self.z0, self.z1, self.y, self.material
+            "xz_rect(x0: {}, x1: {}, z0: {}, z1:{}, y: {}, area: {}, material: {})",
+            self.x0, self.x1, self.z0, self.z1, self.y, self.area, self.material
         )
     }
 }
@@ -51,6 +60,7 @@ impl XZrect {
     /// * `z1` - Y-coordinate bound z1.
     /// * `y` - Y-coordinate.
     /// * `material` - Surface material.
+    /// * `rng` - Random number generator.
     pub fn new(
         x0: Float,
         x1: Float,
@@ -58,15 +68,17 @@ impl XZrect {
         z1: Float,
         y: Float,
         material: ArcMaterial,
+        rng: ArcRandomizer,
     ) -> ArcHittable {
-        // Guard against mixed up min/max values.
         Arc::new(XZrect {
-            x0: x0.min(x1),
-            x1: x0.max(x1),
-            z0: z0.min(z1),
-            z1: z0.max(z1),
+            x0,
+            x1,
+            z0,
+            z1,
             y,
+            area: (x1 - x0) * (z1 - z0),
             material: Arc::clone(&material),
+            rng: Arc::clone(&rng),
         })
     }
 }
@@ -108,8 +120,40 @@ impl Hittable for XZrect {
         // The bounding box must have non-zero width in each dimension, so pad
         // the Z dimension a small amount.
         Some(AABB::new(
-            Point3::new(self.x0, self.y - 0.0001, self.z0),
-            Point3::new(self.x1, self.y + 0.0001, self.z1),
+            Point3::new(self.x0, self.y - MIN_THICKNESS, self.z0),
+            Point3::new(self.x1, self.y + MIN_THICKNESS, self.z1),
         ))
+    }
+
+    /// Sample PDF value at hit point and given direction.
+    ///
+    /// * `origin` - Hit point.
+    /// * `v` - Direction to sample.
+    fn pdf_value(&self, origin: Point3, v: Vec3) -> Float {
+        let ray = Ray::new(origin, v, 0.0);
+        if let Some(rec) = self.hit(&ray, RAY_EPSILON, INFINITY) {
+            // Distance to hit is rec.t * v.length().
+            // So distance^2 = rec.t * rec.t * v.length_squared().
+            let v_len_sq = v.length_squared();
+            let v_len = v_len_sq.sqrt();
+            let v_unit = v / v_len;
+
+            let distance_squared = rec.t * rec.t * v_len_sq;
+            let cosine = v_unit.dot(rec.normal.unit_vector()).abs();
+
+            distance_squared / (cosine * self.area)
+        } else {
+            0.0
+        }
+    }
+
+    /// Generate a random direction towards this object.
+    ///
+    /// * `origin` - Hit point.
+    fn random(&self, origin: Point3) -> Vec3 {
+        let x = self.rng.float_in_range(self.x0, self.x1);
+        let z = self.rng.float_in_range(self.z0, self.z1);
+        let random_point = Point3::new(x, self.y, z);
+        random_point - origin
     }
 }

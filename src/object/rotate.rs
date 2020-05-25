@@ -95,6 +95,29 @@ impl Hittable for Rotate {
     fn bounding_box(&self, _time0: Float, _time1: Float) -> Option<AABB> {
         Some(self.bbox)
     }
+
+    /// Sample PDF value at hit point and given direction.
+    ///
+    /// * `origin` - Hit point.
+    /// * `v` - Direction to sample.
+    fn pdf_value(&self, origin: Point3, v: Vec3) -> Float {
+        self.object.pdf_value(
+            rotate_neg(&origin, self.axis, self.sin_theta, self.cos_theta),
+            rotate_neg(&v, self.axis, self.sin_theta, self.cos_theta),
+        )
+    }
+
+    /// Generate a random direction towards this object.
+    ///
+    /// * `origin` - Hit point.
+    fn random(&self, origin: Point3) -> Vec3 {
+        self.object.random(rotate_neg(
+            &origin,
+            self.axis,
+            self.sin_theta,
+            self.cos_theta,
+        ))
+    }
 }
 
 /// Calculates the bounding box for an object rotated about a coordinate axis.
