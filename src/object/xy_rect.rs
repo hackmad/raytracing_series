@@ -136,9 +136,10 @@ impl Hittable for XYrect {
             // So distance^2 = rec.t * rec.t * v.length_squared().
             let v_len_sq = v.length_squared();
             let v_len = v_len_sq.sqrt();
+            let v_unit = v / v_len;
 
             let distance_squared = rec.t * rec.t * v_len_sq;
-            let cosine = v.dot(rec.normal).abs() / v_len;
+            let cosine = v_unit.dot(rec.normal.unit_vector()).abs();
 
             distance_squared / (cosine * self.area)
         } else {

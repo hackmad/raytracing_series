@@ -79,7 +79,9 @@ impl Material for Lambertian {
     /// * `rec` - The `HitRecord`.
     /// * `scattered` - The scattered ray.
     fn scattering_pdf(&self, _ray_in: &Ray, rec: &HitRecord, scattered: &Ray) -> Float {
-        let cosine = rec.normal.dot(scattered.direction.unit_vector());
+        let n = rec.normal.unit_vector();
+        let v = scattered.direction.unit_vector();
+        let cosine = n.dot(v);
         if cosine < 0.0 {
             0.0
         } else {

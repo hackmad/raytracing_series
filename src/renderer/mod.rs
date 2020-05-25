@@ -101,11 +101,14 @@ impl RecursiveTracer {
 
             let scattered = Ray::new(rec.point, p.generate(), ray.time);
             let pdf_val = p.value(scattered.direction);
+            if pdf_val > 0.0 {
+                let scattering_pdf = rec.material.scattering_pdf(&ray, &rec, &scattered);
 
-            let scattering_pdf = rec.material.scattering_pdf(&ray, &rec, &scattered);
-
-            let colour = self.ray_colour(&scattered, depth - 1);
-            emission + sr.attenuation * scattering_pdf * colour / pdf_val
+                let colour = self.ray_colour(&scattered, depth - 1);
+                emission + sr.attenuation * scattering_pdf * colour / pdf_val
+            } else {
+                emission
+            }
         } else {
             emission
         }
