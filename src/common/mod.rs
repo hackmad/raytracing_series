@@ -50,6 +50,11 @@ pub trait Randomizer: fmt::Debug {
     /// Returns a random floating point values in [0, 1].
     fn float(&self) -> Float;
 
+    /// Returns `n` random floating point values in [0, 1].
+    ///
+    /// * `n` - Number of samples.
+    fn float_vec(&self, n: usize) -> Vec<Float>;
+
     /// Returns a random floating point value in [`min`, `max`].
     ///
     /// * `min` - Minimum bound
@@ -85,6 +90,13 @@ pub trait Randomizer: fmt::Debug {
     /// * `min` - Minimum bound
     /// * `max` - Maximum bound
     fn u64_in_range(&self, min: u64, max: u64) -> u64;
+
+    /// Returns `n` random floating point values in [`min`, `max`].
+    ///
+    /// * `n` - Number of samples.
+    /// * `min` - Minimum bound
+    /// * `max` - Maximum bound
+    fn float_vec_in_range(&self, n: usize, min: Float, max: Float) -> Vec<Float>;
 
     /// Returns a random vector with random components in [0, 1].
     fn vec3(&self) -> Vec3;

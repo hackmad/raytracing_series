@@ -2,6 +2,7 @@
 //!
 //! A library for generating random numbers.
 
+#![allow(dead_code)]
 use super::{ArcRandomizer, Float, Randomizer, Vec3, TWO_PI};
 use rand::distributions::uniform::{SampleBorrow, SampleUniform};
 use rand::{Rng, RngCore, SeedableRng};
@@ -52,6 +53,14 @@ where
     fn float(&self) -> Float {
         let mut rng = self.rng.lock().unwrap();
         Random::float(&mut rng)
+    }
+
+    /// Returns `n` random floating point values in [0, 1].
+    ///
+    /// * `n` - Number of samples.
+    fn float_vec(&self, n: usize) -> Vec<Float> {
+        let mut rng = self.rng.lock().unwrap();
+        Random::float_vec(&mut rng, n)
     }
 
     /// Returns a random floating point value in [`min`, `max`].
@@ -106,6 +115,16 @@ where
     fn u64_in_range(&self, min: u64, max: u64) -> u64 {
         let mut rng = self.rng.lock().unwrap();
         Random::in_range(&mut rng, min, max)
+    }
+
+    /// Returns `n` random floating point values in [`min`, `max`].
+    ///
+    /// * `n` - Number of samples.
+    /// * `min` - Minimum bound
+    /// * `max` - Maximum bound
+    fn float_vec_in_range(&self, n: usize, min: Float, max: Float) -> Vec<Float> {
+        let mut rng = self.rng.lock().unwrap();
+        Random::vec_in_range(&mut rng, n, min, max)
     }
 
     /// Returns a random vector with random components in [0, 1].
@@ -245,7 +264,14 @@ where
         rng.gen::<Float>()
     }
 
-    /// Returns a random floating point values in [`min`, `max`].
+    /// Returns `n` random floating point values in [0, 1].
+    ///
+    /// * `n` - Number of samples.
+    fn float_vec(rng: &mut MutexGuard<'_, T>, n: usize) -> Vec<Float> {
+        (0..n).map(|_| rng.gen::<Float>()).collect()
+    }
+
+    /// Returns a random value in [`min`, `max`].
     ///
     /// * `min` - Minimum bound
     /// * `max` - Maximum bound
@@ -255,6 +281,26 @@ where
         B2: SampleBorrow<U> + Sized,
     {
         rng.gen_range::<U, B1, B2>(min, max)
+    }
+
+    /// Returns `n` random values in [`min`, `max`].
+    ///
+    /// * `n` - Number of samples.
+    /// * `min` - Minimum bound
+    /// * `max` - Maximum bound
+    fn vec_in_range<U: SampleUniform, B1, B2>(
+        rng: &mut MutexGuard<'_, T>,
+        n: usize,
+        min: B1,
+        max: B2,
+    ) -> Vec<U>
+    where
+        B1: SampleBorrow<U> + Sized + Copy,
+        B2: SampleBorrow<U> + Sized + Copy,
+    {
+        (0..n)
+            .map(|_| rng.gen_range::<U, B1, B2>(min, max))
+            .collect()
     }
 
     /// Returns a random unit vector by picking points on the unit sphere
