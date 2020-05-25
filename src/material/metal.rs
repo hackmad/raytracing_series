@@ -68,11 +68,12 @@ impl Material for Metal {
     /// * `ray_in` - Incident ray.
     /// * `rec` - The `HitRecord`.
     fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterResult> {
-        let reflected = ray_in.direction.unit_vector().reflect(rec.normal);
+        let unit_normal = rec.normal.unit_vector();
+        let reflected = ray_in.direction.unit_vector().reflect(unit_normal);
 
         let scatter_direction = reflected + self.rng.in_unit_sphere() * self.fuzz;
 
-        if scatter_direction.dot(rec.normal) > 0.0 {
+        if scatter_direction.dot(unit_normal) > 0.0 {
             Some(ScatterResult {
                 scattered: Ray::new(rec.point, scatter_direction, ray_in.time),
                 attenuation: self.albedo.value(rec.u, rec.v, &rec.point),
