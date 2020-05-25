@@ -36,6 +36,7 @@ pub enum Scenery {
     SmokeAndFog,
     FinalNextWeek,
     RotateSpheres,
+    FinalRestOfYourLife,
 }
 
 impl<'a> Scenery {
@@ -68,6 +69,7 @@ impl<'a> Scenery {
         map.insert("smoke_and_fog", Scenery::SmokeAndFog);
         map.insert("final_next_week", Scenery::FinalNextWeek);
         map.insert("rotate_spheres", Scenery::RotateSpheres);
+        map.insert("final_rest_of_your_life", Scenery::FinalRestOfYourLife);
 
         map
     }
@@ -165,6 +167,9 @@ impl Scene {
             }
             Scenery::RotateSpheres => {
                 rotate_spheres(image_width, image_height, bvh_enabled, Arc::clone(&rng))
+            }
+            Scenery::FinalRestOfYourLife => {
+                final_rest_of_your_life(image_width, image_height, bvh_enabled, Arc::clone(&rng))
             }
         }
     }
@@ -998,7 +1003,7 @@ fn cornell_box_base<'a>(
         Arc::clone(&light),
         Arc::clone(&rng),
     ));
-    let bottom = FlipFace::new(XZrect::new(
+    let top = FlipFace::new(XZrect::new(
         0.0,
         555.0,
         0.0,
@@ -1007,7 +1012,7 @@ fn cornell_box_base<'a>(
         Arc::clone(&white),
         Arc::clone(&rng),
     ));
-    let top = XZrect::new(
+    let bottom = XZrect::new(
         0.0,
         555.0,
         0.0,
@@ -1080,6 +1085,10 @@ fn cornell_box(
 ) -> Scene {
     let (objects, materials) = cornell_box_base(Arc::clone(&rng));
 
+    let white = materials
+        .get("white")
+        .expect("White material not found for cornell box.");
+
     let mut world: Vec<ArcHittable> = Vec::new();
     let mut lights: Vec<ArcHittable> = Vec::new();
 
@@ -1090,10 +1099,6 @@ fn cornell_box(
             lights.push(Arc::clone(&object));
         }
     }
-
-    let white = materials
-        .get("white")
-        .expect("White material not found for cornell box.");
 
     world.push(Translate::new(
         Rotate::new(
@@ -1462,6 +1467,64 @@ fn rotate_spheres(
         &world,
         &lights,
         camera,
+        black_background,
+        bvh_enabled,
+        Arc::clone(&rng),
+    )
+}
+
+fn final_rest_of_your_life(
+    image_width: u32,
+    image_height: u32,
+    bvh_enabled: bool,
+    rng: ArcRandomizer,
+) -> Scene {
+    let (objects, materials) = cornell_box_base(Arc::clone(&rng));
+
+    let white = materials
+        .get("white")
+        .expect("White material not found for cornell box.");
+
+    let mut world: Vec<ArcHittable> = Vec::new();
+    let mut lights: Vec<ArcHittable> = Vec::new();
+
+    for (key, object) in objects {
+        world.push(Arc::clone(&object));
+
+        if key == "top_light" {
+            lights.push(Arc::clone(&object));
+        }
+    }
+
+    world.push(Translate::new(
+        Rotate::new(
+            XYZbox::new(
+                Point3::zero(),
+                Point3::new(165.0, 330.0, 165.0),
+                Arc::clone(&white),
+                Arc::clone(&rng),
+            ),
+            Y_AXIS,
+            15.0,
+        ),
+        Vec3::new(265.0, 0.0, 295.0),
+    ));
+
+    let glass_mat = Dielectric::new(1.5, Arc::clone(&rng));
+    let glass = Sphere::new(
+        Point3::new(190.0, 90.0, 190.0),
+        90.0,
+        glass_mat,
+        Arc::clone(&rng),
+    );
+
+    world.push(Arc::clone(&glass));
+    lights.push(Arc::clone(&glass));
+
+    Scene::new_scene(
+        &world,
+        &lights,
+        cornell_box_camera(image_width, image_height, Arc::clone(&rng)),
         black_background,
         bvh_enabled,
         Arc::clone(&rng),
