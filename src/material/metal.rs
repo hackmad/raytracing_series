@@ -68,7 +68,10 @@ impl Material for Metal {
     /// * `ray_in` - Incident ray.
     /// * `rec` - The `HitRecord`.
     fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterRecord> {
-        let reflected = ray_in.direction.unit_vector().reflect(rec.normal);
+        let reflected = ray_in
+            .direction
+            .unit_vector()
+            .reflect(rec.normal.unit_vector());
 
         let scatter_direction = reflected + self.fuzz * self.rng.in_unit_sphere();
 

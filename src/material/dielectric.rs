@@ -90,12 +90,13 @@ impl Material for Dielectric {
         };
 
         let unit_direction = ray_in.direction.unit_vector();
+        let unit_normal = rec.normal.unit_vector();
 
-        let cos_theta = -unit_direction.dot(rec.normal).min(1.0);
+        let cos_theta = -unit_direction.dot(unit_normal).min(1.0);
         let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
 
         if etai_over_etat * sin_theta > 1.0 {
-            let reflected = unit_direction.reflect(rec.normal);
+            let reflected = unit_direction.reflect(unit_normal);
             Some(ScatterRecord {
                 specular_ray: Some(Ray::new(rec.point, reflected, ray_in.time)),
                 attenuation,
@@ -105,7 +106,7 @@ impl Material for Dielectric {
         } else {
             let reflect_prob = schlick(cos_theta, etai_over_etat);
             if self.rng.float() < reflect_prob {
-                let reflected = unit_direction.reflect(rec.normal);
+                let reflected = unit_direction.reflect(unit_normal);
                 Some(ScatterRecord {
                     specular_ray: Some(Ray::new(rec.point, reflected, ray_in.time)),
                     attenuation,
@@ -113,7 +114,7 @@ impl Material for Dielectric {
                     pdf: None,
                 })
             } else {
-                let refracted = unit_direction.refract(rec.normal, etai_over_etat);
+                let refracted = unit_direction.refract(unit_normal, etai_over_etat);
                 Some(ScatterRecord {
                     specular_ray: Some(Ray::new(rec.point, refracted, ray_in.time)),
                     attenuation,

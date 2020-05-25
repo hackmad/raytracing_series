@@ -74,9 +74,10 @@ cargo run -- --help
 
 ### Raytracing The Rest Of Your Life
 
-| Title       | Image                                                          | Title | Image |
-| ----------- | -------------------------------------------------------------- | ----- | ----- |
-| Final Image | <img src="./images/final_rest_of_your_life.png" width="200" /> |       |       |
+| Title                | Image                                                       | Title       | Image                                                          |
+| -------------------- | ----------------------------------------------------------- | ----------- | -------------------------------------------------------------- |
+| Standard Cornell Box | <img src="./images/cornell_box_2.png" width="200" />        |             |                                                                |
+| Specular Reflections | <img src="./images/specular_reflections.png" width="200" /> | Final Image | <img src="./images/final_rest_of_your_life.png" width="200" /> |
 
 #### Timing Benchmarks
 

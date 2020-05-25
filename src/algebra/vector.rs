@@ -131,7 +131,7 @@ impl Vec3 {
 
     /// Returns the reflection along a vector `n`.
     ///
-    /// * `n` - The vector along which to perform reflection.
+    /// * `n` - The unit vector along which to perform reflection.
     pub fn reflect(self, n: Vec3) -> Vec3 {
         self - 2.0 * self.dot(n) * n
     }
@@ -141,6 +141,9 @@ impl Vec3 {
     /// The ratio should be calculated as refractive index of material where
     /// the ray came from `𝜂i` and the refractive index of material where the
     /// ray is transmitted `𝜂t`.
+    ///
+    /// * `n` - Unit normal.
+    /// * `etai_over_etat` - Ratio of refractive indices of 2 materials.
     pub fn refract(self, n: Vec3, etai_over_etat: Float) -> Vec3 {
         let cos_theta = -self.dot(n);
         let r_out_parallel = (self + n * cos_theta) * etai_over_etat;

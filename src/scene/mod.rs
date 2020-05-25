@@ -36,6 +36,7 @@ pub enum Scenery {
     SmokeAndFog,
     FinalNextWeek,
     RotateSpheres,
+    SpecularReflections,
     FinalRestOfYourLife,
 }
 
@@ -69,6 +70,7 @@ impl<'a> Scenery {
         map.insert("smoke_and_fog", Scenery::SmokeAndFog);
         map.insert("final_next_week", Scenery::FinalNextWeek);
         map.insert("rotate_spheres", Scenery::RotateSpheres);
+        map.insert("specular_reflections", Scenery::SpecularReflections);
         map.insert("final_rest_of_your_life", Scenery::FinalRestOfYourLife);
 
         map
@@ -167,6 +169,9 @@ impl Scene {
             }
             Scenery::RotateSpheres => {
                 rotate_spheres(image_width, image_height, bvh_enabled, Arc::clone(&rng))
+            }
+            Scenery::SpecularReflections => {
+                specular_reflections(image_width, image_height, bvh_enabled, Arc::clone(&rng))
             }
             Scenery::FinalRestOfYourLife => {
                 final_rest_of_your_life(image_width, image_height, bvh_enabled, Arc::clone(&rng))
@@ -1155,7 +1160,7 @@ fn cornell_box_smoke_and_fog(
     }
 
     let diffuse_light = DiffuseLight::new(SolidColour::from_rgb(7.0, 7.0, 7.0), Arc::clone(&rng));
-    let light = XZrect::new(
+    let light = FlipFace::new(XZrect::new(
         113.0,
         443.0,
         127.0,
@@ -1163,7 +1168,7 @@ fn cornell_box_smoke_and_fog(
         554.0,
         Arc::clone(&diffuse_light),
         Arc::clone(&rng),
-    );
+    ));
     world.push(Arc::clone(&light));
 
     let lights = vec![Arc::clone(&light)];
@@ -1467,6 +1472,73 @@ fn rotate_spheres(
         &world,
         &lights,
         camera,
+        black_background,
+        bvh_enabled,
+        Arc::clone(&rng),
+    )
+}
+
+fn specular_reflections(
+    image_width: u32,
+    image_height: u32,
+    bvh_enabled: bool,
+    rng: ArcRandomizer,
+) -> Scene {
+    let (objects, materials) = cornell_box_base(Arc::clone(&rng));
+
+    let white = materials
+        .get("white")
+        .expect("White material not found for cornell box.");
+
+    let aluminum = Metal::new(
+        SolidColour::from_rgb(0.8, 0.85, 0.88),
+        0.0,
+        Arc::clone(&rng),
+    );
+
+    let mut world: Vec<ArcHittable> = Vec::new();
+    let mut lights: Vec<ArcHittable> = Vec::new();
+
+    for (key, object) in objects {
+        world.push(Arc::clone(&object));
+
+        if key == "top_light" {
+            lights.push(Arc::clone(&object));
+        }
+    }
+
+    world.push(Translate::new(
+        Rotate::new(
+            XYZbox::new(
+                Point3::zero(),
+                Point3::new(165.0, 330.0, 165.0),
+                Arc::clone(&aluminum),
+                Arc::clone(&rng),
+            ),
+            Y_AXIS,
+            15.0,
+        ),
+        Vec3::new(265.0, 0.0, 295.0),
+    ));
+
+    world.push(Translate::new(
+        Rotate::new(
+            XYZbox::new(
+                Point3::zero(),
+                Point3::new(165.0, 165.0, 165.0),
+                Arc::clone(&white),
+                Arc::clone(&rng),
+            ),
+            Y_AXIS,
+            -18.0,
+        ),
+        Vec3::new(130.0, 0.0, 65.0),
+    ));
+
+    Scene::new_scene(
+        &world,
+        &lights,
+        cornell_box_camera(image_width, image_height, Arc::clone(&rng)),
         black_background,
         bvh_enabled,
         Arc::clone(&rng),
