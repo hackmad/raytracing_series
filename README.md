@@ -107,7 +107,7 @@ Done: 9.33 minutese
 
 Without Bounding Volume Hierarchy:
 
-````bash
+```bash
 target/release/raytracing_series --scene final_one_weekend -w 1200 -h 600 \
     --seed 8589869056 -t 4 -o final_one_weekend.png
 
@@ -123,4 +123,4 @@ target/release/raytracing_series --scene final_one_weekend --bvh -w 1200 -h 600 
 
 BVH: 0.000471452 seconds
 Done: 5.14 minutese
-````
+```
