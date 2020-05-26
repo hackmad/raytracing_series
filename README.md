@@ -113,6 +113,7 @@ target/release/raytracing_series --scene final_one_weekend -w 1200 -h 600 \
 
 HittableList: 0.000035394 seconds
 Done: 10.89 minutes
+```
 
 With Bounding Volume Hierarchy:
 
