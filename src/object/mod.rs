@@ -19,9 +19,7 @@ mod xz_rect;
 mod yz_rect;
 
 use super::algebra::{Axis, Point3, Ray, Vec3, AXES, ONB, X_AXIS, Y_AXIS, Z_AXIS};
-use super::common::{
-    ArcRandomizer, Float, INFINITY, MIN_THICKNESS, PI, PI_OVER_2, RAY_EPSILON, TWO_PI,
-};
+use super::common::{Float, Random, INFINITY, MIN_THICKNESS, PI, PI_OVER_2, RAY_EPSILON, TWO_PI};
 use super::material::{ArcMaterial, Isotropic};
 use super::texture::ArcTexture;
 use std::fmt;

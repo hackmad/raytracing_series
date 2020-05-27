@@ -4,7 +4,7 @@
 
 use super::algebra::{Colour, Ray};
 use super::app_config::AppConfig;
-use super::common::{ArcRandomizer, Float, HittablePDF, MixturePDF, INFINITY, PDF, RAY_EPSILON};
+use super::common::{Float, HittablePDF, MixturePDF, Random, INFINITY, PDF, RAY_EPSILON};
 use super::scene::Scene;
 use std::sync::Arc;
 
@@ -12,9 +12,6 @@ use std::sync::Arc;
 pub struct RecursiveTracer {
     /// The scene.
     pub scene: Scene,
-
-    /// Random number generator.
-    pub rng: ArcRandomizer,
 
     /// Application configuration.
     pub config: AppConfig,
@@ -28,7 +25,6 @@ impl RecursiveTracer {
     /// * `j` - Pixel y-coordinate.
     /// * `config` - Program configuration.
     /// * `tracer` - The rendering algorithm.
-    /// * `rng` - The random number generator.
     pub fn trace_ray(&self, i: u32, j: u32) -> Colour {
         let x = i as Float;
         let y = j as Float;
@@ -39,8 +35,10 @@ impl RecursiveTracer {
 
         (0..n)
             .fold(Colour::zero(), |colour, _| {
-                let u = (x + Arc::clone(&self.rng).float()) / w;
-                let v = (y + Arc::clone(&self.rng).float()) / h;
+                let s = Random::samples::<Float>(2);
+
+                let u = (x + s[0]) / w;
+                let v = (y + s[1]) / h;
 
                 let ray = self.scene.camera.get_ray(u, v);
                 colour + self.ray_colour(&ray, self.config.max_depth)
@@ -95,9 +93,8 @@ impl RecursiveTracer {
 
             let light_pdf = Arc::new(HittablePDF::new(lights, rec.point));
             let diffuse_pdf = Arc::clone(&pdf);
-            let rng = Arc::clone(&self.rng);
 
-            let p = MixturePDF::new(light_pdf, diffuse_pdf, rng);
+            let p = MixturePDF::new(light_pdf, diffuse_pdf);
 
             let scattered = Ray::new(rec.point, p.generate(), ray.time);
             let pdf_val = p.value(scattered.direction);

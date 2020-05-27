@@ -9,7 +9,7 @@ mod lambertian;
 mod metal;
 
 use super::algebra::{Colour, Ray};
-use super::common::{ArcPDF, ArcRandomizer, CosinePDF, Float, PI};
+use super::common::{ArcPDF, CosinePDF, Float, Random, PI};
 use super::object::HitRecord;
 use super::texture::ArcTexture;
 use std::fmt;

@@ -2,7 +2,7 @@
 //!
 //! A library for handling dielectric material.
 
-use super::{ArcMaterial, ArcRandomizer, Colour, Float, HitRecord, Material, Ray, ScatterRecord};
+use super::{ArcMaterial, Colour, Float, HitRecord, Material, Random, Ray, ScatterRecord};
 use std::fmt;
 use std::sync::Arc;
 
@@ -14,21 +14,16 @@ pub struct Dielectric {
 
     /// Reciprocal of `ref_idx`.
     one_over_ref_idx: Float,
-
-    /// Random number generator.
-    rng: ArcRandomizer,
 }
 
 impl Dielectric {
     /// Creates a new dielectric material.
     ///
     /// * `ri` - Index of refraction.
-    /// * `rng` - Random number generator.
-    pub fn new(ri: Float, rng: ArcRandomizer) -> ArcMaterial {
+    pub fn new(ri: Float) -> ArcMaterial {
         Arc::new(Dielectric {
             ref_idx: ri,
             one_over_ref_idx: 1.0 / ri,
-            rng: Arc::clone(&rng),
         })
     }
 }
@@ -105,7 +100,7 @@ impl Material for Dielectric {
             })
         } else {
             let reflect_prob = schlick(cos_theta, etai_over_etat);
-            if self.rng.float() < reflect_prob {
+            if Random::sample::<Float>() < reflect_prob {
                 let reflected = unit_direction.reflect(unit_normal);
                 Some(ScatterRecord {
                     specular_ray: Some(Ray::new(rec.point, reflected, ray_in.time)),

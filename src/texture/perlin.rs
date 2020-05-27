@@ -3,7 +3,7 @@
 //! A library for the 3-dimensional perlin noise texture
 
 #![allow(dead_code)]
-use super::{ArcRandomizer, Float, Point3, Vec3};
+use super::{Float, Point3, Random, Vec3};
 use std::fmt;
 
 /// Perlin noise generator.
@@ -26,15 +26,14 @@ impl Perlin {
     /// Creates a new perlin texture.
     ///
     /// * `size` - Grid size.
-    /// * `rng` - Random number generator.
-    pub fn new(size: usize, rng: ArcRandomizer) -> Perlin {
+    pub fn new(size: usize) -> Perlin {
         let random: Vec<Vec3> = (0..size)
-            .map(|_i| rng.vec3_in_range(-1.0, 1.0).unit_vector())
+            .map(|_i| Random::vec3_in_range(-1.0, 1.0).unit_vector())
             .collect();
 
-        let perm_x = perlin_generate_perm(size, &rng);
-        let perm_y = perlin_generate_perm(size, &rng);
-        let perm_z = perlin_generate_perm(size, &rng);
+        let perm_x = perlin_generate_perm(size);
+        let perm_y = perlin_generate_perm(size);
+        let perm_z = perlin_generate_perm(size);
 
         Perlin {
             random,
@@ -99,9 +98,9 @@ impl Perlin {
 /// Generate a random permuation.
 ///
 /// * `n` - Number of points.
-fn perlin_generate_perm(n: usize, rng: &ArcRandomizer) -> Vec<usize> {
+fn perlin_generate_perm(n: usize) -> Vec<usize> {
     let mut p: Vec<usize> = (0..n).map(|x| x).collect();
-    rng.permute(&mut p);
+    Random::permute(&mut p);
     p
 }
 

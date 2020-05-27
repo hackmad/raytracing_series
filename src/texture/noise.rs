@@ -3,7 +3,7 @@
 //! A library for the 3-dimensional noise texture
 
 #![allow(dead_code)]
-use super::{ArcRandomizer, ArcTexture, Axis, Colour, Float, Perlin, Point3, Texture};
+use super::{ArcTexture, Axis, Colour, Float, Perlin, Point3, Texture};
 use std::fmt;
 use std::sync::{Arc, RwLock};
 
@@ -34,16 +34,14 @@ impl Noise {
     /// * `turbulence_size` - Turbulence size.
     /// * `grid_size` - Grid size for Perlin noise.
     /// * `axis` - Axis along which the marble grain aligns.
-    /// * `rng` - Random number generator.
     pub fn new(
         scale: Float,
         turbulence_depth: usize,
         turbulence_size: Float,
         grid_size: usize,
         axis: Axis,
-        rng: ArcRandomizer,
     ) -> ArcTexture {
-        let perlin = Arc::new(RwLock::new(Perlin::new(grid_size, rng)));
+        let perlin = Arc::new(RwLock::new(Perlin::new(grid_size)));
 
         Arc::new(Noise {
             perlin,

@@ -3,7 +3,7 @@
 //! A library to handle mixing probability density functions.
 
 #![allow(dead_code)]
-use super::{ArcPDF, ArcRandomizer, Float, Vec3, PDF};
+use super::{ArcPDF, Float, Random, Vec3, PDF};
 use std::fmt;
 use std::sync::Arc;
 
@@ -12,9 +12,6 @@ use std::sync::Arc;
 pub struct MixturePDF {
     /// The PDFs to mix.
     p: [ArcPDF; 2],
-
-    /// Random number generator.
-    rng: ArcRandomizer,
 }
 
 impl MixturePDF {
@@ -22,11 +19,9 @@ impl MixturePDF {
     ///
     /// * `p0` - PDF related to the shape of light source.
     /// * `p1` - PDF related to the normal vector and type of surface.
-    /// * `rng` - Random number generator.
-    pub fn new(p0: ArcPDF, p1: ArcPDF, rng: ArcRandomizer) -> MixturePDF {
+    pub fn new(p0: ArcPDF, p1: ArcPDF) -> MixturePDF {
         MixturePDF {
             p: [Arc::clone(&p0), Arc::clone(&p1)],
-            rng: Arc::clone(&rng),
         }
     }
 }
@@ -50,7 +45,7 @@ impl PDF for MixturePDF {
 
     /// Returns a random direction based on PDF.
     fn generate(&self) -> Vec3 {
-        if self.rng.float() < 0.5 {
+        if Random::sample::<Float>() < 0.5 {
             self.p[0].generate()
         } else {
             self.p[1].generate()

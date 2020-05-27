@@ -2,7 +2,7 @@
 //!
 //! A library for bounding volume hierarchy.
 
-use super::{ArcHittable, ArcRandomizer, Axis, Float, HitRecord, Hittable, Ray, AABB};
+use super::{ArcHittable, Axis, Float, HitRecord, Hittable, Random, Ray, AABB};
 use std::fmt;
 use std::sync::Arc;
 
@@ -32,14 +32,8 @@ impl BVH {
     /// * `objects` - List of objects
     /// * `time0` - Start time of motion.
     /// * `time1` - End time of motion.
-    /// * `rng` - Random number generator.
-    pub fn new(
-        objects: &mut Vec<ArcHittable>,
-        time0: Float,
-        time1: Float,
-        rng: &ArcRandomizer,
-    ) -> ArcHittable {
-        split(objects, 0, objects.len(), time0, time1, rng)
+    pub fn new(objects: &mut Vec<ArcHittable>, time0: Float, time1: Float) -> ArcHittable {
+        split(objects, 0, objects.len(), time0, time1)
     }
 }
 
@@ -119,16 +113,14 @@ impl Hittable for BVH {
 /// * `n` - Number of objects to split.
 /// * `time0` - Start time of motion.
 /// * `time1` - End time of motion.
-/// * `rng` - Random number generator.
 fn split(
     objects: &mut Vec<ArcHittable>,
     start: usize,
     n: usize,
     time0: Float,
     time1: Float,
-    rng: &ArcRandomizer,
 ) -> ArcHittable {
-    let axis = rng.clone().float_in_range(0.0, 2.0).round() as Axis;
+    let axis = Random::sample_in_range::<Axis>(0, 2);
 
     let (left, right, leaf) = if n == 1 {
         (
@@ -172,8 +164,8 @@ fn split(
             let even = n % 2 == 0;
             let half2 = if even { half } else { half + 1 };
 
-            let l = split(objects, start, half, time0, time1, rng);
-            let r = split(objects, start + half, half2, time0, time1, rng);
+            let l = split(objects, start, half, time0, time1);
+            let r = split(objects, start + half, half2, time0, time1);
             (l, r, false)
         }
     };
