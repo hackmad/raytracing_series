@@ -15,7 +15,7 @@ pub struct Random<T: RngCore> {
     rng: Mutex<T>,
 }
 
-/// Create a new thread local random number generator.
+/// Create a new random number generator with random seed.
 pub fn new_thread_rng() -> ArcRandomizer {
     let rng: ChaCha20Rng = SeedableRng::from_entropy();
     Arc::new(Random {

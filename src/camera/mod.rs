@@ -138,7 +138,7 @@ impl Camera {
     }
 
     /// Returns a ray for the given parametric coordinates along the image
-    /// image plane. The ray's time paramter is set at rng value between
+    /// image plane. The ray's time paramter is set at random value between
     /// `time0` and `time1` for motion blur effect.
     ///
     /// * `s`: Horizontal parameter.
