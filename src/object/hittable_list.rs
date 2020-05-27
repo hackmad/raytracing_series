@@ -3,7 +3,7 @@
 //! A library for handling ray intersections with a collection of
 //! geometric objects.
 
-use super::{ArcHittable, ArcRandomizer, Float, HitRecord, Hittable, Point3, Ray, Vec3, AABB};
+use super::{ArcHittable, Float, HitRecord, Hittable, Point3, Random, Ray, Vec3, AABB};
 use std::fmt;
 use std::sync::Arc;
 
@@ -12,19 +12,13 @@ use std::sync::Arc;
 pub struct HittableList {
     /// List of objects.
     objects: Vec<ArcHittable>,
-
-    /// Random number generator.
-    rng: ArcRandomizer,
 }
 
 impl HittableList {
     /// Create a new collection of geometric objects.
-    ///
-    /// * `rng` - Random number generator.
-    pub fn new(rng: ArcRandomizer) -> HittableList {
+    pub fn new() -> HittableList {
         HittableList {
             objects: Vec::new(),
-            rng: Arc::clone(&rng),
         }
     }
 
@@ -133,7 +127,7 @@ impl Hittable for HittableList {
         } else if size == 1 {
             self.objects[0].random(origin)
         } else {
-            self.objects[self.rng.usize_in_range(0, size - 1)].random(origin)
+            self.objects[Random::sample_in_range(0, size - 1)].random(origin)
         }
     }
 }

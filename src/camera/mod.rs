@@ -5,9 +5,8 @@
 
 #![allow(dead_code)]
 use super::algebra::{Point3, Ray, Vec3};
-use super::common::{ArcRandomizer, Float};
+use super::common::{Float, Random};
 use std::fmt;
-use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct Camera {
@@ -40,9 +39,6 @@ pub struct Camera {
 
     /// Keeps track of end time for motion blur.
     time1: Float,
-
-    /// Random number generator
-    rng: ArcRandomizer,
 }
 
 impl fmt::Display for Camera {
@@ -98,7 +94,6 @@ impl Camera {
     /// * `focus_dist` - The distance to focal plane.
     /// * `time0` - Start time for motion blur.
     /// * `time1` - End time for motion blur.
-    /// * `rng` - Random number generator.
     pub fn new(
         lookfrom: Point3,
         lookat: Point3,
@@ -109,7 +104,6 @@ impl Camera {
         focus_dist: Float,
         time0: Float,
         time1: Float,
-        rng: ArcRandomizer,
     ) -> Camera {
         let theta = vfov.to_radians();
         let half_height = (theta / 2.0).tan();
@@ -133,20 +127,19 @@ impl Camera {
             w,
             time0,
             time1,
-            rng: Arc::clone(&rng),
         }
     }
 
     /// Returns a ray for the given parametric coordinates along the image
-    /// image plane. The ray's time paramter is set at rng value between
+    /// image plane. The ray's time paramter is set at random value between
     /// `time0` and `time1` for motion blur effect.
     ///
     /// * `s`: Horizontal parameter.
     /// * `t`: Vertical parameter.
     pub fn get_ray(&self, s: Float, t: Float) -> Ray {
-        let rd = self.rng.in_unit_disk() * self.lens_radius;
+        let rd = Random::vec3_in_unit_disk() * self.lens_radius;
         let offset = self.u * rd.x() + self.v * rd.y();
-        let time = self.rng.float_in_range(self.time0, self.time1);
+        let time = Random::sample_in_range(self.time0, self.time1);
 
         Ray::new(
             self.origin + offset,

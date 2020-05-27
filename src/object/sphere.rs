@@ -3,8 +3,8 @@
 //! A library for handling ray intersections with a sphere
 
 use super::{
-    get_sphere_uv, ArcHittable, ArcMaterial, ArcRandomizer, Float, HitRecord, Hittable, Point3,
-    Ray, Vec3, AABB, INFINITY, ONB, RAY_EPSILON, TWO_PI,
+    get_sphere_uv, ArcHittable, ArcMaterial, Float, HitRecord, Hittable, Point3, Random, Ray, Vec3,
+    AABB, INFINITY, ONB, RAY_EPSILON, TWO_PI,
 };
 use std::fmt;
 use std::sync::Arc;
@@ -20,9 +20,6 @@ pub struct Sphere {
 
     /// Surface material.
     material: ArcMaterial,
-
-    /// Random number generator.
-    rng: ArcRandomizer,
 }
 
 impl fmt::Display for Sphere {
@@ -44,18 +41,11 @@ impl Sphere {
     /// * `center` - Center.
     /// * `radius` - Radius.
     /// * `material` - Surface material.
-    /// * `rng` - Random number generator.
-    pub fn new(
-        center: Vec3,
-        radius: Float,
-        material: ArcMaterial,
-        rng: ArcRandomizer,
-    ) -> ArcHittable {
+    pub fn new(center: Vec3, radius: Float, material: ArcMaterial) -> ArcHittable {
         Arc::new(Sphere {
             center,
             radius,
             material: Arc::clone(&material),
-            rng: Arc::clone(&rng),
         })
     }
 
@@ -148,6 +138,6 @@ impl Hittable for Sphere {
         let direction = self.center - origin;
         let distance_squared = direction.length_squared();
         let uvw = ONB::new(direction);
-        uvw.local_from_vec3(&self.rng.to_sphere(self.radius, distance_squared))
+        uvw.local_from_vec3(&Random::vec3_to_sphere(self.radius, distance_squared))
     }
 }

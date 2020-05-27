@@ -9,7 +9,7 @@ mod perlin;
 mod solid_colour;
 
 use super::algebra::{Axis, Colour, Point3, Vec3};
-use super::common::{clamp, ArcRandomizer, Float};
+use super::common::{clamp, Float, Random};
 use std::fmt;
 use std::sync::Arc;
 

@@ -21,7 +21,6 @@ impl HittablePDF {
     /// Create a new cosine density functino given a surface normal.
     ///
     /// * `object` - Surface normal.
-    /// * `rng` - Random number generator.
     pub fn new(object: ArcHittable, origin: Point3) -> HittablePDF {
         HittablePDF {
             object: Arc::clone(&object),

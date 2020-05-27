@@ -23,7 +23,7 @@ use common::*;
 use rayon::prelude::*;
 use renderer::*;
 use scene::*;
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 use std::time::Instant;
 
 /// Entry point for the recursive raytracer.
@@ -37,10 +37,8 @@ fn main() {
         .build_global()
         .unwrap();
 
-    // Create a random number generator.
-    let rng = match config.seed {
-        Some(seed) => new_seeded_rng(seed),
-        None => new_thread_rng(),
+    if let Some(seed) = config.seed {
+        Random::seed(seed);
     };
 
     // Setup rendering algorithm
@@ -51,9 +49,7 @@ fn main() {
             config.image_width,
             config.image_height,
             config.bvh_enabled,
-            Arc::clone(&rng),
         ),
-        rng: Arc::clone(&rng),
     };
 
     // Allocate an image buffer.

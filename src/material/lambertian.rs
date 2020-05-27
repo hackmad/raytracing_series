@@ -3,8 +3,7 @@
 //! A library for handling Lambertian diffuse material.
 
 use super::{
-    ArcMaterial, ArcRandomizer, ArcTexture, CosinePDF, Float, HitRecord, Material, Ray,
-    ScatterRecord, PI,
+    ArcMaterial, ArcTexture, CosinePDF, Float, HitRecord, Material, Ray, ScatterRecord, PI,
 };
 use std::fmt;
 use std::sync::Arc;
@@ -14,20 +13,15 @@ use std::sync::Arc;
 pub struct Lambertian {
     /// The diffuse colour provided by a texture.
     albedo: ArcTexture,
-
-    /// Random number generator.
-    rng: ArcRandomizer,
 }
 
 impl Lambertian {
     /// Creates a new Lambertian diffuse material.
     ///
     /// * `albedo` - The diffuse colour provided by a texture.
-    /// * `rng` - Random number generator.
-    pub fn new(albedo: ArcTexture, rng: ArcRandomizer) -> ArcMaterial {
+    pub fn new(albedo: ArcTexture) -> ArcMaterial {
         Arc::new(Lambertian {
             albedo: Arc::clone(&albedo),
-            rng: Arc::clone(&rng),
         })
     }
 }
@@ -62,7 +56,7 @@ impl Material for Lambertian {
     /// * `ray_in` - Incident ray.
     /// * `rec` - The `HitRecord`.
     fn scatter(&self, _ray_in: &Ray, rec: &HitRecord) -> Option<ScatterRecord> {
-        let pdf = CosinePDF::new(rec.normal, Arc::clone(&self.rng));
+        let pdf = CosinePDF::new(rec.normal);
 
         Some(ScatterRecord {
             attenuation: self.albedo.value(rec.u, rec.v, &rec.point),

@@ -3,8 +3,8 @@
 //! A library for handling ray intersections with an axis aligned box.
 
 use super::{
-    ArcHittable, ArcMaterial, ArcRandomizer, FlipFace, Float, HitRecord, Hittable, HittableList,
-    Point3, Ray, Vec3, XYrect, XZrect, YZrect, AABB,
+    ArcHittable, ArcMaterial, FlipFace, Float, HitRecord, Hittable, HittableList, Point3, Ray,
+    Vec3, XYrect, XZrect, YZrect, AABB,
 };
 use std::fmt;
 use std::sync::Arc;
@@ -42,9 +42,8 @@ impl XYZbox {
     /// * `p0` - Holds minimum (x0, y0, z0) coordinates.
     /// * `p1` - Holds maximum (x1, y1, z1) coordinates.
     /// * `material` - Surface material.
-    /// * `rng` - Random number generator.
-    pub fn new(p0: Point3, p1: Point3, material: ArcMaterial, rng: ArcRandomizer) -> ArcHittable {
-        let mut sides = HittableList::new(Arc::clone(&rng));
+    pub fn new(p0: Point3, p1: Point3, material: ArcMaterial) -> ArcHittable {
+        let mut sides = HittableList::new();
 
         sides.add(XYrect::new(
             p0.x(),
@@ -53,7 +52,6 @@ impl XYZbox {
             p1.y(),
             p1.z(),
             Arc::clone(&material),
-            Arc::clone(&rng),
         ));
         sides.add(FlipFace::new(XYrect::new(
             p0.x(),
@@ -62,7 +60,6 @@ impl XYZbox {
             p1.y(),
             p0.z(),
             Arc::clone(&material),
-            Arc::clone(&rng),
         )));
 
         sides.add(XZrect::new(
@@ -72,7 +69,6 @@ impl XYZbox {
             p1.z(),
             p1.y(),
             Arc::clone(&material),
-            Arc::clone(&rng),
         ));
         sides.add(FlipFace::new(XZrect::new(
             p0.x(),
@@ -81,7 +77,6 @@ impl XYZbox {
             p1.z(),
             p0.y(),
             Arc::clone(&material),
-            Arc::clone(&rng),
         )));
 
         sides.add(YZrect::new(
@@ -91,7 +86,6 @@ impl XYZbox {
             p1.z(),
             p1.x(),
             Arc::clone(&material),
-            Arc::clone(&rng),
         ));
         sides.add(FlipFace::new(YZrect::new(
             p0.y(),
@@ -100,7 +94,6 @@ impl XYZbox {
             p1.z(),
             p0.x(),
             Arc::clone(&material),
-            Arc::clone(&rng),
         )));
 
         Arc::new(XYZbox {

@@ -101,7 +101,7 @@ impl AppConfig {
                     .long("seed")
                     .value_name("SEED")
                     .takes_value(true)
-                    .about("seed for rng number generator (debug)"),
+                    .about("seed for random number generator (debug)"),
             )
             .arg(
                 Arg::with_name("out")

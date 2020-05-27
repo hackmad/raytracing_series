@@ -2,9 +2,7 @@
 //!
 //! A library for handling reflective material.
 
-use super::{
-    ArcMaterial, ArcRandomizer, ArcTexture, Float, HitRecord, Material, Ray, ScatterRecord,
-};
+use super::{ArcMaterial, ArcTexture, Float, HitRecord, Material, Random, Ray, ScatterRecord};
 use std::fmt;
 use std::sync::Arc;
 
@@ -16,9 +14,6 @@ pub struct Metal {
 
     /// Fuzziness factor used for blurred reflections.
     fuzz: Float,
-
-    /// Random number generator.
-    rng: ArcRandomizer,
 }
 
 impl Metal {
@@ -26,12 +21,10 @@ impl Metal {
     ///
     /// * `albedo` - The diffuse colour provided by a texture.
     /// * `fuzz` - The fuzziness factor for blurred reflections.
-    /// * `rng` - Random number generator.
-    pub fn new(albedo: ArcTexture, fuzz: Float, rng: ArcRandomizer) -> ArcMaterial {
+    pub fn new(albedo: ArcTexture, fuzz: Float) -> ArcMaterial {
         Arc::new(Metal {
             albedo: Arc::clone(&albedo),
             fuzz,
-            rng: Arc::clone(&rng),
         })
     }
 }
@@ -62,7 +55,7 @@ impl Material for Metal {
     /// If the incident ray is absorbed, `None` is returned.
     ///
     /// Model the reflections. For grazing angles, the ray is absorbed.
-    /// Use a small sphere based on `fuzz` to rngize the reflected
+    /// Use a small sphere based on `fuzz` to randomize the reflected
     /// direction for blurry reflection.
     ///
     /// * `ray_in` - Incident ray.
@@ -71,7 +64,7 @@ impl Material for Metal {
         let unit_normal = rec.normal.unit_vector();
         let reflected = ray_in.direction.unit_vector().reflect(unit_normal);
 
-        let scatter_direction = reflected + self.fuzz * self.rng.in_unit_sphere();
+        let scatter_direction = reflected + self.fuzz * Random::vec3_in_unit_sphere();
 
         if scatter_direction.dot(unit_normal) > 0.0 {
             Some(ScatterRecord {

@@ -3,8 +3,7 @@
 //! A library to handle cosine probability density function.
 
 #![allow(dead_code)]
-use super::{ArcRandomizer, Float, Vec3, ONB, PDF, PI};
-use std::sync::Arc;
+use super::{Float, Random, Vec3, ONB, PDF, PI};
 
 /// Models the cosine probability density function.
 #[derive(Debug, Clone)]
@@ -12,21 +11,14 @@ pub struct CosinePDF {
     /// The orthonormal basis vectors for a point on a surface based on
     /// surface normal.
     uvw: ONB,
-
-    /// Random number generator.
-    rng: ArcRandomizer,
 }
 
 impl CosinePDF {
     /// Create a new cosine density functino given a surface normal.
     ///
     /// * `n` - Surface normal.
-    /// * `rng` - Random number generator.
-    pub fn new(n: Vec3, rng: ArcRandomizer) -> CosinePDF {
-        CosinePDF {
-            uvw: ONB::new(n),
-            rng: Arc::clone(&rng),
-        }
+    pub fn new(n: Vec3) -> CosinePDF {
+        CosinePDF { uvw: ONB::new(n) }
     }
 }
 
@@ -45,6 +37,6 @@ impl PDF for CosinePDF {
 
     /// Returns a random direction based on PDF.
     fn generate(&self) -> Vec3 {
-        self.uvw.local_from_vec3(&self.rng.cosine_direction())
+        self.uvw.local_from_vec3(&Random::cosine_direction())
     }
 }

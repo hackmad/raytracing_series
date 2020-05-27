@@ -2,7 +2,7 @@
 //!
 //! A library for handling diffuse light emissive material.
 
-use super::{ArcMaterial, ArcRandomizer, ArcTexture, Colour, HitRecord, Material, Ray};
+use super::{ArcMaterial, ArcTexture, Colour, HitRecord, Material, Ray};
 use std::fmt;
 use std::sync::Arc;
 
@@ -11,20 +11,15 @@ use std::sync::Arc;
 pub struct DiffuseLight {
     /// The emission provided by a texture.
     emit: ArcTexture,
-
-    /// Random number generator.
-    rng: ArcRandomizer,
 }
 
 impl DiffuseLight {
     /// Creates a new diffuse light material.
     ///
     /// * `emeit` - Emission provided by a texture.
-    /// * `rng` - Random number generator.
-    pub fn new(emit: ArcTexture, rng: ArcRandomizer) -> ArcMaterial {
+    pub fn new(emit: ArcTexture) -> ArcMaterial {
         Arc::new(DiffuseLight {
             emit: Arc::clone(&emit),
-            rng: Arc::clone(&rng),
         })
     }
 }

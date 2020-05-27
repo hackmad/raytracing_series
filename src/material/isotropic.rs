@@ -2,7 +2,7 @@
 //!
 //! A library for handling isotropic material for constant medium effects.
 
-use super::{ArcMaterial, ArcRandomizer, ArcTexture, HitRecord, Material, Ray, ScatterRecord};
+use super::{ArcMaterial, ArcTexture, HitRecord, Material, Random, Ray, ScatterRecord};
 use std::fmt;
 use std::sync::Arc;
 
@@ -11,20 +11,15 @@ use std::sync::Arc;
 pub struct Isotropic {
     /// The diffuse colour provided by a texture.
     albedo: ArcTexture,
-
-    /// Random number generator.
-    rng: ArcRandomizer,
 }
 
 impl Isotropic {
     /// Creates a new material for constant medium.
     ///
     /// * `albedo` - Albedo
-    /// * `rng` - Random number generator.
-    pub fn new(albedo: ArcTexture, rng: ArcRandomizer) -> ArcMaterial {
+    pub fn new(albedo: ArcTexture) -> ArcMaterial {
         Arc::new(Isotropic {
             albedo: Arc::clone(&albedo),
-            rng: Arc::clone(&rng),
         })
     }
 }
@@ -60,7 +55,7 @@ impl Material for Isotropic {
     /// * `rec` - The `HitRecord`.
     fn scatter(&self, ray_in: &Ray, rec: &HitRecord) -> Option<ScatterRecord> {
         // Scattering will pick a uniform random direction.
-        let scatter_direction = self.rng.in_unit_sphere();
+        let scatter_direction = Random::vec3_in_unit_sphere();
         let scattered_ray = Some(Ray::new(rec.point, scatter_direction, ray_in.time));
         let attenuation = self.albedo.value(rec.u, rec.v, &rec.point);
 

@@ -4,7 +4,7 @@
 //! the xz-plane.
 
 use super::{
-    ArcHittable, ArcMaterial, ArcRandomizer, Float, HitRecord, Hittable, Point3, Ray, Vec3, AABB,
+    ArcHittable, ArcMaterial, Float, HitRecord, Hittable, Point3, Random, Ray, Vec3, AABB,
     INFINITY, MIN_THICKNESS, RAY_EPSILON,
 };
 use std::fmt;
@@ -33,9 +33,6 @@ pub struct XZrect {
 
     /// Surface material.
     material: ArcMaterial,
-
-    /// Random number generator.
-    rng: ArcRandomizer,
 }
 
 impl fmt::Display for XZrect {
@@ -60,7 +57,6 @@ impl XZrect {
     /// * `z1` - Y-coordinate bound z1.
     /// * `y` - Y-coordinate.
     /// * `material` - Surface material.
-    /// * `rng` - Random number generator.
     pub fn new(
         x0: Float,
         x1: Float,
@@ -68,7 +64,6 @@ impl XZrect {
         z1: Float,
         y: Float,
         material: ArcMaterial,
-        rng: ArcRandomizer,
     ) -> ArcHittable {
         Arc::new(XZrect {
             x0,
@@ -78,7 +73,6 @@ impl XZrect {
             y,
             area: (x1 - x0) * (z1 - z0),
             material: Arc::clone(&material),
-            rng: Arc::clone(&rng),
         })
     }
 }
@@ -151,8 +145,8 @@ impl Hittable for XZrect {
     ///
     /// * `origin` - Hit point.
     fn random(&self, origin: Point3) -> Vec3 {
-        let x = self.rng.float_in_range(self.x0, self.x1);
-        let z = self.rng.float_in_range(self.z0, self.z1);
+        let x = Random::sample_in_range(self.x0, self.x1);
+        let z = Random::sample_in_range(self.z0, self.z1);
         let random_point = Point3::new(x, self.y, z);
         random_point - origin
     }

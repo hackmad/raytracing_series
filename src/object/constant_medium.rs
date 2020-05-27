@@ -4,8 +4,8 @@
 //! effects like smoke and fog.
 
 use super::{
-    ArcHittable, ArcMaterial, ArcRandomizer, ArcTexture, Float, HitRecord, Hittable, Isotropic,
-    Ray, Vec3, AABB, INFINITY, MIN_THICKNESS,
+    ArcHittable, ArcMaterial, ArcTexture, Float, HitRecord, Hittable, Isotropic, Random, Ray, Vec3,
+    AABB, INFINITY, MIN_THICKNESS,
 };
 use std::fmt;
 use std::sync::Arc;
@@ -21,9 +21,6 @@ pub struct ConstantMedium {
 
     /// Phase function (this will be an isotropic material).
     phase_function: ArcMaterial,
-
-    /// Random number generator
-    rng: ArcRandomizer,
 }
 
 impl fmt::Display for ConstantMedium {
@@ -46,17 +43,11 @@ impl ConstantMedium {
     ///   convex objects work)
     /// * `density` - Density of medium.
     /// * `albedo` - Provides diffuse colour.
-    pub fn new(
-        boundary: ArcHittable,
-        density: Float,
-        albedo: ArcTexture,
-        rng: ArcRandomizer,
-    ) -> ArcHittable {
+    pub fn new(boundary: ArcHittable, density: Float, albedo: ArcTexture) -> ArcHittable {
         Arc::new(ConstantMedium {
             boundary,
             neg_inv_density: -1.0 / density,
-            phase_function: Isotropic::new(albedo, Arc::clone(&rng)),
-            rng: Arc::clone(&rng),
+            phase_function: Isotropic::new(albedo),
         })
     }
 }
@@ -70,7 +61,7 @@ impl Hittable for ConstantMedium {
     fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord> {
         // Print occasional samples when debugging. To enable, set enable_debug true.
         let enable_debug = false;
-        let debugging = enable_debug && self.rng.float() < 0.00001;
+        let debugging = enable_debug && Random::sample::<Float>() < 0.00001;
 
         let rec1 = self.boundary.hit(ray, -INFINITY, INFINITY);
         if rec1.is_none() {
@@ -105,7 +96,7 @@ impl Hittable for ConstantMedium {
 
         let ray_length = ray.direction.length();
         let distance_inside_boundary = (t1 - t0) * ray_length;
-        let hit_distance = self.neg_inv_density * self.rng.float().ln();
+        let hit_distance = self.neg_inv_density * Random::sample::<Float>().ln();
 
         if hit_distance > distance_inside_boundary {
             return None;
