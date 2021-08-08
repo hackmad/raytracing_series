@@ -61,7 +61,7 @@ impl Rotate {
                 cos_theta,
                 bbox,
             }),
-            Err(e) => panic!(e),
+            Err(e) => panic!("{}", e),
         }
     }
 }
@@ -190,7 +190,7 @@ fn rotate<'a>(v: &Vec3, axis: Axis, sin_theta: Float, cos_theta: Float) -> Vec3 
             let newy = y * cos_theta + x * sin_theta;
             Vec3::new(newx, newy, z)
         }
-        _ => panic!(format!("Invalid axis {}", axis)),
+        _ => panic!("Invalid axis {}", axis),
     }
 }
 
