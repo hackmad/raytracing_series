@@ -11,32 +11,71 @@ mod object;
 mod scene;
 
 use algebra::*;
-use clap::{App, Arg};
+use clap::{builder::EnumValueParser, Parser};
 use common::*;
 use object::*;
 use scene::*;
 
 /// Program configuration
+#[derive(Parser, Clone)]
+#[command(author, version, about, long_about = None)]
 struct Config {
-    /// Image height
-    image_width: u32,
+    /// Image height.
+    #[arg(
+        long = "image-width",
+        short = 'w',
+        value_name = "WIDTH",
+        default_value_t = 200,
+        help = "image width in pixels"
+    )]
+    pub image_width: u32,
 
-    /// Image width
-    image_height: u32,
+    /// Image width.
+    #[arg(
+        long = "image_height",
+        short = 'h',
+        value_name = "HEIGHT",
+        default_value_t = 100,
+        help = "image height in pixels"
+    )]
+    pub image_height: u32,
 
-    /// Samples per pixels for antialiasing
-    samples_per_pixel: u32,
+    /// Samples per pixels for antialiasing.
+    #[arg(
+        long = "samples_per_pixel",
+        short = 's',
+        long = "samples_per_pixel",
+        value_name = "SAMPLES",
+        default_value_t = 100,
+        help = "number of samples per pixel for antialiasing"
+    )]
+    pub samples_per_pixel: u32,
 
     /// Max recursion depth
-    max_depth: u32,
+    #[arg(
+        long = "max_depth",
+        short = 'd',
+        long = "max_depth",
+        value_name = "DEPTH",
+        default_value_t = 50,
+        help = "maximum depth of recursion"
+    )]
+    pub max_depth: u32,
 
-    /// Scene to render
-    scenery: Scenery,
+    /// Scene to render.
+    #[arg(
+        long = "scene",
+        value_name = "SCENE",
+        value_parser = EnumValueParser::<Scenery>::new(),
+        default_value = "random_spheres",
+        help = "scene to render",
+    )]
+    pub scenery: Scenery,
 }
 
 /// Entry point for the recursive raytracer.
 fn main() {
-    let c = app_config();
+    let c = Config::parse();
 
     let s = Scene::new(c.scenery, c.image_width, c.image_height);
 
@@ -100,105 +139,4 @@ fn background_colour(ray: &Ray) -> Colour {
     let unit_direction = ray.direction.unit_vector();
     let t = 0.5 * (unit_direction.y() + 1.0);
     (Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t).as_colour()
-}
-
-fn app_config() -> Config {
-    let matches = App::new("Raytracing in One Weekend")
-        .version("0.0.1")
-        .arg(
-            Arg::with_name("image_width")
-                .short('w')
-                .long("image_width")
-                .value_name("WIDTH")
-                .takes_value(true)
-                .default_value("200")
-                .about("image width in pixels"),
-        )
-        .arg(
-            Arg::with_name("image_height")
-                .short('h')
-                .long("image_height")
-                .value_name("HEIGHT")
-                .takes_value(true)
-                .default_value("100")
-                .about("image height in pixels"),
-        )
-        .arg(
-            Arg::with_name("samples_per_pixel")
-                .short('s')
-                .long("samples_per_pixel")
-                .value_name("SAMPLES")
-                .takes_value(true)
-                .default_value("100")
-                .about("number of samples per pixel for antialiasing"),
-        )
-        .arg(
-            Arg::with_name("max_depth")
-                .short('d')
-                .long("max_depth")
-                .value_name("DEPTH")
-                .takes_value(true)
-                .default_value("50")
-                .about("maximum depth of recursion"),
-        )
-        .arg(
-            Arg::with_name("scene")
-                .long("scene")
-                .value_name("SCENE")
-                .takes_value(true)
-                .possible_values(&[
-                    "lambertian_diffuse",
-                    "metal",
-                    "dielectric",
-                    "camera_viewpoint",
-                    "camera_fov",
-                    "defocus_blur",
-                    "random_spheres",
-                ])
-                .default_value("random_spheres")
-                .about("scene to render"),
-        )
-        .get_matches();
-
-    let image_width = match matches.value_of("image_width") {
-        Some(s) => s.parse::<u32>().unwrap(),
-        _ => panic!("Invalid image width"),
-    };
-
-    let image_height = match matches.value_of("image_height") {
-        Some(s) => s.parse::<u32>().unwrap(),
-        _ => panic!("Invalid image height"),
-    };
-
-    let samples_per_pixel = match matches.value_of("samples_per_pixel") {
-        Some(s) => s.parse::<u32>().unwrap(),
-        _ => panic!("Invalid samples per pixel"),
-    };
-
-    let max_depth = match matches.value_of("max_depth") {
-        Some(s) => s.parse::<u32>().unwrap(),
-        _ => panic!("Invalid max depth"),
-    };
-
-    let scenery = match matches.value_of("scene") {
-        Some(s) => match s {
-            "lambertian_diffuse" => Scenery::LambertianDiffuse,
-            "metal" => Scenery::Metal,
-            "dielectric" => Scenery::Dielectric,
-            "camera_viewpoint" => Scenery::CameraViewpoint,
-            "camera_fov" => Scenery::CameraFov,
-            "defocus_blur" => Scenery::DefocusBlur,
-            "random_spheres" => Scenery::RandomSpheres,
-            s => panic!("Unknown scenery {}", s),
-        },
-        _ => panic!("Invalid scene name"),
-    };
-
-    Config {
-        image_width,
-        image_height,
-        samples_per_pixel,
-        max_depth,
-        scenery,
-    }
 }

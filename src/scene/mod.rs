@@ -9,8 +9,9 @@ use super::camera::*;
 use super::common::*;
 use super::material::*;
 use super::object::*;
+use clap::ValueEnum;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, ValueEnum)]
 pub enum Scenery {
     LambertianDiffuse,
     Metal,
