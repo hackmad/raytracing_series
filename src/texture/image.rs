@@ -30,7 +30,7 @@ impl Image {
         // Read image and convert to RGB.
         let img = image::open(path)
             .expect(format!("Unable to open {}", path).as_ref())
-            .into_rgb();
+            .into_rgb8();
 
         // Read metadata before we wrap it in a Rc<RefCell<RgbImage>> to
         // avoid borrowing it.

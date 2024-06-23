@@ -52,29 +52,32 @@ impl Random {
         })
     }
 
-    /// Returns a random value in [`min`, `max`].
+    /// Returns a random value in [`min`, `max`).
     ///
     /// * `min` - Minimum bound
     /// * `max` - Maximum bound
-    pub fn sample_in_range<T: SampleUniform>(min: T, max: T) -> T {
+    pub fn sample_in_range<T>(min: T, max: T) -> T
+    where
+        T: SampleUniform + PartialOrd,
+    {
         RNG.with(|rng| {
             let mut r = rng.borrow_mut();
-            r.gen_range(min, max)
+            r.gen_range(min..max)
         })
     }
 
-    /// Returns `n` random values in [`min`, `max`].
+    /// Returns `n` random values in [`min`, `max`).
     ///
     /// * `n` - Number of samples.
     /// * `min` - Minimum bound
     /// * `max` - Maximum bound
-    pub fn samples_in_range<T: SampleUniform>(n: usize, min: T, max: T) -> Vec<T>
+    pub fn samples_in_range<T>(n: usize, min: T, max: T) -> Vec<T>
     where
-        T: Copy,
+        T: SampleUniform + PartialOrd + Copy,
     {
         RNG.with(|rng| {
             let mut r = rng.borrow_mut();
-            (0..n).map(|_| r.gen_range(min, max)).collect()
+            (0..n).map(|_| r.gen_range(min..max)).collect()
         })
     }
 
@@ -92,9 +95,9 @@ impl Random {
         RNG.with(|rng| {
             let mut r = rng.borrow_mut();
             Vec3::new(
-                r.gen_range(min, max),
-                r.gen_range(min, max),
-                r.gen_range(min, max),
+                r.gen_range(min..max),
+                r.gen_range(min..max),
+                r.gen_range(min..max),
             )
         })
     }
@@ -106,9 +109,9 @@ impl Random {
             let mut r = rng.borrow_mut();
             loop {
                 let p = Vec3::new(
-                    r.gen_range(-1.0, 1.0),
-                    r.gen_range(-1.0, 1.0),
-                    r.gen_range(-1.0, 1.0),
+                    r.gen_range(-1.0..1.0),
+                    r.gen_range(-1.0..1.0),
+                    r.gen_range(-1.0..1.0),
                 );
                 if p.length_squared() < 1.0 {
                     break p;
@@ -122,9 +125,9 @@ impl Random {
     pub fn unit_vec3() -> Vec3 {
         RNG.with(|rng| {
             let mut r = rng.borrow_mut();
-            let a = r.gen_range::<Float, Float, Float>(0.0, TWO_PI);
-            let z = r.gen_range::<Float, Float, Float>(-1.0, 1.0);
-            let r = (1.0 - z * z).sqrt();
+            let a: Float = r.gen_range(0.0..TWO_PI);
+            let z: Float = r.gen_range(-1.0..1.0);
+            let r: Float = (1.0 - z * z).sqrt();
             Vec3::new(r * a.cos(), r * a.sin(), z)
         })
     }
@@ -148,7 +151,7 @@ impl Random {
         RNG.with(|rng| {
             let mut r = rng.borrow_mut();
             loop {
-                let p = Vec3::new(r.gen_range(-1.0, 1.0), r.gen_range(-1.0, 1.0), 0.0);
+                let p = Vec3::new(r.gen_range(-1.0..1.0), r.gen_range(-1.0..1.0), 0.0);
                 if p.length_squared() < 1.0 {
                     break p;
                 }
@@ -163,7 +166,7 @@ impl Random {
         RNG.with(|rng| {
             let mut r = rng.borrow_mut();
             for i in (1..v.len()).rev() {
-                let target = r.gen_range(0, i);
+                let target = r.gen_range(0..i);
 
                 let (x, y) = (v[i], v[target]);
 

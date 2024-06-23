@@ -11,12 +11,13 @@ use super::common::*;
 use super::material::*;
 use super::object::*;
 use super::texture::*;
+use clap::ValueEnum;
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Instant;
 
 /// Scene types.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, ValueEnum)]
 pub enum Scenery {
     LambertianDiffuse,
     Metal,
@@ -38,43 +39,6 @@ pub enum Scenery {
     RotateSpheres,
     SpecularReflections,
     FinalRestOfYourLife,
-}
-
-impl<'a> Scenery {
-    /// Returns a new `HashMap<&str, Scenery>`.
-    ///
-    /// There is probably a better way to do this.  To get the string
-    /// representations you can do this:
-    /// ```
-    /// let scene_map = Scenery::all();
-    /// let scenes: Vec<&str> = scene_map.keys().map(|k| k.as_ref()).collect();
-    /// ```
-    pub fn all() -> HashMap<&'a str, Scenery> {
-        let mut map = HashMap::new();
-
-        map.insert("lambertian_diffuse", Scenery::LambertianDiffuse);
-        map.insert("metal", Scenery::Metal);
-        map.insert("dielectric", Scenery::Dielectric);
-        map.insert("telephoto", Scenery::Telephoto);
-        map.insert("wide_angle", Scenery::WideAngle);
-        map.insert("defocus_blur", Scenery::DefocusBlur);
-        map.insert("final_one_weekend", Scenery::FinalOneWeekend);
-        map.insert("motion_blur", Scenery::MotionBlur);
-        map.insert("checkered_floor", Scenery::CheckeredFloor);
-        map.insert("checkered_spheres", Scenery::CheckeredSpheres);
-        map.insert("perlin_spheres", Scenery::PerlinSpheres);
-        map.insert("earth", Scenery::Earth);
-        map.insert("simple_light", Scenery::SimpleLight);
-        map.insert("empty_cornell_box", Scenery::EmptyCornellBox);
-        map.insert("cornell_box", Scenery::CornellBox);
-        map.insert("smoke_and_fog", Scenery::SmokeAndFog);
-        map.insert("final_next_week", Scenery::FinalNextWeek);
-        map.insert("rotate_spheres", Scenery::RotateSpheres);
-        map.insert("specular_reflections", Scenery::SpecularReflections);
-        map.insert("final_rest_of_your_life", Scenery::FinalRestOfYourLife);
-
-        map
-    }
 }
 
 /// Models a scene.

@@ -34,11 +34,11 @@ Run with program arguments (note that `--` is needed after arguments for cargo
 and before program arguments can be supplied):
 
 ```bash
-cargo run -- --scene cornell_box -w 1200 -h 600 -o image.png
+cargo run -- --scene cornell-box -w 1200 -h 600 -o image.png
 ```
 
 ```bash
-./target/debug/raytracing_series --scene cornell_box -w 1200 -h 600 -o image.png
+./target/debug/raytracing_series --scene cornell-box -w 1200 -h 600 -o image.png
 ```
 
 Get help on program arguments:
@@ -86,7 +86,7 @@ cargo run -- --help
 Without Bounding Volume Hierarchy:
 
 ```bash
-target/release/raytracing_series --scene final_one_weekend -w 1200 -h 600 \
+target/release/raytracing_series --scene final-one-weekend -w 1200 -h 600 \
     --seed 8589869056 -t 1 -o final_one_weekend.png
 
 HittableList: 0.000061101 seconds
@@ -96,7 +96,7 @@ Done: 28.45 minutes
 With Bounding Volume Hierarchy:
 
 ```bash
-target/release/raytracing_series --scene final_one_weekend  --bvh -w 1200 -h 600 \
+target/release/raytracing_series --scene final-one-weekend  --bvh -w 1200 -h 600 \
     --seed 8589869056 -t 1 -o final_one_weekend_bvh.png
 
 BVH: 0.000398774 seconds
@@ -108,7 +108,7 @@ Done: 9.33 minutese
 Without Bounding Volume Hierarchy:
 
 ```bash
-target/release/raytracing_series --scene final_one_weekend -w 1200 -h 600 \
+target/release/raytracing_series --scene final-one-weekend -w 1200 -h 600 \
     --seed 8589869056 -t 4 -o final_one_weekend.png
 
 HittableList: 0.000035394 seconds
@@ -118,7 +118,7 @@ Done: 10.89 minutes
 With Bounding Volume Hierarchy:
 
 ```bash
-target/release/raytracing_series --scene final_one_weekend --bvh -w 1200 -h 600 \
+target/release/raytracing_series --scene final-one-weekend --bvh -w 1200 -h 600 \
     --seed 8589869056 -t 4 -o final_one_weekend_bvh.png
 
 BVH: 0.000471452 seconds
