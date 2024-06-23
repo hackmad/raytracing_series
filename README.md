@@ -140,4 +140,3 @@ target/release/raytracing_series --scene random_spheres --bvh -w 1200 -h 600 \
 BVH: 0.000471452 seconds
 Done: 5.14 minutese
 ````
-

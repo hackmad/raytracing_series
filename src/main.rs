@@ -20,6 +20,7 @@ mod texture;
 use algebra::*;
 use app_config::*;
 use background::*;
+use clap::Parser;
 use common::*;
 use object::*;
 use rayon::prelude::*;
@@ -30,11 +31,11 @@ use std::time::Instant;
 /// Entry point for the recursive raytracer.
 fn main() {
     // Load the program configuration.
-    let config = AppConfig::load();
+    let config = AppConfig::parse();
 
     // Configure number of threads.
     rayon::ThreadPoolBuilder::new()
-        .num_threads(config.num_threads)
+        .num_threads(config.threads())
         .build_global()
         .unwrap();
 

@@ -3,7 +3,7 @@
 //! A library for generating random numbers.
 
 use super::{ArcRandomizer, Float, Randomizer, Vec3, TWO_PI};
-use rand::distributions::uniform::{SampleBorrow, SampleUniform};
+use rand::distributions::uniform::SampleUniform;
 use rand::{Rng, RngCore, SeedableRng};
 use rand_chacha::ChaCha20Rng;
 use std::fmt;
@@ -210,12 +210,8 @@ where
     ///
     /// * `min` - Minimum bound
     /// * `max` - Maximum bound
-    fn in_range<U: SampleUniform, B1, B2>(rng: &mut MutexGuard<'_, T>, min: B1, max: B2) -> U
-    where
-        B1: SampleBorrow<U> + Sized,
-        B2: SampleBorrow<U> + Sized,
-    {
-        rng.gen_range::<U, B1, B2>(min, max)
+    fn in_range<U: SampleUniform + PartialOrd>(rng: &mut MutexGuard<'_, T>, min: U, max: U) -> U {
+        rng.gen_range(min..max)
     }
 
     /// Returns a random unit vector by picking points on the unit sphere
