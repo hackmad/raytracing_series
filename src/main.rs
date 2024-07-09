@@ -2,7 +2,6 @@
 
 extern crate clap;
 extern crate image;
-extern crate num_cpus;
 extern crate rand;
 extern crate rand_chacha;
 extern crate rayon;

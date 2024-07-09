@@ -24,7 +24,7 @@ pub const PI_OVER_2: Float = 0.5 * PI;
 pub const INFINITY: Float = std::f64::INFINITY;
 
 /// Random number generator.
-pub use self::random::{new_seeded_rng, new_thread_rng, Random};
+pub use self::random::{new_seeded_rng, new_thread_rng};
 
 /// Define some utility functions for generating random values.
 ///

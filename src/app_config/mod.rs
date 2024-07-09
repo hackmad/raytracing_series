@@ -4,6 +4,7 @@
 
 use super::scene::Scenery;
 use clap::{builder::EnumValueParser, Parser};
+use std::thread::available_parallelism;
 
 /// Program configuration.
 #[derive(Parser, Clone)]
@@ -21,7 +22,7 @@ pub struct AppConfig {
 
     /// Image width.
     #[arg(
-        long = "image_height",
+        long = "image-height",
         short = 'h',
         value_name = "HEIGHT",
         default_value_t = 100,
@@ -31,9 +32,8 @@ pub struct AppConfig {
 
     /// Samples per pixels for antialiasing.
     #[arg(
-        long = "samples_per_pixel",
+        long = "samples-per-pixel",
         short = 's',
-        long = "samples_per_pixel",
         value_name = "SAMPLES",
         default_value_t = 100,
         help = "number of samples per pixel for antialiasing"
@@ -42,9 +42,8 @@ pub struct AppConfig {
 
     /// Max recursion depth
     #[arg(
-        long = "max_depth",
+        long = "max-depth",
         short = 'd',
-        long = "max_depth",
         value_name = "DEPTH",
         default_value_t = 50,
         help = "maximum depth of recursion"
@@ -81,7 +80,6 @@ pub struct AppConfig {
     #[arg(
         long = "out",
         short = 'o',
-        long = "out",
         value_name = "OUTPUT_PATH",
         required = true,
         help = "output file path. file extension determines image type."
@@ -93,7 +91,7 @@ pub struct AppConfig {
         long = "threads",
         short = 't',
         value_name = "THREADS",
-        default_value_t = num_cpus::get(),
+        default_value_t = get_max_threads(),
         help = "number of threads to use (default = max logical cores)",
     )]
     num_threads: usize,
@@ -102,7 +100,7 @@ pub struct AppConfig {
 impl AppConfig {
     /// Returns the number of threads to use.
     pub fn threads(&self) -> usize {
-        let max_threads = num_cpus::get();
+        let max_threads = get_max_threads();
         if self.num_threads == 0 {
             panic!("Invalid num threads");
         } else if self.num_threads > max_threads {
@@ -110,4 +108,9 @@ impl AppConfig {
         }
         self.num_threads
     }
+}
+
+/// Returns the number of threads available. If unable, then 1 is returned.
+fn get_max_threads() -> usize {
+    available_parallelism().map_or(1, |n| n.get())
 }
