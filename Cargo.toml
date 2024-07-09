@@ -1,6 +1,6 @@
 [package]
 name = "raytracing_series"
-version = "0.3.2"
+version = "0.3.3"
 authors = ["Ahmad Kabani <ahmadkabani@yahoo.com>"]
 edition = "2018"
 
@@ -12,4 +12,4 @@ clap = { version = "4", features = ["derive"] }
 rand_chacha = "0.3"
 image = "0.25"
 rayon = "1"
-num_cpus = "1"
+

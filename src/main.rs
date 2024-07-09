@@ -2,7 +2,6 @@
 
 extern crate clap;
 extern crate image;
-extern crate num_cpus;
 extern crate rand;
 extern crate rand_chacha;
 extern crate rayon;
@@ -17,6 +16,7 @@ mod object;
 mod renderer;
 mod scene;
 mod texture;
+mod tiles;
 
 use app_config::*;
 use clap::Parser;
@@ -26,6 +26,7 @@ use renderer::*;
 use scene::*;
 use std::sync::Mutex;
 use std::time::Instant;
+use tiles::*;
 
 /// Entry point for the recursive raytracer.
 fn main() {
@@ -42,9 +43,20 @@ fn main() {
         Random::seed(seed);
     };
 
-    // Setup rendering algorithm
+    // Allocate an image buffer.
+    let imgbuf = Mutex::new(image::ImageBuffer::new(
+        config.image_width,
+        config.image_height,
+    ));
+
+    // Calculate tiles in x and y direction.
+    let n_tiles_x = get_tile_count(config.tile_size, config.image_width);
+    let n_tiles_y = get_tile_count(config.tile_size, config.image_height);
+    let n_tiles = n_tiles_x * n_tiles_y;
+
+    // setup rendering algorithm.
     let renderer = RecursiveTracer {
-        config: AppConfig::parse(),
+        config: config.clone(),
         scene: Scene::new(
             config.scenery,
             config.image_width,
@@ -53,27 +65,31 @@ fn main() {
         ),
     };
 
-    // Allocate an image buffer.
-    let imgbuf = Mutex::new(image::ImageBuffer::new(
-        config.image_width,
-        config.image_height,
-    ));
-
-    // Tracking progress.
-    let percent_step = 100.0 / (config.image_height as Float);
+    // tracking progress.
+    let percent_step = 100.0 / (n_tiles as Float);
     let current_progress = Mutex::new(0.0);
     let start = Instant::now();
 
     eprint!("Progress: 0.0%\r");
 
-    (0..config.image_height).into_par_iter().for_each(|j| {
-        // Process an entire scanline in one thread.
-        for i in 0..config.image_width {
-            let rgb = renderer.trace_ray(i, j).to_rgb();
-            imgbuf
-                .lock()
-                .expect("Unable to lock image buffer")
-                .put_pixel(i, config.image_height - 1 - j, image::Rgb(rgb));
+    (0..n_tiles).into_par_iter().for_each(|tile_idx| {
+        // Process a tile in one thread.
+        let tile_bounds = get_tile_bounds(
+            tile_idx,
+            n_tiles_x,
+            config.tile_size,
+            config.image_width,
+            config.image_height,
+        );
+
+        for j in tile_bounds.y_min..=tile_bounds.y_max {
+            for i in tile_bounds.x_min..=tile_bounds.x_max {
+                let rgb = renderer.trace_ray(i, j).to_rgb();
+                imgbuf
+                    .lock()
+                    .expect("Unable to lock image buffer")
+                    .put_pixel(i, config.image_height - 1 - j, image::Rgb(rgb));
+            }
         }
 
         // Update progress.
@@ -82,7 +98,7 @@ fn main() {
         eprint!("                 \rProgress: {:>6.2}%", *data);
     });
 
-    // Write the output file.
+    // write the output file.
     eprint!("                 \rWriting output file...");
     imgbuf
         .lock()
@@ -90,7 +106,7 @@ fn main() {
         .save(&config.output_path)
         .expect("Error writing output file");
 
-    // Display stats.
+    // display stats.
     eprint!("                                         \r");
     let seconds = start.elapsed().as_secs_f32();
     if seconds < 60.0 {
