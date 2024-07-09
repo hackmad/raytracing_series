@@ -32,7 +32,7 @@ struct Config {
 
     /// Image width.
     #[arg(
-        long = "image_height",
+        long = "image-height",
         short = 'h',
         value_name = "HEIGHT",
         default_value_t = 100,
@@ -42,9 +42,8 @@ struct Config {
 
     /// Samples per pixels for antialiasing.
     #[arg(
-        long = "samples_per_pixel",
+        long = "samples-per-pixel",
         short = 's',
-        long = "samples_per_pixel",
         value_name = "SAMPLES",
         default_value_t = 100,
         help = "number of samples per pixel for antialiasing"
@@ -53,9 +52,8 @@ struct Config {
 
     /// Max recursion depth
     #[arg(
-        long = "max_depth",
+        long = "max-depth",
         short = 'd',
-        long = "max_depth",
         value_name = "DEPTH",
         default_value_t = 50,
         help = "maximum depth of recursion"
