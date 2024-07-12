@@ -1,3 +1,22 @@
+use std::sync::Mutex;
+
+use crate::RecursiveTracer;
+
+/// Tile bounds.
+pub struct TileBounds {
+    // Minimum x-coordinate.
+    pub x_min: u32,
+
+    // Minimum y-coordinate.
+    pub y_min: u32,
+
+    // Maximum x-coordinate.
+    pub x_max: u32,
+
+    // Maximum y-coordinate.
+    pub y_max: u32,
+}
+
 /// Calculates number of tiles based on given image dimension and tile size.
 ///
 /// * `tile_size` - Tile size in pixels.
@@ -10,7 +29,7 @@ pub fn get_tile_count(tile_size: u8, dimension: u32) -> usize {
     }
 }
 
-/// Calculates tile bounds based on a tile index. Tiles are counted from top-left to bottom-right
+/// Calculates tile bounds based on a tile index. Tiles are counted from top-left to bottom-right.
 ///
 /// * `tile_idx`  - Tile index.
 /// * `n_tiles_x` - Number of tiles in x-direction.
@@ -42,14 +61,42 @@ pub fn get_tile_bounds(
     }
 }
 
-/// Tile bounds.
-pub struct TileBounds {
-    // Minimum x-coordinate.
-    pub x_min: u32,
-    // Minimum y-coordinate.
-    pub y_min: u32,
-    // Maximum x-coordinate.
-    pub x_max: u32,
-    // Maximum y-coordinate.
-    pub y_max: u32,
+/// Render a single tile.
+///
+/// * `renderer`    - The ray tracer to use for rendering.
+/// * `tile_bounds` - Tile bounds in image coordinates.
+/// * `pixels`      - The tile pixels destination.
+pub fn render_tile(
+    renderer: &RecursiveTracer,
+    tile_bounds: &TileBounds,
+    pixels: &mut image::RgbImage,
+) {
+    for j in tile_bounds.y_min..=tile_bounds.y_max {
+        for i in tile_bounds.x_min..=tile_bounds.x_max {
+            let rgb = renderer.trace_ray(i, j).to_rgb();
+            let x = i - tile_bounds.x_min;
+            let y = j - tile_bounds.y_min;
+            pixels.put_pixel(x, y, image::Rgb(rgb));
+        }
+    }
+}
+
+/// Copy a tile to to the image destination.
+///
+/// * `image_mutex` - The mutex holding the image.
+/// * `tile_bounds` - Tile bounds in image coordinates.
+/// * `pixels`      - The tile pixels destination.
+pub fn copy_tile(
+    image_mutex: &Mutex<image::RgbImage>,
+    tile_bounds: &TileBounds,
+    pixels: &image::RgbImage,
+) {
+    let mut img = image_mutex.lock().expect("Unable to lock image buffer");
+
+    image::imageops::overlay(
+        &mut *img,
+        pixels,
+        tile_bounds.x_min.into(),
+        tile_bounds.y_min.into(),
+    );
 }

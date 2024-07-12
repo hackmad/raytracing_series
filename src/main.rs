@@ -30,26 +30,27 @@ use tiles::*;
 
 /// Entry point for the recursive raytracer.
 fn main() {
-    // Load the program configuration.
+    // load the program configuration.
     let config = AppConfig::parse();
 
-    // Configure number of threads.
+    // configure number of threads.
     rayon::ThreadPoolBuilder::new()
         .num_threads(config.threads())
         .build_global()
         .unwrap();
 
+    // seed the random number generator.
     if let Some(seed) = config.seed {
         Random::seed(seed);
     };
 
-    // Allocate an image buffer.
-    let imgbuf = Mutex::new(image::ImageBuffer::new(
+    // allocate an RGB image.
+    let image_mutex = Mutex::new(image::RgbImage::new(
         config.image_width,
         config.image_height,
     ));
 
-    // Calculate tiles in x and y direction.
+    // calculate tiles in x and y direction.
     let n_tiles_x = get_tile_count(config.tile_size, config.image_width);
     let n_tiles_y = get_tile_count(config.tile_size, config.image_height);
     let n_tiles = n_tiles_x * n_tiles_y;
@@ -72,39 +73,33 @@ fn main() {
 
     eprint!("Progress: 0.0%\r");
 
-    (0..n_tiles).into_par_iter().for_each(|tile_idx| {
-        // Process a tile in one thread.
-        let tile_bounds = get_tile_bounds(
-            tile_idx,
-            n_tiles_x,
-            config.tile_size,
-            config.image_width,
-            config.image_height,
-        );
+    // create pixels to be used by the rayon worker groups so we don't reallocate per tile.
+    (0..n_tiles).into_par_iter().for_each_init(
+        || image::RgbImage::new(config.tile_size as u32, config.tile_size as u32),
+        |pixels, tile_idx| {
+            // calculate the tile bounds.
+            let tile_bounds = get_tile_bounds(
+                tile_idx,
+                n_tiles_x,
+                config.tile_size,
+                config.image_width,
+                config.image_height,
+            );
 
-        for j in tile_bounds.y_min..=tile_bounds.y_max {
-            for i in tile_bounds.x_min..=tile_bounds.x_max {
-                let rgb = renderer.trace_ray(i, j).to_rgb();
-                imgbuf
-                    .lock()
-                    .expect("Unable to lock image buffer")
-                    .put_pixel(i, config.image_height - 1 - j, image::Rgb(rgb));
-            }
-        }
+            // render whole tile and then copy to destination.
+            render_tile(&renderer, &tile_bounds, pixels);
+            copy_tile(&image_mutex, &tile_bounds, pixels);
 
-        // Update progress.
-        let mut data = current_progress.lock().unwrap();
-        *data += percent_step;
-        eprint!("                 \rProgress: {:>6.2}%", *data);
-    });
+            // update progress.
+            let mut data = current_progress.lock().unwrap();
+            *data += percent_step;
+            eprint!("                 \rProgress: {:>6.2}%", *data);
+        },
+    );
 
     // write the output file.
     eprint!("                 \rWriting output file...");
-    imgbuf
-        .lock()
-        .expect("Unbale to lock image buffer for writing")
-        .save(&config.output_path)
-        .expect("Error writing output file");
+    write_image(&image_mutex, &config.output_path);
 
     // display stats.
     eprint!("                                         \r");
@@ -116,4 +111,19 @@ fn main() {
     } else {
         eprintln!("Done: {:.2} hours", seconds / 3600.0);
     }
+}
+
+/// Copy a tile to to the image destination.
+///
+/// * `image_mutex` - The mutex holding the image.
+/// * `output_path` - Path to the image.
+fn write_image(image_mutex: &Mutex<image::RgbImage>, output_path: &str) {
+    let img = image_mutex
+        .lock()
+        .expect("Unbale to lock image buffer for writing");
+
+    // flip image first because it will be upside down.
+    image::imageops::flip_vertical(&*img)
+        .save(output_path)
+        .expect("Error writing output file");
 }
