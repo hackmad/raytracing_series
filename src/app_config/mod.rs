@@ -109,6 +109,14 @@ pub struct AppConfig {
         help = "tile size in pixels (default = 32)"
     )]
     pub tile_size: u8,
+
+    /// GUI.
+    #[arg(
+        long = "gui",
+        value_name = "GUI",
+        help = "show rendered image in a gui"
+    )]
+    pub gui: bool,
 }
 
 impl AppConfig {
