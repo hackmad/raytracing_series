@@ -59,7 +59,7 @@ fn main() -> Result<(), String> {
         None
     };
 
-    // Start a separate thread that will queue all tiles. This way we can run the event loop in main thread.
+    // Start a separate thread that will queue all tiles.
     let render_thread = {
         let pool = Arc::clone(&pool);
         let image = Arc::clone(&image);
@@ -68,12 +68,21 @@ fn main() -> Result<(), String> {
         thread::spawn(|| render(pool, image, remaining_tiles, window))
     };
 
+    // Wait for render to complete, then save image and shutdown pool.
+    let progress_thread = {
+        let pool = Arc::clone(&pool);
+        let image = Arc::clone(&image);
+        let remaining_tiles = Arc::clone(&remaining_tiles);
+        thread::spawn(|| progress(pool, image, remaining_tiles))
+    };
+
     if CONFIG.gui {
-        // Run the event loop for the GUI.
+        // Run the event loop for the GUI. This will run in the main thread.
         app.unwrap().run()
     } else {
-        // Wait for rendering to complete.
-        render_thread.join().map_err(|e| format!("{:?}", e))
+        // Wait for remaining threads to complete.
+        render_thread.join().map_err(|e| format!("{:?}", e))?;
+        progress_thread.join().map_err(|e| format!("{:?}", e))
     }
 }
 
@@ -134,26 +143,7 @@ fn render(
         });
     }
 
-    println!("Queued up all tiles to render.");
-
-    // Wait for render to complete, then save image and shutdown pool.
-    loop {
-        let remaining_tiles = *remaining_tiles.lock().unwrap();
-
-        let progress =
-            100_f32 * (CONFIG.n_tiles() - remaining_tiles) as f32 / CONFIG.n_tiles() as f32;
-
-        eprint!("\rProgress {:.2}%        ", progress);
-
-        if remaining_tiles == 0 {
-            eprintln!();
-            write_image(image);
-            pool.lock().unwrap().shutdown();
-            break;
-        }
-
-        thread::sleep(Duration::from_secs(2));
-    }
+    eprintln!("\nQueued up all tiles to render.");
 }
 
 /// Write the image to disk.
@@ -167,5 +157,34 @@ fn write_image(image: Arc<Mutex<image::RgbaImage>>) {
         .map(|img| image::imageops::flip_vertical(&*img).save(&CONFIG.output_path))
     {
         eprintln!("Error writing output image");
+    }
+}
+
+/// Displays the progress of the render. When complete it saves the image and shuts down the thread pool.
+///
+/// * `pool`            - Thread pool.
+/// * `image`           - Image buffer to render.
+/// * `remaining_tiles` - Number of tiles remaining.
+fn progress(
+    pool: Arc<Mutex<ThreadPool>>,
+    image: Arc<Mutex<image::RgbaImage>>,
+    remaining_tiles: Arc<Mutex<usize>>,
+) {
+    loop {
+        let remaining_tiles = *remaining_tiles.lock().unwrap();
+
+        let progress = (CONFIG.n_tiles() - remaining_tiles) as f32 / CONFIG.n_tiles() as f32;
+        eprint!("\rProgress {:.2}%    ", 100_f32 * progress);
+
+        if remaining_tiles == 0 {
+            eprintln!();
+
+            write_image(image);
+            pool.lock().unwrap().shutdown();
+
+            break;
+        }
+
+        thread::sleep(Duration::from_secs(2));
     }
 }

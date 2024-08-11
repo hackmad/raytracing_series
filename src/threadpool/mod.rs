@@ -12,8 +12,8 @@ pub struct ThreadPool {
     /// List of workers.
     workers: Vec<Worker>,
 
-    /// Used to send a job to workers on an MPSC channel.
-    sender: Option<mpsc::Sender<Job>>,
+    /// Used to send a job to workers.
+    sender: Option<mpsc::SyncSender<Job>>,
 
     /// Indicates that the thread pool is shutting down.
     is_shutting_down: bool,
@@ -27,8 +27,9 @@ impl ThreadPool {
             return Err(PoolCreationError::ZeroPoolSize);
         }
 
-        // Create an MPSC channel to send / receive jobs.
-        let (sender, receiver) = mpsc::channel();
+        // Create a bounded channel to send / receive jobs. This way we don't have a lot of jobs queued up in case
+        // of termination.
+        let (sender, receiver) = mpsc::sync_channel(size);
         let receiver = Arc::new(Mutex::new(receiver));
 
         // Allocate workers.
@@ -95,6 +96,9 @@ struct Worker {
 
 impl Worker {
     /// Create a new worker and listen for jobs to execute.
+    ///
+    /// * `id`       - Thread ID.
+    /// * `receiver` - Receiver for job messages.
     fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Job>>>) -> Worker {
         let thread = thread::spawn(move || loop {
             let message = receiver.lock().unwrap().recv();
