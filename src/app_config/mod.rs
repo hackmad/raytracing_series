@@ -2,9 +2,14 @@
 //!
 //! A library for handling application configuration
 
+use crate::get_tile_count;
+
 use super::scene::Scenery;
 use clap::{builder::EnumValueParser, Parser};
 use std::thread::available_parallelism;
+
+// RGBA color channels.
+pub const COLOR_CHANNELS: usize = 4;
 
 /// Program configuration.
 #[derive(Parser, Clone)]
@@ -116,6 +121,22 @@ impl AppConfig {
             panic!("Num threads > max logical CPUs {}", max_threads);
         }
         self.num_threads
+    }
+
+    pub fn n_tiles_x(&self) -> usize {
+        get_tile_count(self.tile_size, self.image_width)
+    }
+
+    pub fn n_tiles_y(&self) -> usize {
+        get_tile_count(self.tile_size, self.image_height)
+    }
+
+    pub fn n_tiles(&self) -> usize {
+        self.n_tiles_x() * self.n_tiles_y()
+    }
+
+    pub fn tiles_pixel_bytes(&self) -> usize {
+        self.tile_size as usize * self.tile_size as usize * COLOR_CHANNELS
     }
 }
 

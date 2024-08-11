@@ -186,6 +186,12 @@ impl Vec3 {
     pub fn to_rgb(self) -> [u8; 3] {
         [self.x() as u8, self.y() as u8, self.z() as u8]
     }
+
+    /// Returns an array of `u8` to be used as rgba values.
+    /// For now alpha = 255.
+    pub fn to_rgba(self) -> [u8; 4] {
+        [self.x() as u8, self.y() as u8, self.z() as u8, 255_u8]
+    }
 }
 
 impl ops::Add<Vec3> for Vec3 {

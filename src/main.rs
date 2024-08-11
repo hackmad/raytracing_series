@@ -1,11 +1,5 @@
 //! # Recursive ray tracer
 
-extern crate clap;
-extern crate image;
-extern crate rand;
-extern crate rand_chacha;
-extern crate rayon;
-
 mod algebra;
 mod app_config;
 mod background;
@@ -16,114 +10,211 @@ mod object;
 mod renderer;
 mod scene;
 mod texture;
+mod threadpool;
 mod tiles;
 
 use app_config::*;
-use clap::Parser;
 use common::*;
-use rayon::prelude::*;
 use renderer::*;
 use scene::*;
-use std::sync::Mutex;
-use std::time::Instant;
+use threadpool::*;
 use tiles::*;
 
+use clap::Parser;
+use pixels::{Pixels, SurfaceTexture};
+use std::cell::RefCell;
+use std::sync::{Arc, LazyLock, Mutex};
+use std::thread;
+use std::time::Duration;
+use tao::{
+    dpi::LogicalSize,
+    event::{ElementState, Event, KeyEvent, WindowEvent},
+    event_loop::{ControlFlow, EventLoop},
+    keyboard::Key,
+    window::{Window, WindowBuilder},
+};
+
+static CONFIG: LazyLock<AppConfig> = LazyLock::new(|| AppConfig::parse());
+
 /// Entry point for the recursive raytracer.
-fn main() {
-    // load the program configuration.
-    let config = AppConfig::parse();
-
-    // configure number of threads.
-    rayon::ThreadPoolBuilder::new()
-        .num_threads(config.threads())
-        .build_global()
-        .unwrap();
-
+fn main() -> Result<(), pixels::Error> {
     // seed the random number generator.
-    if let Some(seed) = config.seed {
+    if let Some(seed) = CONFIG.seed {
         Random::seed(seed);
     };
 
-    // allocate an RGB image.
-    let image_mutex = Mutex::new(image::RgbImage::new(
-        config.image_width,
-        config.image_height,
-    ));
+    eprintln!("Running with {} threads", CONFIG.threads());
 
-    // calculate tiles in x and y direction.
-    let n_tiles_x = get_tile_count(config.tile_size, config.image_width);
-    let n_tiles_y = get_tile_count(config.tile_size, config.image_height);
-    let n_tiles = n_tiles_x * n_tiles_y;
+    // Initialize logger for tao.
+    env_logger::init();
 
-    // setup rendering algorithm.
-    let renderer = RecursiveTracer {
-        config: config.clone(),
-        scene: Scene::new(
-            config.scenery,
-            config.image_width,
-            config.image_height,
-            config.bvh_enabled,
-        ),
+    // Create a new event loop for the application.
+    let event_loop = EventLoop::new();
+
+    // Create a new window.
+    let window = Arc::new(
+        WindowBuilder::new()
+            .with_title("Raytracing Series")
+            .with_inner_size(LogicalSize::new(CONFIG.image_width, CONFIG.image_height))
+            .with_resizable(false)
+            .build(&event_loop)
+            .unwrap(),
+    );
+    let inner_size = window.inner_size();
+
+    // Create a surface texture that uses the logical inner size to render to the entire window's inner dimensions.
+    // Then create pixel frame buffer that matches rendered image dimensions.
+    let pixels = {
+        let surface_texture = SurfaceTexture::new(inner_size.width, inner_size.height, &window);
+
+        Arc::new(Mutex::new(Pixels::new(
+            CONFIG.image_width,
+            CONFIG.image_height,
+            surface_texture,
+        )?))
     };
 
-    // tracking progress.
-    let percent_step = 100.0 / (n_tiles as Float);
-    let current_progress = Mutex::new(0.0);
-    let start = Instant::now();
+    // Create a thread pool for rendering tiles in parallel.
+    let pool = Arc::new(Mutex::new(ThreadPool::build(CONFIG.threads()).unwrap()));
 
-    eprint!("Progress: 0.0%\r");
+    // Track remaining tiles. It will be used to shutdown the thread pool.
+    let remaining_tiles = Arc::new(Mutex::new(CONFIG.n_tiles()));
 
-    // create pixels to be used by the rayon worker groups so we don't reallocate per tile.
-    (0..n_tiles).into_par_iter().for_each_init(
-        || image::RgbImage::new(config.tile_size as u32, config.tile_size as u32),
-        |pixels, tile_idx| {
-            // calculate the tile bounds.
-            let tile_bounds = get_tile_bounds(
-                tile_idx,
-                n_tiles_x,
-                config.tile_size,
-                config.image_width,
-                config.image_height,
-            );
+    // Start a separate thread that will queue all tiles. This way we can run the event loop in main thread.
+    {
+        let remaining_tiles = Arc::clone(&remaining_tiles);
+        let pool = Arc::clone(&pool);
+        let pixels = Arc::clone(&pixels);
+        let window = Arc::clone(&window);
+        thread::spawn(|| render(pool, pixels, window, remaining_tiles));
+    }
 
-            // render whole tile and then copy to destination.
-            render_tile(&renderer, &tile_bounds, pixels);
-            copy_tile(&image_mutex, &tile_bounds, pixels);
+    // Run the event loop.
+    event_loop.run(move |event, _, control_flow| {
+        //println!("{:?}", event);
+        *control_flow = ControlFlow::Wait;
 
-            // update progress.
-            let mut data = current_progress.lock().unwrap();
-            *data += percent_step;
-            eprint!("                 \rProgress: {:>6.2}%", *data);
-        },
-    );
+        match event {
+            Event::WindowEvent { event, .. } => match event {
+                // When window is closed or destroyed or Escape key is pressed, stop rendering.
+                WindowEvent::CloseRequested
+                | WindowEvent::Destroyed
+                | WindowEvent::KeyboardInput {
+                    event:
+                        KeyEvent {
+                            logical_key: Key::Escape,
+                            state: ElementState::Released,
+                            ..
+                        },
+                    ..
+                } => {
+                    eprintln!("Exiting application.");
+                    pool.lock().unwrap().shutdown();
+                    *control_flow = ControlFlow::Exit;
+                }
+                _ => (),
+            },
+            Event::RedrawRequested(_) => {
+                // Draw the pixel frame buffer to the window. If there are errors show the error and stop rendering.
+                if let Err(err) = pixels.lock().map(|p| p.render()) {
+                    println!("pixels.render() failed with error.\n{}", err);
+                    pool.lock().unwrap().shutdown();
+                    *control_flow = ControlFlow::Exit;
+                }
+            }
+            _ => (),
+        }
+    })
+}
 
-    // write the output file.
-    eprint!("                 \rWriting output file...");
-    write_image(&image_mutex, &config.output_path);
+/// Render the scene in parallel using worker threads.
+///
+/// * `pool`            - The thread pool.
+/// * `pixels`          - Pixel frame buffer to render to window.
+/// * `window`          - The window.
+/// * `remaining_tiles` - Number of tiles remaining.
+fn render(
+    pool: Arc<Mutex<ThreadPool>>,
+    pixels: Arc<Mutex<Pixels>>,
+    window: Arc<Window>,
+    remaining_tiles: Arc<Mutex<usize>>,
+) {
+    // setup rendering algorithm.
+    let renderer = Arc::new(RecursiveTracer {
+        config: CONFIG.clone(),
+        scene: Scene::new(
+            CONFIG.scenery,
+            CONFIG.image_width,
+            CONFIG.image_height,
+            CONFIG.bvh_enabled,
+        ),
+    });
 
-    // display stats.
-    eprint!("                                         \r");
-    let seconds = start.elapsed().as_secs_f32();
-    if seconds < 60.0 {
-        eprintln!("Done: {:.2} seconds", seconds);
-    } else if seconds < 3600.0 {
-        eprintln!("Done: {:.2} minutes", seconds / 60.0);
-    } else {
-        eprintln!("Done: {:.2} hours", seconds / 3600.0);
+    // Queue up the tiles to render.
+    for tile_idx in 0..CONFIG.n_tiles() {
+        let remaining_tiles = Arc::clone(&remaining_tiles);
+        let renderer = Arc::clone(&renderer);
+        let pixels = Arc::clone(&pixels);
+        let window = Arc::clone(&window);
+
+        pool.lock().unwrap().execute(move || {
+            thread_local! {
+                // Allocate pixels for rendering a tile per thread so we don't allocate for each tile.
+                pub static TILE_PIXELS: RefCell<Vec<u8>> = {
+                    eprintln!("Allocating tile pixels for {:?}", thread::current().id());
+                    RefCell::new(vec![0_u8; CONFIG.tiles_pixel_bytes()])
+                };
+            }
+
+            TILE_PIXELS.with_borrow_mut(|tile_pixels| {
+                // calculate the tile bounds.
+                let tile_bounds = get_tile_bounds(tile_idx);
+
+                // render whole tile and then copy to destination.
+                render_tile(renderer, &tile_bounds, tile_pixels);
+                copy_tile(Arc::clone(&pixels), &tile_bounds, tile_pixels);
+            });
+
+            // Update remaining tiles. If rendering is complete save the image.
+            let mut remaining_tiles = remaining_tiles.lock().unwrap();
+            *remaining_tiles -= 1;
+            if *remaining_tiles == 0 {
+                write_image(pixels);
+            }
+
+            // Request a redraw of the window.
+            window.request_redraw();
+        });
+    }
+
+    println!("Queued up all tiles to render.");
+
+    // Wait for render to complete, then save image and shutdown pool.
+    loop {
+        if *remaining_tiles.lock().unwrap() == 0 {
+            write_image(pixels);
+            pool.lock().unwrap().shutdown();
+            break;
+        }
+
+        thread::sleep(Duration::from_secs(1));
     }
 }
 
 /// Copy a tile to to the image destination.
 ///
-/// * `image_mutex` - The mutex holding the image.
-/// * `output_path` - Path to the image.
-fn write_image(image_mutex: &Mutex<image::RgbImage>, output_path: &str) {
-    let img = image_mutex
-        .lock()
-        .expect("Unbale to lock image buffer for writing");
+/// * `pixels` - Pixel frame buffer to render to window.
+fn write_image(pixels: Arc<Mutex<Pixels>>) {
+    eprintln!("Saving output image to {}", CONFIG.output_path);
 
-    // flip image first because it will be upside down.
-    image::imageops::flip_vertical(&*img)
-        .save(output_path)
-        .expect("Error writing output file");
+    let mut img = image::RgbaImage::new(CONFIG.image_width, CONFIG.image_height);
+
+    if let Err(_) = pixels.lock().map(|p| img.copy_from_slice(p.frame())) {
+        eprintln!("Error accessing pixels to write to output image");
+        return;
+    }
+
+    if let Err(_) = img.save(&CONFIG.output_path) {
+        eprintln!("Error writing output image");
+    }
 }
