@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use pixels::Pixels;
+use image::{self, imageops};
 
 use crate::{RecursiveTracer, COLOR_CHANNELS, CONFIG};
 
@@ -85,27 +85,19 @@ pub fn render_tile(
 
 /// Copy a tile to to the image destination.
 ///
-/// * `pixels`      - The mutex holding the image.
+/// * `imgbuf`      - The image buffer for rendered image.
 /// * `tile_bounds` - Tile bounds in image coordinates.
 /// * `tile_pixels` - The tile pixels source.
-pub fn copy_tile(pixels: Arc<Mutex<Pixels>>, tile_bounds: &TileBounds, tile_pixels: &Vec<u8>) {
-    let mut pixels = pixels.lock().expect("Unable to lock image buffer");
-    let frame = pixels.frame_mut();
-
-    let h = CONFIG.image_height;
-    let ts = CONFIG.tile_size as usize;
-    let tw = (tile_bounds.x_max - tile_bounds.x_min + 1) as usize;
-
-    for y in tile_bounds.y_min..=tile_bounds.y_max {
-        let y1 = h - 1 - y; // flip vertically
-        let dst_start = (y1 * CONFIG.image_width + tile_bounds.x_min) as usize * COLOR_CHANNELS;
-        let dst_end = dst_start + tw * COLOR_CHANNELS;
-
-        let src_start = (y - tile_bounds.y_min) as usize * ts * COLOR_CHANNELS;
-        let src_end = src_start + tw * COLOR_CHANNELS;
-
-        let dst = &mut frame[dst_start..dst_end];
-        let src = &tile_pixels[src_start..src_end];
-        dst.copy_from_slice(src);
-    }
+pub fn copy_tile(
+    image: Arc<Mutex<image::RgbaImage>>,
+    tile_bounds: &TileBounds,
+    tile_pixels: &image::RgbaImage,
+) {
+    let mut img = image.lock().expect("Unable to lock image buffer");
+    imageops::overlay(
+        &mut *img,
+        tile_pixels,
+        tile_bounds.x_min as i64,
+        tile_bounds.y_min as i64,
+    );
 }
