@@ -12,7 +12,6 @@ pub struct AppConfig {
     /// Image height.
     #[arg(
         long = "image-width",
-        short = 'w',
         value_name = "WIDTH",
         default_value_t = 200,
         help = "image width in pixels"
@@ -21,8 +20,7 @@ pub struct AppConfig {
 
     /// Image width.
     #[arg(
-        long = "image_height",
-        short = 'h',
+        long = "image-height",
         value_name = "HEIGHT",
         default_value_t = 100,
         help = "image height in pixels"
@@ -31,7 +29,7 @@ pub struct AppConfig {
 
     /// Samples per pixels for antialiasing.
     #[arg(
-        long = "samples_per_pixel",
+        long = "samples-per-pixel",
         short = 's',
         long = "samples_per_pixel",
         value_name = "SAMPLES",
@@ -42,7 +40,7 @@ pub struct AppConfig {
 
     /// Max recursion depth
     #[arg(
-        long = "max_depth",
+        long = "max-depth",
         short = 'd',
         long = "max_depth",
         value_name = "DEPTH",
