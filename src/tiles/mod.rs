@@ -1,10 +1,8 @@
-use std::sync::{Arc, Mutex};
-
-use image::{self, imageops};
-
 use crate::{RecursiveTracer, COLOR_CHANNELS, CONFIG};
+use std::sync::Arc;
 
 /// Tile bounds.
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct TileBounds {
     // Minimum x-coordinate.
     pub x_min: u32,
@@ -63,11 +61,7 @@ pub fn get_tile_bounds(tile_idx: usize) -> TileBounds {
 /// * `renderer`    - The ray tracer to use for rendering.
 /// * `tile_bounds` - Tile bounds in image coordinates.
 /// * `tile_pixels` - The tile pixels destination.
-pub fn render_tile(
-    renderer: Arc<RecursiveTracer>,
-    tile_bounds: &TileBounds,
-    tile_pixels: &mut [u8],
-) {
+pub fn render_tile(renderer: Arc<RecursiveTracer>, tile_bounds: &TileBounds, tile_pixels: &mut [u8]) {
     for j in tile_bounds.y_min..=tile_bounds.y_max {
         let ty = j - tile_bounds.y_min;
 
@@ -85,19 +79,24 @@ pub fn render_tile(
 
 /// Copy a tile to to the image destination.
 ///
-/// * `imgbuf`      - The image buffer for rendered image.
-/// * `tile_bounds` - Tile bounds in image coordinates.
+/// * `image`       - The image buffer for rendered image.
 /// * `tile_pixels` - The tile pixels source.
-pub fn copy_tile(
-    image: Arc<Mutex<image::RgbaImage>>,
-    tile_bounds: &TileBounds,
-    tile_pixels: &image::RgbaImage,
-) {
-    let mut img = image.lock().expect("Unable to lock image buffer");
-    imageops::overlay(
-        &mut *img,
-        tile_pixels,
-        tile_bounds.x_min as i64,
-        tile_bounds.y_min as i64,
-    );
+/// * `tile_bounds` - Tile bounds in image coordinates.
+pub fn copy_tile(image: &mut [u8], tile_pixels: &[u8], tile_bounds: &TileBounds) {
+    let w = CONFIG.image_width;
+    let h = CONFIG.image_height;
+
+    for j in tile_bounds.y_min..=tile_bounds.y_max {
+        let ty = j - tile_bounds.y_min;
+
+        for i in tile_bounds.x_min..=tile_bounds.x_max {
+            let tx = i - tile_bounds.x_min;
+            let tile_offset = (ty * CONFIG.tile_size as u32 + tx) as usize * COLOR_CHANNELS;
+            let rgba = &tile_pixels[tile_offset..tile_offset + COLOR_CHANNELS];
+
+            let idx = ((h - j - 1) * w + i) as usize * COLOR_CHANNELS; // Flip image y-cooridnate / upside down
+            let dst = &mut image[idx..idx + COLOR_CHANNELS];
+            dst.copy_from_slice(rgba);
+        }
+    }
 }

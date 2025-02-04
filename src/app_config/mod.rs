@@ -18,7 +18,6 @@ pub struct AppConfig {
     /// Image height.
     #[arg(
         long = "image-width",
-        short = 'w',
         value_name = "WIDTH",
         default_value_t = 200,
         help = "image width in pixels"
@@ -28,7 +27,6 @@ pub struct AppConfig {
     /// Image width.
     #[arg(
         long = "image-height",
-        short = 'h',
         value_name = "HEIGHT",
         default_value_t = 100,
         help = "image height in pixels"
@@ -145,6 +143,10 @@ impl AppConfig {
 
     pub fn tiles_pixel_bytes(&self) -> usize {
         self.tile_size as usize * self.tile_size as usize * COLOR_CHANNELS
+    }
+
+    pub fn image_pixel_bytes(&self) -> usize {
+        self.image_width as usize * self.image_height as usize * COLOR_CHANNELS
     }
 }
 

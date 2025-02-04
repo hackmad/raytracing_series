@@ -34,11 +34,11 @@ Run with program arguments (note that `--` is needed after arguments for cargo
 and before program arguments can be supplied):
 
 ```bash
-cargo run -- --scene cornell-box -w 1200 -h 600 -o image.png
+cargo run -- --scene cornell-box --image-width 1200 --image-height 600 -o image.png
 ```
 
 ```bash
-./target/debug/raytracing_series --scene cornell-box -w 1200 -h 600 -o image.png
+./target/debug/raytracing_series --scene cornell-box --image-width 1200 --image-height 600 -o image.png
 ```
 
 Get help on program arguments:
